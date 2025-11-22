@@ -53,6 +53,7 @@ export default async function githubCodePushController(req: Request, res: Respon
 
         ResponseWriter.success(res, repo_url, 'Export job queued successfully', 200);
     } catch (error) {
+        console.error('errow while exporting to igithub : ', error);
         ResponseWriter.server_error(res, 'Failed to export to GitHub');
         return;
     }
