@@ -1,5 +1,6 @@
 import { JSX } from "react";
 import ArchitectureTitleComponent from "../base/ArchitectureTitleComponent";
+import Image from "next/image";
 
 interface Review {
   name: string;
@@ -117,7 +118,7 @@ interface ReviewCardProps {
 
 function ReviewCard({ review, index }: ReviewCardProps): JSX.Element {
   const isLight: boolean = index % 2 === 0;
-  
+
   return (
     <div className={`mx-4 min-w-[400px] max-w-[400px] ${isLight ? 'bg-[#fdf9f0]' : 'bg-[#1a1a1a]'} border ${isLight ? 'border-[#e5e0d5]' : 'border-[#333]'} rounded-lg p-6 flex-shrink-0`}>
       <div className="flex gap-1 mb-3">
@@ -144,7 +145,7 @@ interface MarqueeRowProps {
 function MarqueeRow({ reviews, duration }: MarqueeRowProps): JSX.Element {
   return (
     <div className="relative overflow-hidden py-4">
-      <div 
+      <div
         className="flex animate-marquee"
         style={{
           animation: `marquee ${duration}s linear infinite`
@@ -166,14 +167,14 @@ function MarqueeRow({ reviews, duration }: MarqueeRowProps): JSX.Element {
 
 export default function ReviewsSection(): JSX.Element {
   return (
-    <div className="min-h-screen bg-primary z-20 py-12">
-      <ArchitectureTitleComponent 
-        firstText="Winter tales" 
-        secondText="from the Wall" 
-        bordercolor="border-[#141517]" 
-        bgcolor="bg-[#6c44fc]" 
+    <div className="min-h-screen bg-primary z-20">
+      <ArchitectureTitleComponent
+        firstText="Winter tales"
+        secondText="from the Wall"
+        bordercolor="border-[#141517]"
+        bgcolor="bg-[#6c44fc]"
       />
-      
+
       <div className="mt-16 space-y-6">
         <MarqueeRow reviews={reviews} duration={40} />
         <MarqueeRow reviews={reviews2} duration={50} />

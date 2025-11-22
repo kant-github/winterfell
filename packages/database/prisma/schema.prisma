@@ -23,8 +23,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  subscription Subscription?
-  contracts    Contract[]
+  subscription              Subscription?
+  contracts                 Contract[]
+  contractGenerationReviews ContractGenerationReviews[]
+  publicReviews             PublicReview[]
 }
 
 model Contract {
@@ -52,9 +54,10 @@ model Contract {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  deployments Deployment[]
-  buildJob    BuildJob[]
-  messages    Message[]
+  deployments               Deployment[]
+  buildJob                  BuildJob[]
+  messages                  Message[]
+  contractGenerationReviews ContractGenerationReviews[]
 }
 
 model BuildJob {
@@ -156,6 +159,36 @@ model Subscription {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ContractGenerationReviews {
+  id String @id @default(cuid())
+
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  rating   Int
+  liked    String? @db.Text
+  disliked String? @db.Text
+  overall  String? @db.Text
+
+  createdAt DateTime @default(now())
+}
+
+model PublicReview {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  rating  Int
+  title   String?
+  content String? @db.Text
+
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 enum ContractType {

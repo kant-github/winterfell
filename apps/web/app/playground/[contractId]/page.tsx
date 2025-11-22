@@ -11,6 +11,7 @@ import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import axios from 'axios';
 import { useChatStore } from '@/src/store/user/useChatStore';
 import React, { useEffect } from 'react';
+import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 
 export default function Page({ params }: { params: Promise<{ contractId: string }> }) {
     const { cleanStore, loading } = useBuilderChatStore();
@@ -99,6 +100,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             <div className="flex-1 min-h-0 flex flex-col">
                 <BuilderDashboard />
             </div>
+            {/* <ContractReviewCard open={true} onClose={() => { }} onSubmit={() => { }} /> */}
         </div>
     );
 }
