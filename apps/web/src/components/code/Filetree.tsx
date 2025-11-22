@@ -94,18 +94,21 @@ export default function FileTree() {
                                     <AiFillFolder size={16} className="text-[#317FFF]" />
                                 )
                             ) : (
-                                <FileIcon filename={item.data} size={14} className="text-neutral-400" />
+                                <FileIcon
+                                    filename={item.data}
+                                    size={14}
+                                    className="text-neutral-400"
+                                />
                             )}
                             <span className="w-full text-sm truncate">{item.data}</span>
                         </div>
                     )}
                 >
-                    <div className='h-full'>
+                    <div className="h-full">
                         <Tree treeId="file-tree" rootItem="root" treeLabel="Project Files" />
                     </div>
                 </UncontrolledTreeEnvironment>
             </div>
         </div>
     );
-
 }

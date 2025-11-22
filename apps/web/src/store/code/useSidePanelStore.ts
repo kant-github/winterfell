@@ -1,5 +1,5 @@
-import { SidePanelValues } from "@/src/components/code/EditorSidePanel";
-import { create } from "zustand";
+import { SidePanelValues } from '@/src/components/code/EditorSidePanel';
+import { create } from 'zustand';
 
 interface SidePanelState {
     currentState: string | null;
@@ -10,4 +10,4 @@ interface SidePanelState {
 export const useSidePanelStore = create<SidePanelState>((set) => ({
     currentState: 'FILE',
     setCurrentState: (value: SidePanelValues | null) => set({ currentState: value }),
-}))
+}));

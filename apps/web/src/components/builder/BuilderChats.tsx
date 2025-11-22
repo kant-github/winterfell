@@ -189,7 +189,10 @@ export default function BuilderChats() {
     }
 
     return (
-        <div className="w-full max-w-md min-w-md flex flex-col pt-4" style={{ height: 'calc(100vh - 3.5rem)' }}>
+        <div
+            className="w-full max-w-md min-w-md flex flex-col pt-4"
+            style={{ height: 'calc(100vh - 3.5rem)' }}
+        >
             <div className="flex-1 flex flex-col gap-y-3 text-light text-sm pl-4 overflow-y-auto min-h-0 custom-scrollbar">
                 {messages.map((message) => (
                     <div key={message.id} className="w-full flex shrink-0">
@@ -197,7 +200,9 @@ export default function BuilderChats() {
                             <div className="flex justify-end items-start w-full">
                                 <div className="flex items-start gap-x-2 max-w-[70%]">
                                     <div>
-                                        <span className='text-right flex justify-end text-xs font-semibold mb-1 mr-1'>{formatChatTime(message.createdAt)}</span>
+                                        <span className="text-right flex justify-end text-xs font-semibold mb-1 mr-1">
+                                            {formatChatTime(message.createdAt)}
+                                        </span>
                                         <div className="px-4 py-2 rounded-b-[8px] rounded-tl-[8px] text-sm font-semibold bg-primary text-light text-right">
                                             {message.content}
                                         </div>

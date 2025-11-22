@@ -35,9 +35,8 @@ export default class KubernetesManager {
         body: pod_template,
       });
 
-      console.log('pod name is: ', response.metadata?.name);
+      console.log("pod name is: ", response.metadata?.name);
       return pod_name;
-
     } catch (err) {
       console.error("error in creating pod : ", err);
     }
@@ -48,8 +47,7 @@ export default class KubernetesManager {
       await this.core_api.deleteNamespacedPod({
         namespace: env.KUBERNETES_NAMESPACE,
         name: pod_name,
-      }
-      );
+      });
 
       return { success: true };
     } catch (err) {
@@ -58,7 +56,10 @@ export default class KubernetesManager {
     }
   }
 
-  public async get_pod_status(user_id: string, contract_id: string): Promise<{ success: boolean, pod_status?: string }> {
+  public async get_pod_status(
+    user_id: string,
+    contract_id: string,
+  ): Promise<{ success: boolean; pod_status?: string }> {
     try {
       const pod_name = await PodServices.get_pod_name(user_id, contract_id);
       const pod = await this.core_api.readNamespacedPod({
@@ -70,7 +71,7 @@ export default class KubernetesManager {
 
       return { success: true, pod_status };
     } catch (error) {
-      console.error('Failed to fetch pod status');
+      console.error("Failed to fetch pod status");
       return { success: false };
     }
   }
@@ -84,12 +85,8 @@ export default class KubernetesManager {
       });
 
       const pod_status = pod.status?.phase;
-      while (pod_status != 'Running') {
-
-      }
-    } catch (error) {
-
-    }
+      while (pod_status != "Running") {}
+    } catch (error) {}
   }
 
   // private async run_command_in_pod(user_id: string, contract_id: string) {
@@ -101,7 +98,7 @@ export default class KubernetesManager {
   //       name: pod_name,
   //     });
   //   } catch (err) {
-      
+
   //   }
 
   // }

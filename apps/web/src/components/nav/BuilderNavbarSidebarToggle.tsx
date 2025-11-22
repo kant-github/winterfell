@@ -13,11 +13,12 @@ export default function BuilderNavbarSidebarToggle() {
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const shortcutKey = isMac ? 'Cmd' : 'Ctrl';
 
-    const iconBaseStyles = "cursor-pointer transition-transform hover:-translate-y-[0.5px]";
+    const iconBaseStyles = 'cursor-pointer transition-transform hover:-translate-y-[0.5px]';
 
-    const chatButtonBaseStyles = "flex items-center justify-center gap-x-1 rounded-[4px] border px-3 py-0.5 text-xs cursor-pointer";
-    const chatButtonActiveStyles = "border-light/70 text-light/70";
-    const chatButtonInactiveStyles = "border-light/50 text-light/50";
+    const chatButtonBaseStyles =
+        'flex items-center justify-center gap-x-1 rounded-[4px] border px-3 py-0.5 text-xs cursor-pointer';
+    const chatButtonActiveStyles = 'border-light/70 text-light/70';
+    const chatButtonInactiveStyles = 'border-light/50 text-light/50';
 
     return (
         <div className="flex items-center justify-center gap-x-1.5">
@@ -26,7 +27,7 @@ export default function BuilderNavbarSidebarToggle() {
                     onClick={() => setCollapsechat(!collapseChat)}
                     className={cn(
                         chatButtonBaseStyles,
-                        collapseChat ? chatButtonInactiveStyles : chatButtonActiveStyles
+                        collapseChat ? chatButtonInactiveStyles : chatButtonActiveStyles,
                     )}
                 >
                     <span>collapse chat</span>
@@ -34,7 +35,7 @@ export default function BuilderNavbarSidebarToggle() {
                         size={15}
                         className={cn(
                             iconBaseStyles,
-                            collapseChat ? "text-light/50" : "text-light/70"
+                            collapseChat ? 'text-light/50' : 'text-light/70',
                         )}
                     />
                 </div>

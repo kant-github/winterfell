@@ -15,7 +15,7 @@ interface ApiResponse<T = unknown> {
 }
 
 export default class ResponseWriter {
-    static success<T>(res: Response, data: T, message: string, status_code: number): void {
+    static success<T>(res: Response, data: T, message: string, status_code: number = 200): void {
         const response: ApiResponse<T> = {
             success: true,
             data,

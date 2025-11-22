@@ -173,7 +173,6 @@ model ContractGenerationReviews {
   rating   Int
   liked    String? @db.Text
   disliked String? @db.Text
-  overall  String? @db.Text
 
   createdAt DateTime @default(now())
 }

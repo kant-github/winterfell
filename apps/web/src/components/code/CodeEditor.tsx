@@ -140,10 +140,10 @@ export default function CodeEditor(): JSX.Element {
                         />
                     </>
                 ) : (
-                <div className='w-full h-full flex justify-center items-center'>
-                    <LiaServicestack size={200} className="text-neutral-800" />
-                </div>
-            )}
+                    <div className="w-full h-full flex justify-center items-center">
+                        <LiaServicestack size={200} className="text-neutral-800" />
+                    </div>
+                )}
             </div>
         </div>
     );

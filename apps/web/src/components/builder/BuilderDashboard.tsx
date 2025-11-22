@@ -52,7 +52,7 @@ export default function BuilderDashboard(): JSX.Element {
 
 function Editing() {
     return (
-        <div className='flex h-full'>
+        <div className="flex h-full">
             <EditorSidePanel />
             <SidePanel />
             <CodeEditor />

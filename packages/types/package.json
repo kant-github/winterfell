@@ -14,7 +14,10 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@repo/database": "*"
+    "@repo/database": "*",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
   }
 }

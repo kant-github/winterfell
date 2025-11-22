@@ -1,11 +1,10 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import env from "../../configs/config.env";
-import { MessagesAnnotation, StateGraph } from "@langchain/langgraph";
-import Tool from "./tool";
-import { AIMessage } from "@langchain/core/messages";
-import StreamParser from "../../services/stream_parser";
-import { ChatRole, prisma } from "@repo/database";
-
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import env from '../../configs/config.env';
+import { MessagesAnnotation, StateGraph } from '@langchain/langgraph';
+import Tool from './tool';
+import { AIMessage } from '@langchain/core/messages';
+import StreamParser from '../../services/stream_parser';
+import { ChatRole, prisma } from '@repo/database';
 
 export default class Agent {
     private llm;
@@ -22,25 +21,26 @@ export default class Agent {
         // add the clause llm too
 
         this.agent_builder = new StateGraph(MessagesAnnotation)
-            .addNode("llmCall", this.llm_call.bind(this))
-            .addNode("toolNode", Tool.node)
-            .addEdge("__start__", "llmCall")
-            .addConditionalEdges(
-                "llmCall",
-                this.should_continue.bind(this),
-                ["toolNode", "__end__"],
-            )
-            .addEdge("toolNode", "llmCall")
+            .addNode('llmCall', this.llm_call.bind(this))
+            .addNode('toolNode', Tool.node)
+            .addEdge('__start__', 'llmCall')
+            .addConditionalEdges('llmCall', this.should_continue.bind(this), [
+                'toolNode',
+                '__end__',
+            ])
+            .addEdge('toolNode', 'llmCall')
             .compile();
 
         this.parser = new StreamParser();
     }
 
     public final_call() {
-        const messages = [{
-            role: 'user',
-            content: 'create a counter contract with only increment.',
-        }];
+        const messages = [
+            {
+                role: 'user',
+                content: 'create a counter contract with only increment.',
+            },
+        ];
 
         const final = async () => {
             console.log('here comes the ai call and response');
@@ -97,11 +97,12 @@ export default class Agent {
     private should_continue(state: typeof MessagesAnnotation.State) {
         const last_message = state.messages.at(-1);
 
-        if (last_message && this.has_tool_calls(last_message)) return "toolNode";
+        if (last_message && this.has_tool_calls(last_message)) return 'toolNode';
 
-        if (typeof last_message?.content === "string" && last_message.content.includes("<END>")) return "__end__";
+        if (typeof last_message?.content === 'string' && last_message.content.includes('<END>'))
+            return '__end__';
 
-        return "__end__";
+        return '__end__';
     }
 
     private coder_content = `
@@ -127,5 +128,5 @@ Process:
 1. Think if rules are needed. If yes → call the tool.
 2. Wait for tool output.
 3. Continue generating the contract with correct rules.
-`
+`;
 }

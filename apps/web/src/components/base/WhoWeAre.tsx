@@ -3,6 +3,7 @@
 import React from 'react';
 import ArchitectureTitleComponent from './ArchitectureTitleComponent';
 import FeatureOne from './FeatureOne';
+import DonutComponent from '../ui/DonutComponent';
 
 const productMetaOptions = [
     {
@@ -30,11 +31,11 @@ export default function WhoWeAre() {
 
     return (
         <>
-            <ArchitectureTitleComponent firstText='WINTERFELL&apos;s' secondText='ARCHITECTURE' />
+            <ArchitectureTitleComponent firstText="WINTERFELL's" secondText="ARCHITECTURE" />
             <section ref={containerRef} className="bg-[#0a0c0d] w-screen">
                 <div className="grid grid-cols-2 gap-0">
                     <div className="h-screen sticky top-0 flex items-center justify-center bg-[#0a0c0d]">
-                        left content (sticky)
+                        <DonutComponent />
                     </div>
 
                     <div className="min-h-[300vh] flex flex-col justify-between z-10 bg-[#0a0c0d]">

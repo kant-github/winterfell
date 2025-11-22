@@ -1,88 +1,215 @@
-import { JSX } from "react";
-import { useState } from "react";
+import { useState } from 'react';
+import {
+    PiSmileyAngryThin,
+    PiSmileySadThin,
+    PiSmileyMehThin,
+    PiSmileyThin,
+    PiSmileyWinkThin,
+    PiCaretDownThin,
+} from 'react-icons/pi';
+import { Button } from '../ui/button';
+import { Textarea } from '../ui/textarea';
+import Card from '../ui/Card';
+import { cn } from '@/src/lib/utils';
+import OpacityBackground from '../utility/OpacityBackground';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { contractReviewSchema } from '@repo/types';
+import { REVIEW_URL } from '@/routes/api_routes';
+import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 
 interface ContractReviewCardProps {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (data: {
+    open: boolean;
+    onClose: () => void;
+    contractId: string;
+    onSubmit?: (data: { rating: number; liked: string; disliked: string }) => void;
+}
+
+interface ReviewForm {
     rating: number;
     liked: string;
     disliked: string;
-  }) => void;
+    showLiked: boolean;
+    showDisliked: boolean;
 }
 
-export default  function ContractReviewCard({ open, onClose, onSubmit = () => {} }: ContractReviewCardProps) {
-  const [rating, setRating] = useState(0);
-  const [liked, setLiked] = useState("");
-  const [disliked, setDisliked] = useState("");
+export default function ContractReviewCard({
+    open,
+    onClose,
+    contractId,
+    onSubmit,
+}: ContractReviewCardProps) {
+    const [form, setForm] = useState<ReviewForm>({
+        rating: 0,
+        liked: '',
+        disliked: '',
+        showLiked: false,
+        showDisliked: false,
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { session } = useUserSessionStore();
+    if (!open) return null;
 
-  if (!open) return null;
+    const emotions = [
+        { icon: PiSmileyAngryThin, value: 1 },
+        { icon: PiSmileySadThin, value: 2 },
+        { icon: PiSmileyMehThin, value: 3 },
+        { icon: PiSmileyThin, value: 4 },
+        { icon: PiSmileyWinkThin, value: 5 },
+    ];
 
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-darkBase border border-dark p-4 rounded-md w-[360px] text-light shadow-xl">
-        <h2 className="text-lg font-medium mb-2 text-light">
-          Quick Feedback
-        </h2>
-        <p className="text-sm text-light/70 mb-4">
-          How was your contract generation experience?
-        </p>
+    const updateForm = (updates: Partial<ReviewForm>) => {
+        setForm((prev) => ({ ...prev, ...updates }));
+    };
 
-        {/* Rating */}
-        <div className="flex gap-1 mb-4">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => setRating(star)}
-              className={`w-8 h-8 flex items-center justify-center rounded-sm transition
-                ${rating >= star ? "bg-primary text-light" : "bg-dark text-light/40"}
-              `}
-            >
-              {star}
-            </button>
-          ))}
-        </div>
+    async function handleSubmit() {
+        if (!session || !session.user || !session.user.token) return;
+        try {
+            setIsSubmitting(true);
 
-        {/* Liked */}
-        <label className="text-sm text-light/70 mb-1 block">
-          What did you like?
-        </label>
-        <textarea
-          value={liked}
-          onChange={(e) => setLiked(e.target.value)}
-          className="w-full bg-dark text-light/80 border border-dark rounded-sm p-2 text-sm mb-3 resize-none h-16 focus:outline-none focus:border-primary"
-        />
+            const validatedData = contractReviewSchema.safeParse({
+                contractId,
+                rating: form.rating,
+                liked: form.liked || null,
+                disliked: form.disliked || null,
+            });
 
-        {/* Disliked */}
-        <label className="text-sm text-light/70 mb-1 block">
-          What could be improved?
-        </label>
-        <textarea
-          value={disliked}
-          onChange={(e) => setDisliked(e.target.value)}
-          className="w-full bg-dark text-light/80 border border-dark rounded-sm p-2 text-sm mb-4 resize-none h-16 focus:outline-none focus:border-primary"
-        />
+            if (!validatedData.success) {
+                alert("wrong inputs")
+                console.log(validatedData.error);
+            };
 
-        {/* Actions */}
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-3 py-1.5 bg-dark text-light/60 border border-dark rounded-sm hover:bg-dark/80 transition"
-          >
-            Cancel
-          </button>
+            const response = await axios.post(REVIEW_URL, validatedData.data, {
+                headers: {
+                    Authorization: `Bearer ${session.user.token}`
+                }
+            });
 
-          <button
-            onClick={() => {
-              onSubmit({ rating, liked, disliked });
-              onClose();
-            }}
-            className="px-4 py-1.5 bg-primary text-light rounded-sm hover:bg-primaryLight transition"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+            if (response.data.success) {
+                toast.success('Review submitted successfully!');
+                onSubmit?.({
+                    rating: form.rating,
+                    liked: form.liked,
+                    disliked: form.disliked
+                });
+                handleCancel();
+            }
+        } catch {
+            toast.error('Error in submitting your review');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    function handleCancel() {
+        setForm({
+            rating: 0,
+            liked: '',
+            disliked: '',
+            showLiked: false,
+            showDisliked: false,
+        });
+        onClose();
+    }
+
+    return (
+        <OpacityBackground className="bg-dark/30">
+            <Card className="bg-dark-base border border-neutral-800 rounded-[8px] w-full max-w-sm overflow-hidden px-6 py-4 absolute bottom-20 right-20">
+                <div className="flex flex-col gap-4">
+                    <h3 className="text-center text-2xl font-medium">How was your experience?</h3>
+                    <div className="flex gap-x-5 justify-center">
+                        {emotions.map((emotion) => {
+                            const Icon = emotion.icon;
+                            const isSelected = form.rating === emotion.value;
+                            return (
+                                <button
+                                    aria-label="smiley"
+                                    type="button"
+                                    key={emotion.value}
+                                    onClick={() => updateForm({ rating: emotion.value })}
+                                    className={cn(
+                                        'transition-colors border-none',
+                                        'border',
+                                        isSelected
+                                            ? 'text-primary'
+                                            : 'text-light/40 hover:border-primary/40',
+                                    )}
+                                >
+                                    <Icon size={30} />
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-2">
+                            <Button
+                                variant={'ghost'}
+                                onClick={() => updateForm({ showLiked: !form.showLiked })}
+                                className="w-full px-4 py-2 bg-dark-base hover:bg-dark-base border border-neutral-800 rounded text-left text-sm text-light/60 hover:text-light/60 hover:border-neutral-700 transition-colors flex items-center justify-between"
+                            >
+                                <span>{form.liked || 'My experience was good'}</span>
+                                <PiCaretDownThin
+                                    className={cn(
+                                        'transition-transform',
+                                        form.showLiked && 'rotate-180',
+                                    )}
+                                />
+                            </Button>
+                            {form.showLiked && (
+                                <Textarea
+                                    value={form.liked}
+                                    onChange={(e) => updateForm({ liked: e.target.value })}
+                                    placeholder="What did you like?"
+                                    className="w-full border border-neutral-800"
+                                />
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <Button
+                                variant={'ghost'}
+                                onClick={() => updateForm({ showDisliked: !form.showDisliked })}
+                                className="w-full px-4 py-2 bg-dark-base hover:bg-dark-base border border-neutral-800 rounded text-left text-sm text-light/60 hover:text-light/60 hover:border-neutral-700 transition-colors flex items-center justify-between"
+                            >
+                                <span>{form.disliked || 'What could be improved'}</span>
+                                <PiCaretDownThin
+                                    className={cn(
+                                        'transition-transform',
+                                        form.showDisliked && 'rotate-180',
+                                    )}
+                                />
+                            </Button>
+                            {form.showDisliked && (
+                                <Textarea
+                                    value={form.disliked}
+                                    onChange={(e) => updateForm({ disliked: e.target.value })}
+                                    placeholder="What could be improved?"
+                                    className="w-full border border-neutral-800"
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                        <Button
+                            variant="ghost"
+                            onClick={handleCancel}
+                            disabled={isSubmitting}
+                            className="flex-1 bg-dark hover:bg-dark hover:text-light"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={form.rating === 0 || isSubmitting}
+                            className="flex-1 bg-light hover:bg-light hover:text-dark-base text-dark-base"
+                        >
+                            {isSubmitting ? 'Submitting...' : 'Submit'}
+                        </Button>
+                    </div>
+                </div>
+            </Card>
+        </OpacityBackground>
+    );
 }

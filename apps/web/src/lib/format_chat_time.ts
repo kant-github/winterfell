@@ -1,10 +1,4 @@
-import {
-    format,
-    formatDistanceToNowStrict,
-    isToday,
-    isYesterday,
-    isThisWeek,
-} from "date-fns";
+import { format, formatDistanceToNowStrict, isToday, isYesterday, isThisWeek } from 'date-fns';
 
 export function formatChatTime(date: Date) {
     if (isToday(date)) {
@@ -12,12 +6,12 @@ export function formatChatTime(date: Date) {
     }
 
     if (isYesterday(date)) {
-        return "Yesterday";
+        return 'Yesterday';
     }
 
     if (isThisWeek(date)) {
-        return format(date, "EEE");
+        return format(date, 'EEE');
     }
 
-    return format(date, "MMM d");
+    return format(date, 'MMM d');
 }
