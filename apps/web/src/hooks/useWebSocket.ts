@@ -29,7 +29,6 @@ export const useWebSocket = () => {
                     setIsConnected(socket.current.is_connected);
                 }
             }, 100);
-
         } catch (error) {
             setIsConnected(false);
             console.error('Failed to initialize WebSocket:', error);
@@ -53,11 +52,11 @@ export const useWebSocket = () => {
     // todo: @rishi this should also get the contract name
     function sendSocketMessage(command: COMMAND, message: COMMAND_WRITER) {
         if (!socket.current) return;
-        const data: ParsedOutgoingMessage<{ message: string, contractName: string }> = {
+        const data: ParsedOutgoingMessage<{ message: string; contractName: string }> = {
             type: command,
             payload: {
                 contractName: '',
-                message: "executing " + message
+                message: 'executing ' + message,
             },
         };
         socket.current.send_message(data);

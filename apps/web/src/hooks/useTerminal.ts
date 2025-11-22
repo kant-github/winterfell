@@ -55,21 +55,33 @@ export function useTerminalLogic({ token, addCommand }: UseTerminalLogicProps) {
 
                 case COMMAND_WRITER.WINTERFELL_BUILD:
                 case COMMAND_WRITER.WINTERFELL_TEST:
-                    case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET:
+                case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET:
                 case COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET: {
                     output = CommandResponse[trimmed];
                     switch (trimmed) {
                         case COMMAND_WRITER.WINTERFELL_BUILD:
-                            sendSocketMessage(COMMAND.WINTERFELL_BUILD, COMMAND_WRITER.WINTERFELL_BUILD);
+                            sendSocketMessage(
+                                COMMAND.WINTERFELL_BUILD,
+                                COMMAND_WRITER.WINTERFELL_BUILD,
+                            );
                             break;
                         case COMMAND_WRITER.WINTERFELL_TEST:
-                            sendSocketMessage(COMMAND.WINTERFELL_TEST, COMMAND_WRITER.WINTERFELL_TEST);
+                            sendSocketMessage(
+                                COMMAND.WINTERFELL_TEST,
+                                COMMAND_WRITER.WINTERFELL_TEST,
+                            );
                             break;
                         case COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET:
-                            sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_DEVNET, COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET);
+                            sendSocketMessage(
+                                COMMAND.WINTERFELL_DEPLOY_DEVNET,
+                                COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET,
+                            );
                             break;
                         case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET:
-                            sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_MAINNET, COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET);
+                            sendSocketMessage(
+                                COMMAND.WINTERFELL_DEPLOY_MAINNET,
+                                COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET,
+                            );
                             break;
                     }
                     break;

@@ -213,8 +213,9 @@ export default function Terminal() {
                                     <Button
                                         // variant='ghost'
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`h-fit px-1.5! bg-transparent py-1 hover:bg-dark rounded-none cursor-pointer ${activeTab === tab.id ? 'bg-dark' : 'text-light/70'
-                                            }`}
+                                        className={`h-fit px-1.5! bg-transparent py-1 hover:bg-dark rounded-none cursor-pointer ${
+                                            activeTab === tab.id ? 'bg-dark' : 'text-light/70'
+                                        }`}
                                     >
                                         <PiTerminalWindow className="size-4" />
                                     </Button>
@@ -236,24 +237,33 @@ export default function Terminal() {
                     </span>
                 </div>
                 <div className="flex items-center space-x-4 text-light/60">
-
-                    <ToolTipComponent side='top' content={isConnected
-                        ? "winter shell is plugged in and cozy."
-                        : "winter shell drifted into a snowstorm… finding the signal again."
-                    }>
+                    <ToolTipComponent
+                        side="top"
+                        content={
+                            isConnected
+                                ? 'winter shell is plugged in and cozy.'
+                                : 'winter shell drifted into a snowstorm… finding the signal again.'
+                        }
+                    >
                         <div className="flex items-center gap-2 cursor-default">
                             <span className="relative flex h-3 w-3 items-center justify-center">
                                 {isConnected && (
                                     <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-50" />
                                 )}
-                                <span className={cn(
-                                    "relative inline-flex rounded-full h-1.5 w-1.5",
-                                    isConnected
-                                        ? "bg-green-500 shadow-md shadow-green-500/60"
-                                        : "bg-red-500 shadow-md shadow-red-500/60"
-                                )} />
+                                <span
+                                    className={cn(
+                                        'relative inline-flex rounded-full h-1.5 w-1.5',
+                                        isConnected
+                                            ? 'bg-green-500 shadow-md shadow-green-500/60'
+                                            : 'bg-red-500 shadow-md shadow-red-500/60',
+                                    )}
+                                />
                             </span>
-                            <span className='font-semibold test-[13px] tracking-wide'>{isConnected ? "winter shell is connected" : "winter shell disconnected"}</span>
+                            <span className="font-semibold test-[13px] tracking-wide">
+                                {isConnected
+                                    ? 'winter shell is connected'
+                                    : 'winter shell disconnected'}
+                            </span>
                         </div>
                     </ToolTipComponent>
 

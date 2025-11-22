@@ -19,6 +19,7 @@
         "@radix-ui/react-tooltip": "^1.2.8",
         "@react-three/drei": "^10.7.6",
         "@react-three/fiber": "^9.3.0",
+        "@repo/types": "*",
         "@solana/wallet-adapter-react": "^0.15.39",
         "@solana/wallet-adapter-wallets": "^0.19.37",
         "@solana/web3.js": "^1.98.4",
@@ -51,8 +52,7 @@
         "tailwind-merge": "^3.3.1",
         "three": "^0.181.1",
         "uuid": "^13.0.0",
-        "zustand": "^5.0.8",
-        "@repo/types": "*"
+        "zustand": "^5.0.8"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",

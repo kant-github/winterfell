@@ -25,7 +25,9 @@ const sidePanelData = [
 ];
 
 interface EditorSidePanel {
-    setSidePanelRenderer: Dispatch<SetStateAction<SidePanelValues>> | ((value: SidePanelValues | null) => void);
+    setSidePanelRenderer:
+        | Dispatch<SetStateAction<SidePanelValues>>
+        | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {
@@ -34,8 +36,7 @@ export default function EditorSidePanel() {
     const { currentState } = useSidePanelStore();
 
     function handleToggleSidebar(value: SidePanelValues) {
-
-        if(collapseFileTree) {
+        if (collapseFileTree) {
             value === currentState ? setCollapseFileTree(false) : setCurrentState(value);
         } else {
             setCollapseFileTree(true);
@@ -51,8 +52,10 @@ export default function EditorSidePanel() {
                         <div
                             onClick={() => handleToggleSidebar(item.value)}
                             className={cn(
-                                "cursor-pointer text-light/70 hover:text-primary/70 transition-colors",
-                                currentState && currentState === item.value ? 'text-primary/70' : 'text-light/70'
+                                'cursor-pointer text-light/70 hover:text-primary/70 transition-colors',
+                                currentState && currentState === item.value
+                                    ? 'text-primary/70'
+                                    : 'text-light/70',
                             )}
                         >
                             {item.icon}

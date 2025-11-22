@@ -12,6 +12,7 @@ import githubCodePushController from '../controllers/github-deploy-controller/gi
 import githubJobStatusController from '../controllers/github-deploy-controller/githubJobStatusController';
 import continueChatController from '../controllers/chat-controller/continueChatController';
 import getChatController from '../controllers/chat-controller/getChatController';
+import { createContractReview } from '../controllers/review/create_contract_review';
 
 const router: Router = Router();
 
@@ -43,5 +44,8 @@ router.post(
     updateSubscriptionController,
 );
 router.get('/subscription/get-plan', authMiddleware, getUserPlanController);
+
+// reviews
+router.post('/review', authMiddleware, createContractReview);
 
 export default router;

@@ -41,6 +41,6 @@ process.on('SIGINT', () => {
 const trial = () => {
     const agent = new Agent();
     agent.final_call();
-}
+};
 
 // setTimeout(trial, 1000);

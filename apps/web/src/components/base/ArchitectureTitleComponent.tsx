@@ -1,19 +1,18 @@
 import { cn } from '@/src/lib/utils';
 import { AnimatePresence, motion, useInView, Variants } from 'framer-motion';
 import { useRef } from 'react';
-
 interface ArchitectureTitleComponentProps {
-    firstText?: string
-    secondText?: string
+    firstText?: string;
+    secondText?: string;
     bgcolor?: string;
-    bordercolor?: string
+    bordercolor?: string;
 }
 
-export default function ArchitectureTitleComponent({ 
-    firstText = "FIRST", 
-    secondText = "SECOND", 
-    bgcolor = "bg-[#0a0c0d]", 
-    bordercolor = "border-[#6c44fc]" 
+export default function ArchitectureTitleComponent({
+    firstText = 'FIRST',
+    secondText = 'SECOND',
+    bgcolor = 'bg-[#0a0c0d]',
+    bordercolor = 'border-[#6c44fc]',
 }: ArchitectureTitleComponentProps) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: false, margin: '-100px' });
@@ -39,7 +38,7 @@ export default function ArchitectureTitleComponent({
             y: 0,
             rotateX: 0,
             transition: {
-                duration: 0.3, // Fast duration for each letter
+                duration: 0.3,
                 ease: [0.22, 1, 0.36, 1],
             },
         },
@@ -62,7 +61,7 @@ export default function ArchitectureTitleComponent({
         <section
             id="about"
             ref={ref}
-            className={cn("w-screen flex flex-col justify-center text-light gap-y-5 z-20", bgcolor)}
+            className={cn('w-screen flex flex-col justify-center text-light gap-y-5 z-20', bgcolor)}
         >
             <AnimatePresence>
                 <motion.div
@@ -70,19 +69,25 @@ export default function ArchitectureTitleComponent({
                     initial="hidden"
                     animate={isInView ? 'visible' : 'hidden'}
                 >
-                    <motion.div 
-                        className={cn("w-full flex items-center justify-start border-t-2 overflow-hidden", bordercolor)}
+                    <motion.div
+                        className={cn(
+                            'w-full flex items-center justify-start border-t-2 overflow-hidden',
+                            bordercolor,
+                        )}
                         variants={containerVariants}
                     >
-                        <span className="text-3xl md:text-[7rem] font-semibold tracking-widest">
+                        <span className="text-3xl md:text-[7rem] font-semibold tracking-wide">
                             {renderAnimatedText(firstText)}
                         </span>
                     </motion.div>
-                    <motion.div 
-                        className={cn("w-full flex items-center justify-start border-b-2 border-t-2 overflow-hidden", bordercolor)}
+                    <motion.div
+                        className={cn(
+                            'w-full flex items-center justify-start border-b-2 border-t-2 overflow-hidden',
+                            bordercolor,
+                        )}
                         variants={containerVariants}
                     >
-                        <span className="text-3xl md:text-[7rem] ml-12 md:ml-[24rem] font-semibold tracking-widest">
+                        <span className="text-3xl md:text-[7rem] ml-12 md:ml-[24rem] font-semibold tracking-wide">
                             {renderAnimatedText(secondText)}
                         </span>
                     </motion.div>

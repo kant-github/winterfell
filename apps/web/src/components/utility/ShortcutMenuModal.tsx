@@ -22,7 +22,9 @@ export default function ShortcutMenu() {
     return (
         <OpacityBackground onBackgroundClick={() => setOpen((prev) => !prev)}>
             <div className="bg-dark-base border border-neutral-800 rounded-[8px] w-full max-w-md overflow-hidden px-6 py-4">
-                <h1 className="text-xl font-semibold text-white text-left mb-3">Keyboard shortcuts</h1>
+                <h1 className="text-xl font-semibold text-white text-left mb-3">
+                    Keyboard shortcuts
+                </h1>
                 <div>
                     {shortcuts.map((shortcut, index) => (
                         <ShortcutItem
@@ -43,7 +45,7 @@ function ShortcutItem({ desc, keys, isLast }: { desc: string; keys: string[]; is
         <div
             className={cn(
                 'flex justify-between items-center py-2.5 px-2 transition-colors',
-                !isLast && 'border-b border-neutral-800'
+                !isLast && 'border-b border-neutral-800',
             )}
         >
             <span className="text-sm text-neutral-200">{desc}</span>

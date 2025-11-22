@@ -31,34 +31,17 @@
   `[language] --- code --- `[language]
 
 ## JSON ARRAY ABOUT GENERATED CONTRACT
+
 - after ending context generate a array of JSON like data for every file
 - it should be wrapped in a IDL tag, that is <IDL></IDL>
 - the JSON array thing should explain the complete contract, every file without it's logic
 
 ## EXAMPLE OF JSON ARRAY
-[
-  {
-    id: uuid,
-    path: "programs/<contract-name>/src/<file-path>.extension",
-    [
-      {
-        function: "<funciton-name>",
-        params: [
-          { name: <param-name>, type: <param-type> },
-        ],
-        returns: [
-          { type: <return-type> },
-        ],
-      },
-      {
-        struct: "<struct-name>",
-        struct_items: [
-          { name: <item-name>, type: <item-name> },
-        ],
-      },
-    ],
-  },
-]
+
+[ { id: uuid, path: "programs/<contract-name>/src/<file-path>.extension", [ { function:
+"<funciton-name>", params: [ { name: <param-name>, type: <param-type> }, ], returns: [ { type:
+<return-type> }, ], }, { struct: "<struct-name>", struct_items: [ { name: <item-name>, type:
+<item-name> }, ], }, ], }, ]
 
 ## RULES
 
