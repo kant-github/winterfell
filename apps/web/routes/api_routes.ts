@@ -19,4 +19,4 @@ export const RUN_COMMAND_URL = API_URL + '/contract/run-command';
 
 export const EXPORT_CONTRACT_URL = API_URL + '/contract/export';
 export const LINK_ACCOUNT = API_URL + '/link-account';
-export const REVIEW_URL = API_URL + '/review'
+export const REVIEW_URL = API_URL + '/review';

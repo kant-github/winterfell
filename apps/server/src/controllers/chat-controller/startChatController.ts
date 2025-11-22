@@ -3,17 +3,26 @@ import { ChatRole, prisma } from '@repo/database';
 import { contentGenerator } from '../../services/init';
 import { startChatSchema } from '../../schemas/start_chat_schema';
 import { Keypair } from '@solana/web3.js';
+import ResponseWriter from '../../class/response_writer';
 
 export default async function startChatController(req: Request, res: Response) {
     const userId = req.user?.id;
+
     if (!userId) {
-        res.status(401).json({ error: 'Unauthorized' });
+        ResponseWriter.unauthorized(res, 'Unauthorized');
         return;
     }
 
     const data = startChatSchema.safeParse(req.body);
+
     if (!data.success) {
-        res.status(400).json({ error: 'Invalid request' + data.error });
+        ResponseWriter.error(
+            res,
+            'Invalid request',
+            400,
+            'VALIDATION_ERROR',
+            JSON.stringify(data.error),
+        );
         return;
     }
 
@@ -55,7 +64,6 @@ export default async function startChatController(req: Request, res: Response) {
         });
 
         const key_pair = Keypair.generate();
-
         await contentGenerator.generateInitialResponse(
             res,
             currentUserMessage,
@@ -66,9 +74,12 @@ export default async function startChatController(req: Request, res: Response) {
     } catch (err) {
         console.error('Controller Error:', err);
         if (!res.headersSent) {
-            res.status(500).json({
-                error: 'Internal server error',
-            });
+            ResponseWriter.server_error(
+                res,
+                'Internal server error',
+                err instanceof Error ? err.message : undefined,
+            );
+            return;
         } else {
             res.write(
                 `data: ${JSON.stringify({

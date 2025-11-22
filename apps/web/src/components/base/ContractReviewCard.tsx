@@ -75,14 +75,14 @@ export default function ContractReviewCard({
             });
 
             if (!validatedData.success) {
-                alert("wrong inputs")
+                alert('wrong inputs');
                 console.log(validatedData.error);
-            };
+            }
 
             const response = await axios.post(REVIEW_URL, validatedData.data, {
                 headers: {
-                    Authorization: `Bearer ${session.user.token}`
-                }
+                    Authorization: `Bearer ${session.user.token}`,
+                },
             });
 
             if (response.data.success) {
@@ -90,7 +90,7 @@ export default function ContractReviewCard({
                 onSubmit?.({
                     rating: form.rating,
                     liked: form.liked,
-                    disliked: form.disliked
+                    disliked: form.disliked,
                 });
                 handleCancel();
             }
