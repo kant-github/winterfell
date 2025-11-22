@@ -1,24 +1,46 @@
-import { CoreV1Api } from "@kubernetes/client-node";
+import {
+  CoreV1Api,
+  Exec,
+  Log,
+  LogOptions,
+  V1Status,
+} from "@kubernetes/client-node";
 import podTemplate from "./template.kubernetes";
-import { kubernetes_services } from "..";
 import { env } from "../configs/configs.env";
 import { PodServices } from "../services/pod.services";
 import KubernetesClient from "./client.kubernetes";
+import { Writable } from "stream";
+import { PodStatus } from "../types/types.kubernetes";
+import { FileContent } from "@repo/types";
 
 export default class KubernetesManager {
   private core_api: CoreV1Api;
+  private exec_command: Exec;
+  private log: Log;
 
   constructor(kubernetes_client: KubernetesClient) {
     this.core_api = kubernetes_client.core_api;
+    this.exec_command = kubernetes_client.exec;
+    this.log = kubernetes_client.log;
   }
 
+  /**
+   * Create a new executor pod for a given job.
+   *
+   * @param job_id - job id
+   * @param user_id - user id
+   * @param contract_id - contract id
+   * @param command - anchor commands (build/test/deploy)
+   * @param code_snapshot_url - codebase
+   * @returns name of pod created
+   */
   public async create_pod(
     job_id: string,
     user_id: string,
     contract_id: string,
     command: string,
     code_snapshot_url: string,
-  ) {
+  ): Promise<string> {
     try {
       const pod_name = PodServices.get_pod_name(user_id, contract_id);
       const pod_template = podTemplate({
@@ -35,71 +57,406 @@ export default class KubernetesManager {
         body: pod_template,
       });
 
-      console.log("pod name is: ", response.metadata?.name);
+      console.log("pod name is:", response.metadata?.name ?? pod_name);
       return pod_name;
     } catch (err) {
-      console.error("error in creating pod : ", err);
+      console.error("Error creating pod:", err);
+      throw err;
     }
   }
 
-  public async delete_pod(pod_name: string): Promise<{ success: boolean }> {
+  /**
+   * Delete a pod from the cluster.
+   *
+   * @param user_id - user id
+   * @param contract_id - contract id
+   * @returns success boolean
+   */
+  public async delete_pod(
+    user_id: string,
+    contract_id: string,
+  ): Promise<{ success: boolean }> {
     try {
+      const pod_name = PodServices.get_pod_name(user_id, contract_id);
       await this.core_api.deleteNamespacedPod({
         namespace: env.KUBERNETES_NAMESPACE,
         name: pod_name,
       });
-
       return { success: true };
     } catch (err) {
-      console.error("error in deleting the pod : ", err);
+      console.error("Error deleting pod:", err);
       return { success: false };
     }
   }
 
+  /**
+   * Get pod status
+   *
+   * @param namespace - k8s namespace
+   * @param pod_name - pod to check
+   * @returns pod_status enum
+   */
   public async get_pod_status(
-    user_id: string,
-    contract_id: string,
-  ): Promise<{ success: boolean; pod_status?: string }> {
+    namespace: string,
+    pod_name: string,
+  ): Promise<PodStatus> {
     try {
-      const pod_name = await PodServices.get_pod_name(user_id, contract_id);
-      const pod = await this.core_api.readNamespacedPod({
-        namespace: env.KUBERNETES_NAMESPACE,
+      const res = await this.core_api.readNamespacedPod({
+        namespace,
         name: pod_name,
       });
 
-      const pod_status = pod.status?.phase;
+      const phase = res.status?.phase;
 
-      return { success: true, pod_status };
-    } catch (error) {
-      console.error("Failed to fetch pod status");
-      return { success: false };
+      switch (phase) {
+        case "Pending":
+          return PodStatus.Pending;
+        case "Running":
+          return PodStatus.Running;
+        case "Succeeded":
+          return PodStatus.Succeeded;
+        case "Failed":
+          return PodStatus.Failed;
+        default:
+          return PodStatus.Unknown;
+      }
+    } catch (err) {
+      console.error("Error in get_pod_status:", err);
+      return PodStatus.Unknown;
     }
   }
 
-  public async wait_for_pod_running(user_id: string, contract_id: string) {
-    try {
-      const pod_name = PodServices.get_pod_name(user_id, contract_id);
-      const pod = await this.core_api.readNamespacedPod({
-        namespace: env.KUBERNETES_NAMESPACE,
-        name: pod_name,
-      });
+  /**
+   * Wait until a pod reaches Running state or fails/times out.
+   *
+   * @param pod_name - name of pod
+   * @param timeoutMs - max wait time
+   */
+  public async wait_for_pod_running(
+    pod_name: string,
+    timeoutMs = 60_000,
+  ): Promise<void> {
+    const start = Date.now();
 
-      const pod_status = pod.status?.phase;
-      while (pod_status != "Running") {}
-    } catch (error) {}
+    const namespace = env.KUBERNETES_NAMESPACE;
+    while (Date.now() - start < timeoutMs) {
+      const status = await this.get_pod_status(namespace, pod_name);
+
+      if (status === PodStatus.Running) return;
+
+      if (status === PodStatus.Failed) {
+        throw new Error("Pod failed during startup");
+      }
+
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+
+    throw new Error("Timed out waiting for pod to be Running");
   }
 
-  // private async run_command_in_pod(user_id: string, contract_id: string) {
-  //   const pod_name = PodServices.get_pod_name(user_id, contract_id);
+  /**
+   * Wait until container is ready to accept commands.
+   *
+   * @param namespace - k8s namespace 
+   * @param pod_name - pod to monitor
+   * @param container_name - container to check
+   * @param timeoutMs - max wait time
+   */
+  public async wait_for_container_ready(
+    namespace: string,
+    pod_name: string,
+    container_name: string,
+    timeoutMs = 30_000,
+  ): Promise<void> {
+    const start = Date.now();
 
-  //   try {
-  //     const pod = await this.core_api.readNamespacedPod({
-  //       namespace: env.KUBERNETES_NAMESPACE,
-  //       name: pod_name,
-  //     });
-  //   } catch (err) {
+    while (Date.now() - start < timeoutMs) {
+      try {
+        await this.run_command_on_pod({
+          namespace,
+          pod_name,
+          container_name,
+          command: ["echo", "ready"],
+          timeoutMs: 5000,
+        });
+        return; // Container is ready
+      } catch (err) {
+        // Container not ready yet, keep waiting
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    }
 
-  //   }
+    throw new Error("Container never became ready to accept commands");
+  }
 
-  // }
+  /**
+   * Execute any command inside a running container inside the pod.
+   *
+   * @param params - exec configuration
+   * @param params.namespace - k8s namespace
+   * @param params.pod_name - pod name
+   * @param params.container_name - container to execute in
+   * @param params.command - commands
+   * @param params.onData - stream callback for live output
+   * @param params.timeoutMs - timeout in milliseconds
+   * @returns stdout and stderr
+   */
+  public async run_command_on_pod(params: {
+    namespace: string;
+    pod_name: string;
+    container_name: string;
+    command: string[];
+    onData?: (chunk: string) => void;
+    timeoutMs?: number;
+  }): Promise<{ stdout: string; stderr: string }> {
+    const { namespace, pod_name, container_name, command, onData, timeoutMs = 300_000 } = params;
+
+    const commandPromise = new Promise<{ stdout: string; stderr: string }>(
+      (resolve, reject) => {
+        let stdout_data = "";
+        let stderr_data = "";
+        let resolved = false;
+
+        const stdout_stream = new Writable({
+          write(chunk, _encoding, callback) {
+            const str = chunk.toString();
+            stdout_data += str;
+            onData?.(str);
+            callback();
+          },
+        });
+
+        const stderr_stream = new Writable({
+          write(chunk, _encoding, callback) {
+            const str = chunk.toString();
+            stderr_data += str;
+            onData?.(str);
+            callback();
+          },
+        });
+
+        // Handle stream errors
+        stdout_stream.on("error", (err) => {
+          if (!resolved) {
+            resolved = true;
+            reject(err);
+          }
+        });
+
+        stderr_stream.on("error", (err) => {
+          if (!resolved) {
+            resolved = true;
+            reject(err);
+          }
+        });
+
+        this.exec_command.exec(
+          namespace,
+          pod_name,
+          container_name,
+          command,
+          stdout_stream,
+          stderr_stream,
+          null,
+          false,
+          (status: V1Status) => {
+            if (resolved) return; // Already handled by stream error
+            resolved = true;
+
+            // Close streams
+            stdout_stream.end();
+            stderr_stream.end();
+
+            if (status.status === "Success") {
+              resolve({ stdout: stdout_data, stderr: stderr_data });
+            } else {
+              reject(
+                new Error(status.message || "Pod command execution failed"),
+              );
+            }
+          },
+        );
+      },
+    );
+
+    // Race between command execution and timeout
+    return Promise.race([
+      commandPromise,
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Command execution timeout")),
+          timeoutMs,
+        ),
+      ),
+    ]);
+  }
+
+  /**
+   * Stream logs from a pod
+   *
+   * @param params.namespace - k8s namespace
+   * @param params.user_id - user owning the pod
+   * @param params.contract_id - contract owning the pod
+   * @param params.container_name - which container to stream logs from
+   * @param params.tail_lines - number of trailing lines
+   * @param params.onData - called for every log chunk
+   */
+  public async stream_pod_logs(params: {
+    namespace: string;
+    user_id: string;
+    contract_id: string;
+    container_name: string;
+    tail_lines: number;
+    onData: (line: string) => void;
+  }): Promise<void> {
+    const {
+      namespace,
+      user_id,
+      contract_id,
+      container_name,
+      tail_lines,
+      onData,
+    } = params;
+
+    const pod_name = PodServices.get_pod_name(user_id, contract_id);
+
+    const log_stream = new Writable({
+      write(chunk, _encoding, callback) {
+        onData(chunk.toString());
+        callback();
+      },
+    });
+
+    const log_options: LogOptions = {
+      follow: true,
+      tailLines: tail_lines,
+      timestamps: false,
+    };
+
+    return new Promise<void>((resolve, reject) => {
+      this.log
+        .log(namespace, pod_name, container_name, log_stream, log_options)
+        .then(() => {
+          log_stream.end();
+          resolve();
+        })
+        .catch((err) => {
+          log_stream.end();
+          reject(err);
+        });
+    });
+  }
+
+  /**
+   * Wait until a pod completes/ succeeds/ fails
+   *
+   * @param namespace - k8s namespace
+   * @param pod_name - pod to monitor
+   * @param timeoutMs - max wait time
+   * @returns final pod_Status
+   */
+  public async wait_for_pod_completion(
+    namespace: string,
+    pod_name: string,
+    timeoutMs = 5 * 60_000,
+  ): Promise<PodStatus> {
+    const start = Date.now();
+
+    while (Date.now() - start < timeoutMs) {
+      const status = await this.get_pod_status(namespace, pod_name);
+
+      if (status === PodStatus.Succeeded || status === PodStatus.Failed) {
+        return status;
+      }
+
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+
+    throw new Error("Timed out waiting for pod completion");
+  }
+
+  /**
+   * Upload a list of files to a pod.
+   * NOTE: This overwrites the init container's downloaded code.
+   * Files are copied to /workspace (not /workspace/${contract_name}).
+   *
+   * @param namespace - k8s namespace
+   * @param pod_name - name od pod
+   * @param files - array of files: { path, content }
+   */
+  public async copy_files_to_pod(
+    namespace: string,
+    pod_name: string,
+    files: FileContent[],
+  ): Promise<void> {
+    if (!files || files.length === 0) {
+      console.log("No files supplied for copying");
+      return;
+    }
+
+    const container_name = "anchor-executor";
+    const base_dir = "/workspace";
+
+    for (const file of files) {
+      if (file.path.includes("..") || file.path.startsWith("/")) {
+        throw new Error(`Invalid file path: ${file.path}`);
+      }
+    }
+
+    await this.run_command_on_pod({
+      namespace,
+      pod_name,
+      container_name,
+      command: [
+        "sh",
+        "-c",
+        `cd ${base_dir} && find . -maxdepth 1 -mindepth 1 ! -name 'target' -exec rm -rf {} + || true`,
+      ],
+    });
+
+    // Copy each file
+    for (const file of files) {
+      const full_path = `${base_dir}/${file.path}`;
+      const dir = full_path.substring(0, full_path.lastIndexOf("/"));
+
+      // Create directory structure
+      await this.run_command_on_pod({
+        namespace,
+        pod_name,
+        container_name,
+        command: ["mkdir", "-p", dir],
+      });
+
+      const escaped_path = full_path.replace(/'/g, "'\\''");
+      const base64 = Buffer.from(file.content).toString("base64");
+
+      await this.run_command_on_pod({
+        namespace,
+        pod_name,
+        container_name,
+        command: [
+          "sh",
+          "-c",
+          `base64 -d > '${escaped_path}' << 'EOF'\n${base64}\nEOF`,
+        ],
+      });
+    }
+
+    console.log(`Copied ${files.length} files into pod ${pod_name}`);
+
+    console.log("Installing dependencies...");
+    try {
+      await this.run_command_on_pod({
+        namespace,
+        pod_name,
+        container_name,
+        command: ["sh", "-c", "cd /workspace && yarn install"],
+        timeoutMs: 5 * 60_000, // 5 minutes for dependency installation
+      });
+      console.log("Dependencies installed successfully");
+    } catch (err) {
+      console.error("Failed to install dependencies:", err);
+      throw new Error("Dependency installation failed");
+    }
+  }
 }

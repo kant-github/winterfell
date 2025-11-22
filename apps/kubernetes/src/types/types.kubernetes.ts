@@ -6,3 +6,12 @@ export interface PodConfig {
   command: string;
   code_snapshot_url: string;
 }
+
+export enum PodStatus {
+  Pending = "Pending",
+  Running = "Running",
+  Succeeded = "Succeeded",
+  Failed = "Failed",
+  Unknown = "Unknown",
+  Terminating = "Terminating"
+}
