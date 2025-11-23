@@ -7,6 +7,7 @@ import { env } from "../configs/configs.env";
 
 export default class RedisQueue {
   private queue: Worker;
+  private namespace: string = env.KUBERNETES_NAMESPACE;
 
   constructor(queue_name: string) {
     this.queue = new Worker(queue_name, this.process_job.bind(this), {
@@ -47,32 +48,50 @@ export default class RedisQueue {
     try {
       const { userId, contractId, contractName, jobId, command } = payload;
 
-      // const pod_status = await kubernetes_services.kubernetes_manager.get_pod_status(userId, contractId);
-      const pod_exists = await kubernetes_services.redis_lock_service.is_locked(
-        userId,
-        contractId,
-      );
+      const pod_exists = await kubernetes_services.redis_lock_service.is_acquired(userId, contractId);
       if (pod_exists) {
-        console.error("Pod already exists");
-        return;
+        throw new Error('Pod already exists for the same command execution');
       }
 
-      await kubernetes_services.redis_lock_service.create_lock(
-        userId,
-        contractId,
-      );
-      const codebase = await PodServices.get_codebase(contractId);
+      console.log('contract id is: ', contractId);
 
-      await kubernetes_services.kubernetes_manager.create_pod(
-        jobId,
-        userId,
-        contractId,
-        command,
-        codebase,
-      );
-    } catch (error) {}
+      const locked = await kubernetes_services.redis_lock_service.acquire_lock(userId, contractId);
+      if (!locked) {
+        throw new Error('Failed to acquire lock');
+      }
 
-    return { success: true, message: "Build completed" };
+      const files = await PodServices.get_codebase(contractId);
+      if (!files || files.length === 0) {
+        throw new Error('No files foudn');
+      }
+      console.log('received codebase');
+
+      const pod_name = await kubernetes_services.kubernetes_manager.create_pod(jobId, userId, contractId, command, files);
+      console.log('created pod', pod_name);
+
+      await kubernetes_services.kubernetes_manager.wait_for_pod_running(pod_name);
+      await kubernetes_services.kubernetes_manager.wait_for_container_ready(this.namespace, pod_name, 'anchor-executor');
+      console.log('copying files to pod');
+      await kubernetes_services.kubernetes_manager.copy_files_to_pod(this.namespace, pod_name, files);
+
+      console.log('runnign command ion pod');
+      await kubernetes_services.kubernetes_manager.run_command_on_pod({
+        namespace: this.namespace,
+        pod_name,
+        container_name: 'anchor-executor',
+        command: ['sh', '-c', 'anchor build'],
+        onData: (chunk) => console.log(chunk),
+      });
+
+      return { success: true, message: "Build completed" };
+
+    } catch (error) {
+      console.error('Build failed');
+    } finally {
+      await kubernetes_services.kubernetes_manager.delete_pod(payload.userId, payload.contractId);
+      await kubernetes_services.redis_lock_service.release_lock(payload.userId, payload.contractId);
+    }
+
   }
 
   private async handleTest(payload: BuildJobPayload) {

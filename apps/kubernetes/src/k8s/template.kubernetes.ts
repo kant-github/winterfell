@@ -34,7 +34,7 @@ export default function podTemplate(configs: PodConfig) {
           command: ["/bin/sh", "-c"],
           args: [
             `
-            echo "Checking out your codebase from ${code_snapshot_url}...;
+            echo "Checking out your codebase from ${code_snapshot_url}...";
             aws s3 cp ${code_snapshot_url} /workspace/code.zip;
             cd /workspace;
             unzip code.zip;
