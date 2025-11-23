@@ -8,6 +8,8 @@
 
 ## EXAMPLE PATTERN FOR [lib.rs]
 
+<file>/programs/<contract-name>/src/lib.rs</file>
+
 ````rust
 use anchor_lang::prelude::*;
 

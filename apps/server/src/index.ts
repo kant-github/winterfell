@@ -41,9 +41,9 @@ process.on('SIGINT', () => {
     });
 });
 
-const trial = () => {
+const trial = async () => {
     const agent = new Agent();
-    agent.final_call();
+    await agent.final_call();
 };
 
-// setTimeout(trial, 1000);
+setTimeout(trial, 1000);
