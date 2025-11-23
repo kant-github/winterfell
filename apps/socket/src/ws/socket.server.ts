@@ -67,6 +67,11 @@ export default class WebSocketServer {
                 this.send_message(ws, data);
                 return;
             }
+            case COMMAND.WINTERFELL_TEST: {
+                const data = await CommandService.handle_incoming_command(ws, message);
+                this.send_message(ws, data);
+                return;
+            }
 
             default:
                 return;
