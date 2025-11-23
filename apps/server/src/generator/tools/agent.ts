@@ -5,6 +5,7 @@ import Tool from './tool';
 import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import StreamParser from '../../services/stream_parser';
 import { ChatRole, prisma } from '@repo/database';
+import AgentStreamParser from '../../services/agent_stream_parser';
 
 // Create custom state annotation that extends MessagesAnnotation
 const AgentState = Annotation.Root({
@@ -18,9 +19,7 @@ const AgentState = Annotation.Root({
 export default class Agent {
     private llm;
     private agent_builder;
-    private parser: StreamParser;
-    private totalInputTokens: number = 0;
-    private totalOutputTokens: number = 0;
+    private parser: AgentStreamParser;
 
     constructor() {
         this.llm = new ChatGoogleGenerativeAI({
@@ -42,7 +41,7 @@ export default class Agent {
             .addEdge('toolNode', 'llmCall')
             .compile();
 
-        this.parser = new StreamParser();
+        this.parser = new AgentStreamParser();
     }
 
     /**
@@ -67,14 +66,6 @@ export default class Agent {
 
             // Get the final AI message
             const lastMessage = result.messages[result.messages.length - 1];
-
-            console.log('tokens -------------------------->')
-            console.log(`Input tokens:  ${this.totalInputTokens}`);
-            console.log(`Output tokens: ${this.totalOutputTokens}`);
-            console.log(`Total tokens:  ${this.totalInputTokens + this.totalOutputTokens}`);
-
-            console.log('printing generated files----------->');
-            this.parser.getGeneratedFiles();
 
             if (lastMessage && 'content' in lastMessage) {
                 console.log('\n=== GENERATION COMPLETE ===\n');
@@ -134,12 +125,7 @@ export default class Agent {
                     continue;
                 }
 
-                // console.log(chunk.text);
-
-                if(chunk.usage_metadata) {
-                    if(chunk.usage_metadata.input_tokens > 0) this.totalInputTokens = chunk.usage_metadata.input_tokens;
-                    if(chunk.usage_metadata.output_tokens > 0) this.totalOutputTokens = chunk.usage_metadata.output_tokens; 
-                }
+                console.log(chunk.text);
 
                 // Handle text content
                 if (chunk.text) {
@@ -242,8 +228,54 @@ RULE:
 If user asks for a contract, and you need any rule, ALWAYS call the tool.
 Do not guess rules.
 
+NOTE: you should write the code in rust anchor framework.
+NOTE: when you give anything not related to code like NAME, CONTEXT, STAGE, PHASE, FILE, CODE, IDL use uppercase.
+
+- at start give all the stages you're going to use.
+- you've free will to generate code but restricted in only generating anchor solana contract
+
+- the content generation should have the following in order:
+    - NAME: name of the contract
+    - CONTEXT: near about 20 words on what will you do
+    - STAGE: current stage with proper name in 1 word (should have atleast 5 stages)
+    - PHASE: should only inside generating stage
+    - FILE: should contain the file path which will be created next
+    - CODE: contain the code of the current generating file
+    - IDL: should be generated at last of the contract which should show the basic layout of the contract
+    - CONTEXT: near about 20 words of what you did at the end of complete contract generation
+
+
+the file structure to strictly follow
+
+/migrations
+    └── deploy.ts
+/programs
+    └── [program_name]
+        └── src
+            ├── lib.rs
+            ├── constants.rs (if needed)
+            ├── errors
+                ├── mod.rs
+                └── error_codes.rs
+            ├── state
+                ├── mod.rs
+                └── [state_name].rs
+            ├── instructions
+                ├── mod.rs
+                └── [instruction_name].rs
+            └── utils (if needed)
+                ├── mod.rs
+                └──[utility_name].rs
+/tests
+    └── [program_name].ts
+.gitignore
+.prettierignore
+Anchor.toml
+Cargo.toml
+package.json
+tsconfig.json
+
 AVAILABLE RULES:
-At first, do fetch staging_schema and anchor_file_structure for understanding the staging structure.
 ${Tool.get_rules_name()}
 
 Process:
