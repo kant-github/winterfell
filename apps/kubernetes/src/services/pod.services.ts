@@ -10,7 +10,7 @@ export class PodServices {
       }
 
       const { data } = await axios.get(
-        `${env.SERVER_CLOUDFRONT_DOMAIN}/${contract_id}`,
+        `${env.SERVER_CLOUDFRONT_DOMAIN}/${contract_id}/resource`,
       );
       return data;
     } catch (error) {

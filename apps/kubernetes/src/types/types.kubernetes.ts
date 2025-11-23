@@ -4,7 +4,7 @@ export interface PodConfig {
   contract_id: string;
   user_id: string;
   command: string;
-  code_snapshot_url: string;
+  // code_snapshot_url: string;
 }
 
 export enum PodStatus {
@@ -13,5 +13,5 @@ export enum PodStatus {
   Succeeded = "Succeeded",
   Failed = "Failed",
   Unknown = "Unknown",
-  Terminating = "Terminating"
+  Terminating = "Terminating",
 }

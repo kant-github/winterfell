@@ -39,7 +39,6 @@ export default class KubernetesManager {
     user_id: string,
     contract_id: string,
     command: string,
-    code_snapshot_url: string,
   ): Promise<string> {
     try {
       const pod_name = PodServices.get_pod_name(user_id, contract_id);
@@ -49,7 +48,6 @@ export default class KubernetesManager {
         contract_id,
         user_id,
         command,
-        code_snapshot_url,
       });
 
       const response = await this.core_api.createNamespacedPod({
@@ -75,14 +73,35 @@ export default class KubernetesManager {
   public async delete_pod(
     user_id: string,
     contract_id: string,
+    maxWaitMs: number = 60000,
   ): Promise<{ success: boolean }> {
     try {
       const pod_name = PodServices.get_pod_name(user_id, contract_id);
+
       await this.core_api.deleteNamespacedPod({
         namespace: env.KUBERNETES_NAMESPACE,
         name: pod_name,
       });
-      return { success: true };
+
+      const start = Date.now();
+      while (Date.now() - start < maxWaitMs) {
+        try {
+          await this.core_api.readNamespacedPod({
+            namespace: env.KUBERNETES_NAMESPACE,
+            name: pod_name,
+          });
+          await new Promise((r) => setTimeout(r, 1000));
+        } catch (err: any) {
+          if (err.statusCode === 404 || err.response?.statusCode === 404) {
+            console.log(`Pod ${pod_name} successfully deleted`);
+            return { success: true };
+          }
+          throw err;
+        }
+      }
+
+      console.warn(`Pod ${pod_name} deletion timeout`);
+      return { success: false };
     } catch (err) {
       console.error("Error deleting pod:", err);
       return { success: false };
@@ -134,17 +153,35 @@ export default class KubernetesManager {
    */
   public async wait_for_pod_running(
     pod_name: string,
-    timeoutMs = 60_000,
+    timeoutMs = 10 * 60_000,
   ): Promise<void> {
     const start = Date.now();
-
     const namespace = env.KUBERNETES_NAMESPACE;
+
+    console.log(`Waiting for pod ${pod_name} to be running...`);
+
     while (Date.now() - start < timeoutMs) {
       const status = await this.get_pod_status(namespace, pod_name);
+      console.log(`Pod ${pod_name} status: ${status}`);
 
-      if (status === PodStatus.Running) return;
+      if (status !== PodStatus.Running) {
+        try {
+          await this.core_api.readNamespacedPod({
+            namespace,
+            name: pod_name,
+          });
+        } catch (err) {
+          console.error("Error getting detailed pod status:", err);
+        }
+      }
+
+      if (status === PodStatus.Running) {
+        console.log("Pod is now running");
+        return;
+      }
 
       if (status === PodStatus.Failed) {
+        console.error("Pod failed during startup");
         throw new Error("Pod failed during startup");
       }
 
@@ -157,7 +194,7 @@ export default class KubernetesManager {
   /**
    * Wait until container is ready to accept commands.
    *
-   * @param namespace - k8s namespace 
+   * @param namespace - k8s namespace
    * @param pod_name - pod to monitor
    * @param container_name - container to check
    * @param timeoutMs - max wait time
@@ -172,6 +209,7 @@ export default class KubernetesManager {
 
     while (Date.now() - start < timeoutMs) {
       try {
+        console.log("waiting for container to be ready");
         await this.run_command_on_pod({
           namespace,
           pod_name,
@@ -179,9 +217,9 @@ export default class KubernetesManager {
           command: ["echo", "ready"],
           timeoutMs: 5000,
         });
-        return; // Container is ready
+        return;
       } catch (err) {
-        // Container not ready yet, keep waiting
+        console.log("failedddd");
         await new Promise((r) => setTimeout(r, 1000));
       }
     }
@@ -209,7 +247,14 @@ export default class KubernetesManager {
     onData?: (chunk: string) => void;
     timeoutMs?: number;
   }): Promise<{ stdout: string; stderr: string }> {
-    const { namespace, pod_name, container_name, command, onData, timeoutMs = 300_000 } = params;
+    const {
+      namespace,
+      pod_name,
+      container_name,
+      command,
+      onData,
+      timeoutMs = 300_000,
+    } = params;
 
     const commandPromise = new Promise<{ stdout: string; stderr: string }>(
       (resolve, reject) => {
@@ -358,7 +403,7 @@ export default class KubernetesManager {
   public async wait_for_pod_completion(
     namespace: string,
     pod_name: string,
-    timeoutMs = 5 * 60_000,
+    timeoutMs = 10 * 60_000,
   ): Promise<PodStatus> {
     const start = Date.now();
 
@@ -403,6 +448,7 @@ export default class KubernetesManager {
       }
     }
 
+    // Clear workspace (except target dir for build cache)
     await this.run_command_on_pod({
       namespace,
       pod_name,
@@ -444,19 +490,61 @@ export default class KubernetesManager {
 
     console.log(`Copied ${files.length} files into pod ${pod_name}`);
 
-    console.log("Installing dependencies...");
+    // Check if package.json exists before installing
+    console.log("Checking for package.json...");
+    try {
+      const { stdout } = await this.run_command_on_pod({
+        namespace,
+        pod_name,
+        container_name,
+        command: [
+          "sh",
+          "-c",
+          "cd /workspace && ls -la && cat package.json 2>&1 || echo 'No package.json'",
+        ],
+        timeoutMs: 10_000,
+      });
+      console.log("Workspace contents:", stdout);
+    } catch (err) {
+      console.error("Error checking workspace:", err);
+    }
+
+    // Check if yarn is installed, if not skip dependency installation
+    console.log("Checking for yarn...");
     try {
       await this.run_command_on_pod({
         namespace,
         pod_name,
         container_name,
-        command: ["sh", "-c", "cd /workspace && yarn install"],
-        timeoutMs: 5 * 60_000, // 5 minutes for dependency installation
+        command: ["which", "yarn"],
+        timeoutMs: 5_000,
       });
+      console.log("Yarn found, installing dependencies...");
+    } catch (err) {
+      console.log(
+        "Yarn not found in container, skipping dependency installation",
+      );
+      return; // Skip if yarn doesn't exist
+    }
+
+    // Only install if package.json exists
+    console.log("Installing dependencies...");
+    try {
+      const { stdout, stderr } = await this.run_command_on_pod({
+        namespace,
+        pod_name,
+        container_name,
+        command: ["sh", "-c", "cd /workspace && yarn install 2>&1"],
+        timeoutMs: 5 * 60_000,
+        onData: (chunk) => console.log(chunk), // Stream output for debugging
+      });
+      console.log("Yarn stdout:", stdout);
+      if (stderr) console.log("Yarn stderr:", stderr);
       console.log("Dependencies installed successfully");
     } catch (err) {
       console.error("Failed to install dependencies:", err);
-      throw new Error("Dependency installation failed");
+      // Don't throw - Anchor projects might not need yarn
+      console.log("Continuing without yarn dependencies...");
     }
   }
 }

@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     python3 clang llvm lld unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Solana Install (CORRECTED — no Markdown link)
+# Solana Install
 RUN curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
 ENV PATH="/root/.local/share/solana/install/active_release/bin:${PATH}"
 
@@ -25,8 +25,8 @@ ENV PATH="/root/.avm/bin:${PATH}"
 # Install Anchor
 RUN avm install latest && avm use latest
 
-# Node.js + Yarn (Required by Anchor)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+# Node.js 20 + Yarn (CHANGED from 18 to 20)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get update && apt-get install -y nodejs && \
     npm install -g yarn
 

@@ -22,6 +22,7 @@ export default class SocketToOrchestratorQueue {
         try {
             const job = await this.queue.add(command, payload, {
                 priority: 2,
+                attempts: 1,
                 jobId: `anchor-command-${payload.contractId}-${this.create_job_id()}`,
             });
             console.log('added to the queue');
