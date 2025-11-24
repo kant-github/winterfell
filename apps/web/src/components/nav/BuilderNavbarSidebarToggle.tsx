@@ -1,9 +1,5 @@
 'use client';
-import {
-    TbLayoutSidebarLeftCollapseFilled,
-    TbLayoutSidebarRightCollapseFilled,
-    TbMessageFilled,
-} from 'react-icons/tb';
+import { TbMessageFilled } from 'react-icons/tb';
 import ToolTipComponent from '../ui/TooltipComponent';
 import { cn } from '@/src/lib/utils';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';

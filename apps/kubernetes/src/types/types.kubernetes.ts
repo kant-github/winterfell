@@ -4,7 +4,6 @@ export interface PodConfig {
     contract_id: string;
     user_id: string;
     command: string;
-    // code_snapshot_url: string;
 }
 
 export enum PodStatus {

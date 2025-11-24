@@ -6,8 +6,7 @@ import { useParams } from 'next/navigation';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useCommandHistoryStore } from '@/src/store/user/useCommandHistoryStore';
 import useShortcuts from '@/src/hooks/useShortcut';
-import { PiBroomFill, PiTerminal, PiTerminalWindow } from 'react-icons/pi';
-import { BiPlus } from 'react-icons/bi';
+import { PiBroomFill, PiTerminal } from 'react-icons/pi';
 import { IoIosClose } from 'react-icons/io';
 import { Button } from '../ui/button';
 import ToolTipComponent from '../ui/TooltipComponent';
@@ -16,10 +15,12 @@ import { useTerminalLogic } from '@/src/hooks/useTerminal';
 import { Line } from '@/src/types/terminal_types';
 import { cn } from '@/src/lib/utils';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
-import { CommandExecutionPayload, TerminalSocketData } from '@repo/types';
+import { IncomingPayload, TerminalSocketData } from '@repo/types';
+import { ParsedIncomingMessage } from '@/src/class/socket.client';
 
 export default function Terminal() {
     const [showTerminal, setShowTerminal] = useState<boolean>(false);
+    const [isRunning, setIsRunning] = useState(false);
     const outputRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const { currentFile } = useCodeEditor();
@@ -31,40 +32,35 @@ export default function Terminal() {
     const { height, startResize } = useTerminalResize({
         onClose: () => setShowTerminal(false),
     });
-    const {
-        terminals,
-        activeTab,
-        currentTerminal,
-        setActiveTab,
-        handleCommand,
-        updateInput,
-        updateLogs,
-        addNewTerminal,
-        deleteTerminal,
-    } = useTerminalLogic({
-        contractId,
-        token: session?.user?.token,
-        addCommand,
-    });
+
+    const { activeTab, currentTerminal, handleCommand, updateInput, updateLogs, deleteTerminal } =
+        useTerminalLogic({
+            contractId,
+            token: session?.user?.token,
+            addCommand,
+            setIsRunning,
+        });
 
     useEffect(() => {
-        function handleIncomingLogs(message: {
-            type: 'TERMINAL_STREAM';
-            payload: CommandExecutionPayload;
-        }) {
-            const { phase, line } = message.payload;
+        function handleIncoming(message: ParsedIncomingMessage<IncomingPayload>) {
+            const { line } = message.payload;
 
-            updateLogs(activeTab, [...currentTerminal.logs, { type: phase, text: line }]);
+            if (message.type === TerminalSocketData.COMPLETED) {
+                setIsRunning(false);
+            }
+
+            updateLogs(activeTab, [...currentTerminal.logs, { type: message.type, text: line }]);
         }
 
-        subscribeToHandler(handleIncomingLogs);
-    }, [activeTab, currentTerminal.logs]);
+        Object.values(TerminalSocketData).forEach((type) => {
+            subscribeToHandler(type, handleIncoming);
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTab]);
 
     useShortcuts({
         'meta+j': () => setShowTerminal((prev) => !prev),
         'ctrl+j': () => setShowTerminal((prev) => !prev),
-        'ctrl+shift+~': () => addNewTerminal(),
-        'ctrl+shift+d': () => deleteTerminal(currentTerminal.id),
     });
 
     const Prompt = () => (
@@ -74,28 +70,39 @@ export default function Terminal() {
     );
 
     useEffect(() => {
-        if (showTerminal) inputRef.current?.focus();
-    }, [showTerminal, activeTab]);
+        if (showTerminal && !isRunning) inputRef.current?.focus();
+    }, [showTerminal, activeTab, isRunning]);
 
     useEffect(() => {
         outputRef.current?.scrollTo({
             top: outputRef.current.scrollHeight,
             behavior: 'smooth',
         });
-    }, [currentTerminal?.logs]);
+    }, [currentTerminal.logs]);
 
     function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (isRunning) return;
+
+        if (e.ctrlKey && e.key === 'c') {
+            e.preventDefault();
+            updateLogs(activeTab, [...currentTerminal.logs, { type: 'command', text: '^C' }]);
+            setIsRunning(false);
+            return;
+        }
+
         if (e.key === 'Enter') {
             e.preventDefault();
             handleCommand(currentTerminal.input);
             updateInput(activeTab, '');
             resetIndex();
         }
+
         if (e.key === 'ArrowUp') {
             e.preventDefault();
             const prevCommand = moveUp();
             if (prevCommand !== null) updateInput(activeTab, prevCommand);
         }
+
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             const nextCommand = moveDown();
@@ -108,15 +115,17 @@ export default function Terminal() {
             const colorClass =
                 line.type === 'command'
                     ? ''
-                    : line.type === TerminalSocketData.INFO
-                      ? 'text-green-600'
-                      : line.type === TerminalSocketData.BUILD_ERROR
-                        ? 'text-[#E9524A]'
-                        : line.type === TerminalSocketData.EXECUTING_COMMAND
-                          ? 'text-primary-light/90'
-                          : line.type === TerminalSocketData.SERVER_MESSAGE
-                            ? 'text-cyan-500'
-                            : 'text-light/80 font-normal';
+                    : line.type === TerminalSocketData.COMPLETED
+                      ? 'text-cyan-500'
+                      : line.type === TerminalSocketData.LOGS
+                        ? 'text-green-500/90'
+                        : line.type === TerminalSocketData.ERROR_MESSAGE
+                          ? 'text-[#E9524A]'
+                          : line.type === TerminalSocketData.EXECUTING_COMMAND
+                            ? 'text-primary-light/90'
+                            : line.type === TerminalSocketData.SERVER_MESSAGE
+                              ? 'text-cyan-500'
+                              : 'text-light/80 font-normal';
 
             return (
                 <div key={i} className="whitespace-pre-wrap text-left">
@@ -130,7 +139,6 @@ export default function Terminal() {
                 </div>
             );
         });
-
     const handleCurrentFileExtension = () => {
         if (!currentFile) return 'no selected file.';
         const currentFileNameArray = currentFile.name.split('.');
@@ -149,7 +157,6 @@ export default function Terminal() {
                 return 'File';
         }
     };
-
     return (
         <>
             {showTerminal && (
@@ -167,6 +174,7 @@ export default function Terminal() {
                         }}
                         className="h-0.5 w-full cursor-ns-resize bg-neutral-800 hover:bg-blue-500/20 active:bg-blue-500/40 transition-colors shrink-0"
                     />
+
                     <div className="text-light/50 py-1 px-4 flex justify-between items-center select-none bg-dark-base shrink-0">
                         <Button
                             disabled
@@ -189,6 +197,7 @@ export default function Terminal() {
                                     <MdDelete className="size-4 text-light/60" />
                                 </Button>
                             </ToolTipComponent>
+
                             <ToolTipComponent content="clear">
                                 <Button
                                     onClick={() => updateLogs(activeTab, [])}
@@ -197,14 +206,7 @@ export default function Terminal() {
                                     <PiBroomFill className="size-3 text-light/70" />
                                 </Button>
                             </ToolTipComponent>
-                            <ToolTipComponent content="add new tab">
-                                <Button
-                                    onClick={addNewTerminal}
-                                    className="h-fit w-0 bg-transparent hover:bg-dark p-0.5 rounded cursor-pointer"
-                                >
-                                    <BiPlus className="size-4 text-light/70" />
-                                </Button>
-                            </ToolTipComponent>
+
                             <ToolTipComponent content="close">
                                 <Button
                                     onClick={() => setShowTerminal(false)}
@@ -215,45 +217,34 @@ export default function Terminal() {
                             </ToolTipComponent>
                         </div>
                     </div>
+
                     <div className="flex flex-1 min-h-0 overflow-hidden">
                         <div
                             ref={outputRef}
-                            onClick={() => inputRef.current?.focus()}
+                            onClick={() => !isRunning && inputRef.current?.focus()}
                             className="flex-1 cursor-text overflow-y-auto px-3 py-2 text-light/80 flex flex-col"
                         >
                             {renderLines(currentTerminal.logs)}
-                            <div className="flex mt-1">
-                                <Prompt />
-                                <input
-                                    aria-label="terminal"
-                                    ref={inputRef}
-                                    type="text"
-                                    value={currentTerminal.input}
-                                    onChange={(e) => updateInput(activeTab, e.target.value)}
-                                    onKeyDown={handleInputKeyDown}
-                                    className="outline-none bg-transparent text-light/80 caret-green-400 ml-2 flex-1"
-                                />
-                            </div>
-                        </div>
 
-                        <div className="w- border-l border-neutral-800 px-1 flex flex-col items-center py-2 overflow-y-auto shrink-0">
-                            {terminals.map((tab) => (
-                                <ToolTipComponent key={tab.id} content={tab.name}>
-                                    <Button
-                                        // variant='ghost'
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`h-fit px-1.5! bg-transparent py-1 hover:bg-dark rounded-none cursor-pointer ${
-                                            activeTab === tab.id ? 'bg-dark' : 'text-light/70'
-                                        }`}
-                                    >
-                                        <PiTerminalWindow className="size-4" />
-                                    </Button>
-                                </ToolTipComponent>
-                            ))}
+                            {!isRunning && (
+                                <div className="flex mt-1">
+                                    <Prompt />
+                                    <input
+                                        aria-label="terminal"
+                                        ref={inputRef}
+                                        type="text"
+                                        value={currentTerminal.input}
+                                        onChange={(e) => updateInput(activeTab, e.target.value)}
+                                        onKeyDown={handleInputKeyDown}
+                                        className="outline-none bg-transparent text-light/80 caret-green-400 ml-2 flex-1"
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
+
             <div className="absolute bottom-0 left-0 right-0 h-6 flex justify-between items-center px-3 text-[11px] text-light/70 bg-dark-base border-t border-neutral-800 z-20">
                 <div
                     className="flex items-center space-x-1.5 hover:bg-neutral-800/50 px-2 py-0.5 rounded-md cursor-pointer transition text-[11px]"

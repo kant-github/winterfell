@@ -11,10 +11,8 @@ export default class RedisPubSub {
 
     private pubsub_processor() {
         this.subscriber.on('message', (channel: string, message: string) => {
-            console.log('channel is', channel);
             const socket = wsserver.connection_mapping.get(channel);
             if (!socket) return;
-            console.log('received msg from k8s');
             console.log(JSON.parse(message));
             wsserver.send_message(socket, JSON.parse(message));
         });

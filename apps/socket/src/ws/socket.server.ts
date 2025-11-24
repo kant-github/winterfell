@@ -1,7 +1,7 @@
 import WebSocket, { WebSocketServer as WSServer } from 'ws';
 import { CustomWebSocket } from '../types/socket_types';
-import { COMMAND, TerminalSocketData, WSServerIncomingPayload } from '@repo/types';
-import RedisPubSub from './redis.pubsub';
+import { COMMAND, IncomingPayload, TerminalSocketData, WSServerIncomingPayload } from '@repo/types';
+import RedisPubSub from '../queue/redis.subscriber';
 import { env } from '../configs/config.env';
 import CommandService from '../services/services.command';
 import { IncomingMessage } from 'http';
@@ -38,7 +38,7 @@ export default class WebSocketServer {
 
             this.redis.subscribe(topic);
             this.add_listeners(ws, topic);
-            this.send_confirmation_connection(ws);
+            this.send_confirmation_connection(ws, contractId);
         });
     }
 
@@ -74,7 +74,6 @@ export default class WebSocketServer {
                 this.send_message(ws, data);
                 return;
             }
-
             default:
                 return;
         }
@@ -113,11 +112,16 @@ export default class WebSocketServer {
         return { authorised: true, decoded: ws.user, contractId: contract_id };
     }
 
-    private send_confirmation_connection(ws: CustomWebSocket) {
-        const data: WSServerIncomingPayload<string> = {
+    private send_confirmation_connection(ws: CustomWebSocket, contractId: string) {
+        const data: WSServerIncomingPayload<IncomingPayload> = {
             type: TerminalSocketData.CONNECTED,
-            payload: 'you are connected to winter shell',
+            payload: {
+                userId: ws.user.id,
+                contractId: contractId,
+                line: 'You are now connected to the soket.',
+                timestamp: Date.now(),
+            },
         };
-        this.send_message(ws, data);
+        // this.send_message(ws, data);
     }
 }

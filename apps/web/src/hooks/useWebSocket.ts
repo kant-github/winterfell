@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import WebSocketClient, { ParsedOutgoingMessage } from '../class/socket.client';
+import WebSocketClient, {
+    ParsedIncomingMessage,
+    ParsedOutgoingMessage,
+} from '../class/socket.client';
 import { cleanWebSocketClient, getWebSocketClient } from '../lib/singletonWebSocket';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
-import { COMMAND, TerminalSocketData } from '@repo/types';
+import { COMMAND, IncomingPayload, TerminalSocketData } from '@repo/types';
 import { COMMAND_WRITER } from '../lib/terminal_commands';
 
 export const useWebSocket = () => {
@@ -11,13 +14,11 @@ export const useWebSocket = () => {
     const params = useParams();
     const { session } = useUserSessionStore();
     const contractId = params?.contractId as string | undefined;
-    const [isConnected, setIsConnected] = useState<boolean>(false);
+    const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
         const token = session?.user?.token;
-        if (!token || !contractId) {
-            return;
-        }
+        if (!token || !contractId) return;
 
         let interval: NodeJS.Timeout | null = null;
 
@@ -25,42 +26,39 @@ export const useWebSocket = () => {
             socket.current = getWebSocketClient(token, contractId);
 
             interval = setInterval(() => {
-                if (socket.current) {
-                    setIsConnected(socket.current.is_connected);
-                }
-            }, 100);
-        } catch (error) {
+                setIsConnected(socket.current?.is_connected ?? false);
+            }, 200);
+        } catch (err) {
+            console.error('Failed to initialize WS:', err);
             setIsConnected(false);
-            console.error('Failed to initialize WebSocket:', error);
         }
 
         return () => {
-            if (interval) {
-                clearInterval(interval);
-            }
+            interval && clearInterval(interval);
             setIsConnected(false);
             socket.current = null;
             cleanWebSocketClient();
         };
     }, [session?.user?.token, contractId]);
 
-    function subscribeToHandler(handler: (payload: any) => void) {
+    function subscribeToHandler(
+        type: TerminalSocketData,
+        handler: (message: ParsedIncomingMessage<IncomingPayload>) => void,
+    ) {
         if (!socket.current) return;
-        // add subscribe handlers to all TerminalSocketData enum values
-        socket.current.subscribe_to_handlers('', handler);
+        socket.current?.subscribe_to_handlers(type, handler);
     }
 
-    // todo: @rishi this should also get the contract name
     function sendSocketMessage(command: COMMAND, message: COMMAND_WRITER) {
         if (!socket.current) return;
-        const data: ParsedOutgoingMessage<{ message: string; contractName: string }> = {
+
+        socket.current.send_message({
             type: command,
             payload: {
                 contractName: '',
-                message: 'executing ' + message,
+                message: `executing ${message}`,
             },
-        };
-        socket.current.send_message(data);
+        });
     }
 
     return {
