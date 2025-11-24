@@ -7,6 +7,8 @@ import Tool from "../tools/tool";
 import { new_chat_coder_prompt, new_chat_planner_prompt, old_chat_coder_prompt, old_chat_planner_prompt } from "./prompts";
 import { AIMessageChunk, MessageStructure } from "@langchain/core/messages";
 import StreamParser from "../../services/stream_parser";
+import { ChatRole, prisma } from "@repo/database";
+import GeneratorShape from "../../metadata/generator";
 
 type planner = RunnableSequence<{
     user_instruction: string;
@@ -26,13 +28,14 @@ type coder = RunnableSequence<{
     files_likely_affected: any;
 }, AIMessageChunk<MessageStructure>>
 
-export default class Generator {
+export default class Generator extends GeneratorShape {
 
-    private gemini_planner: ChatGoogleGenerativeAI;
-    private gemini_coder: ChatGoogleGenerativeAI;
-    private claude_coder: ChatAnthropic;
+    protected gemini_planner: ChatGoogleGenerativeAI;
+    protected gemini_coder: ChatGoogleGenerativeAI;
+    protected claude_coder: ChatAnthropic;
 
     constructor() {
+        super();
         this.gemini_planner = new ChatGoogleGenerativeAI({
             model: 'gemini-2.5-flash',
             temperature: 0.2,
@@ -52,7 +55,7 @@ export default class Generator {
         chat: 'new' | 'old',
         user_instruction: string,
         model: MODEL,
-        contract_id?: string,
+        contract_id: string,
         idl?: Object[],
     ) {
 
@@ -62,13 +65,15 @@ export default class Generator {
             planner_chain,
             coder_chain,
             user_instruction,
+            contract_id,
         );
     }
 
-    private async new_contract(
+    protected async new_contract(
         planner_chain: planner,
-        coder_chain: coder,
+        coder_chain: any,
         user_instruction: string,
+        contract_id: string,
     ) {
 
         const parser = new StreamParser();
@@ -86,18 +91,29 @@ export default class Generator {
 
         // send planning stage from here
 
+
         const code_stream = await coder_chain.stream({
             plan: data.plan,
             files_likely_affected: data.files_likely_affected,
         });
 
-        for(const chunk of code_stream) {
+        const system_message = await prisma.message.create({
+                data: {
+                    contractId: contract_id,
+                    role: ChatRole.SYSTEM,
+                    content: 'starting to generate in a few seconds',
+                },
+        })
 
+        for await(const chunk of code_stream) {
+            if(chunk.text) {
+                parser.feed(chunk.text, system_message);
+            }
         }
 
     }
 
-    private async old_contract(
+    protected async old_contract(
         planner_chain: planner,
         coder_chain: coder,
         user_instruction: string,
@@ -116,7 +132,7 @@ export default class Generator {
 
     }
 
-    private get_chains(chat: 'new' | 'old', model: MODEL) {
+    protected get_chains(chat: 'new' | 'old', model: MODEL) {
 
         let planner_chain;
         let coder_chain;
@@ -130,10 +146,7 @@ export default class Generator {
                     this.gemini_planner.withStructuredOutput(new_planner_output_schema),
                 ]);
 
-                coder_chain = RunnableSequence.from([
-                    new_chat_coder_prompt,
-                    coder,
-                ]);
+                coder_chain = new_chat_coder_prompt.pipe(coder)
 
                 return {
                     planner_chain: planner_chain,
@@ -147,10 +160,7 @@ export default class Generator {
                     this.gemini_planner.withStructuredOutput(old_planner_output_schema),
                 ]);
 
-                coder_chain = RunnableSequence.from([
-                    old_chat_coder_prompt,
-                    coder.bindTools([Tool.get_file]),
-                ]);
+                coder_chain = old_chat_coder_prompt.pipe(coder.bindTools([Tool.get_file]));
 
                 return {
                     planner_chain: planner_chain,
@@ -160,7 +170,4 @@ export default class Generator {
         }
     }
 
-    private create_chain() {
-
-    }
 }

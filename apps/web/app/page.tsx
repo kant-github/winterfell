@@ -15,7 +15,7 @@ export default function Page() {
 
     return (
         <LenisProvider>
-            <div className="min-h-screen w-full flex flex-col bg-dark relative">
+            <div className="min-h-screen w-full flex flex-col bg-dark relative select-none">
                 <Navbar />
                 <Hero />
                 <Features />

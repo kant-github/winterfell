@@ -50,10 +50,19 @@ const gen = async () => {
 
     console.log('new contract generator called');
 
+    const contract = await prisma.contract.create({
+        data: {
+            title: 'contractor',
+            contractType: 'CUSTOM',
+            userId: 'cmidirftj0000r6wlxid766om',
+        },
+    });
+
     gen.generate(
         'new',
         'create me a counter program with only increment',
-        MODEL.GEMINI
+        MODEL.GEMINI,
+        contract.id,
     );
 
 }
