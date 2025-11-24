@@ -1,9 +1,9 @@
-import { COMMAND } from '@repo/types';
+import { COMMAND, TerminalSocketData } from '@repo/types';
 
 export type MessageHandler = (payload: string) => void;
-export interface ParsedIncomingMessage {
-    type: 'TERMINAL_STREAM';
-    payload: string;
+export interface ParsedIncomingMessage<T> {
+    type: TerminalSocketData;
+    payload: T;
 }
 export interface ParsedOutgoingMessage<T> {
     type: COMMAND;
@@ -45,7 +45,7 @@ export default class WebSocketClient {
 
         this.ws.onmessage = (event: MessageEvent<string>) => {
             try {
-                const parsed_data: ParsedIncomingMessage = JSON.parse(event.data);
+                const parsed_data: ParsedIncomingMessage<unknown> = JSON.parse(event.data);
                 this.handle_incoming_message(parsed_data);
             } catch (error) {
                 console.error('Failed to parse incoming WebSocket message:', event.data, error);
@@ -70,7 +70,7 @@ export default class WebSocketClient {
         };
     }
 
-    private handle_incoming_message(parsed_data: ParsedIncomingMessage) {
+    private handle_incoming_message(parsed_data: ParsedIncomingMessage<unknown>) {
         const { type, payload } = parsed_data;
         const handlers = this.handlers.get(type);
         if (handlers) {

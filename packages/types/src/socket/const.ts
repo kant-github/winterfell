@@ -1,13 +1,15 @@
 export type WebSocketPayloadType = "RUN_COMMAND";
 
 export enum TerminalSocketData {
+  CONNECTED = "CONNECTED",
   INFO = "INFO",
-  lOGS = "lOGS",
+  LOGS = 'LOGS',
   EXECUTING_COMMAND = 'EXECUTING_COMMAND',
   BUILD_ERROR = "BUILD_ERROR",
   VALIDATION_ERROR = "VALIDATION_ERROR",
   SERVER_MESSAGE = "SERVER_MESSAGE",
-  CONNECTED = "CONNECTED",
+  ERROR_MESSAGE = 'ERROR_MESSAGE',
+  COMPLETED = 'COMPLETED',
 }
 
 export interface WSServerIncomingPayload<T> {

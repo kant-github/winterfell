@@ -1,10 +1,10 @@
-import { BuildJobPayload, COMMAND, TerminalSocketData } from '@repo/types';
+import { BuildJobPayload, COMMAND } from '@repo/types';
 import { Job, Worker } from 'bullmq';
 import { kubernetes_services } from '..';
 import { PodServices } from '../services/pod.services';
 import { env } from '../configs/configs.env';
 
-export default class RedisSubscriberQueue {
+export default class RedisQueue {
     private queue: Worker;
     private namespace: string = env.KUBERNETES_NAMESPACE;
 
@@ -46,29 +46,44 @@ export default class RedisSubscriberQueue {
         console.log('run build command');
         try {
             const { userId, contractId, jobId, command } = payload;
+            const topic = `${userId}_${contractId}`;
 
             const pod_exists = await kubernetes_services.redis_lock_service.is_acquired(
                 userId,
                 contractId,
             );
             if (pod_exists) {
-                throw new Error('Pod already exists for the same command execution');
+                await kubernetes_services.redis_publisher.send_error_message(topic, {
+                    userId: userId,
+                    contractId: contractId,
+                    line: 'Previous command execution in progress, please wait...',
+                    timestamp: Date.now(),
+                });
+                return;
             }
-
-            console.log('contract id is ------------------------------->  ', contractId);
 
             const locked = await kubernetes_services.redis_lock_service.acquire_lock(
                 userId,
                 contractId,
             );
             if (!locked) {
-                throw new Error('Failed to acquire lock');
+                await kubernetes_services.redis_publisher.send_error_message(topic, {
+                    userId,
+                    contractId,
+                    line: 'Internal server error',
+                    timestamp: Date.now(),
+                });
+                return;
             }
-            console.log('lock acquired ------------------------------->');
-
             const files = await PodServices.get_codebase(contractId);
             if (!files || files.length === 0) {
-                throw new Error('No files foudn');
+                await kubernetes_services.redis_publisher.send_error_message(topic, {
+                    userId,
+                    contractId,
+                    line: 'Failed to read codebase',
+                    timestamp: Date.now(),
+                })
+                return;
             }
 
             const pod_name = await kubernetes_services.kubernetes_manager.create_pod(
@@ -83,19 +98,24 @@ export default class RedisSubscriberQueue {
                 pod_name,
                 'anchor-executor',
             );
+
+            await kubernetes_services.redis_publisher.send_server_message(topic, {
+                userId,
+                contractId,
+                line: 'Winter is going through the codebase',
+                timestamp: Date.now(),
+            })
             await kubernetes_services.kubernetes_manager.copy_files_to_pod(
                 this.namespace,
                 pod_name,
                 files,
             );
 
-            await kubernetes_services.orchestrator_socket_queue.queue_logs({
-                userId: payload.userId,
-                contractId: payload.contractId,
-                line: 'Executing build command...',
+            await kubernetes_services.redis_publisher.send_command_exectuion(topic, {
+                userId,
+                contractId,
+                line: 'Executing build command',
                 timestamp: Date.now(),
-                jobId: payload.jobId,
-                phase: TerminalSocketData.EXECUTING_COMMAND,
             });
 
             await kubernetes_services.kubernetes_manager.run_command_on_pod({
@@ -105,47 +125,43 @@ export default class RedisSubscriberQueue {
                 command: ['sh', '-c', 'anchor build'],
                 onData: (chunk) => {
                     console.log('chunk is --------------> ', chunk);
-                    kubernetes_services.orchestrator_socket_queue.queue_logs({
-                        userId: payload.userId,
-                        contractId: payload.contractId,
+                    kubernetes_services.redis_publisher.send_logs(topic, {
+                        userId,
+                        contractId,
                         line: chunk.toString(),
                         timestamp: Date.now(),
-                        jobId: payload.jobId,
-                        phase: TerminalSocketData.INFO,
                     });
                 },
             });
 
             return { success: true, message: 'Build completed' };
         } catch (error) {
-            await kubernetes_services.orchestrator_socket_queue.queue_logs({
-                userId: payload.userId,
-                contractId: payload.contractId,
-                line: 'Failed to build the contract...',
-                timestamp: Date.now(),
-                jobId: payload.jobId,
-                phase: TerminalSocketData.BUILD_ERROR,
-            });
             console.error('Build failed', error);
-        } finally {
-            console.log('deleting pod ---------------------------->');
-            await kubernetes_services.kubernetes_manager.delete_pod(
-                payload.userId,
-                payload.contractId,
-            );
-            await kubernetes_services.orchestrator_socket_queue.queue_logs({
-                userId: payload.userId,
-                contractId: payload.contractId,
-                line: 'Please try again..',
+            const { userId, contractId } = payload;
+            const topic = `${userId}_${contractId}`;
+            await kubernetes_services.redis_publisher.send_build_error(topic, {
+                userId,
+                contractId,
+                line: 'Failed to build the contract',
                 timestamp: Date.now(),
-                jobId: payload.jobId,
-                phase: TerminalSocketData.SERVER_MESSAGE,
             });
-            await kubernetes_services.redis_lock_service.release_lock(
-                payload.userId,
-                payload.contractId,
+        } finally {
+            const { userId, contractId } = payload;
+            const topic = `${userId}_${contractId}`;
+            await kubernetes_services.kubernetes_manager.delete_pod(
+                userId,
+                contractId,
             );
-            console.log('released lock');
+            await kubernetes_services.redis_lock_service.release_lock(
+                userId,
+                contractId,
+            );
+            await kubernetes_services.redis_publisher.send_completion_message(topic, {
+                userId,
+                contractId,
+                line: 'Command execution complete',
+                timestamp: Date.now(),
+            })
         }
     }
 

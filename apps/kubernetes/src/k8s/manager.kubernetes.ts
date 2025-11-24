@@ -85,9 +85,19 @@ export default class KubernetesManager {
                         name: pod_name,
                     });
                     await new Promise((r) => setTimeout(r, 1000));
-                } catch {
-                    console.log(`Pod ${pod_name} successfully deleted`);
-                    return { success: true };
+                } catch (error) {
+                    const err = error as {
+                        statusCode?: number;
+                        response?: {
+                            statusCode?: number;
+                            [key: string]: any;
+                        };
+                    }
+                    if (err.statusCode === 404 || err.response?.statusCode === 404) {
+                        console.log(`Pod ${pod_name} successfully deleted`);
+                        return { success: true };
+                    }
+                    throw err;
                 }
             }
 
@@ -265,7 +275,6 @@ export default class KubernetesManager {
                     },
                 });
 
-                // Handle stream errors
                 stdout_stream.on('error', (err) => {
                     if (!resolved) {
                         resolved = true;
@@ -306,7 +315,6 @@ export default class KubernetesManager {
             },
         );
 
-        // Race between command execution and timeout
         return Promise.race([
             commandPromise,
             new Promise<never>((_, reject) =>

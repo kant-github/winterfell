@@ -36,16 +36,9 @@ export interface BuildJobCompletionPayload extends BaseJobPayload {
   type: TerminalSocketData;
 }
 
-export interface WSServerIncomingPayload<T> {
-  type: TerminalSocketData;
-  payload: T;
-}
-
-export interface CommandExecutionPayload {
-  userId: string;
-  contractId: string;
-  jobId: string;
-  line: string;
-  timestamp: number;
-  phase: TerminalSocketData;
+export interface IncomingPayload {
+  userId: string,
+  contractId: string,
+  line: string,
+  timestamp: number,
 }
