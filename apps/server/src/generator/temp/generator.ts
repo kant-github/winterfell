@@ -6,6 +6,7 @@ import { new_planner_output_schema, old_planner_output_schema } from "./schema";
 import Tool from "../tools/tool";
 import { new_chat_coder_prompt, new_chat_planner_prompt, old_chat_coder_prompt, old_chat_planner_prompt } from "./prompts";
 import { AIMessageChunk, MessageStructure } from "@langchain/core/messages";
+import StreamParser from "../../services/stream_parser";
 
 type planner = RunnableSequence<{
     user_instruction: string;
@@ -38,10 +39,12 @@ export default class Generator {
         });
         this.gemini_coder = new ChatGoogleGenerativeAI({
             model: 'gemini-2.5-flash',
+            streaming: true,
             temperature: 0.2,
         });
         this.claude_coder = new ChatAnthropic({
             model: 'claude-sonnet-4-5-20250929',
+            streaming: true,
         });
     }
 
@@ -68,6 +71,8 @@ export default class Generator {
         user_instruction: string,
     ) {
 
+        const parser = new StreamParser();
+
         const data = await planner_chain.invoke({
             user_instruction,
         });
@@ -79,12 +84,16 @@ export default class Generator {
             return;
         }
 
-        const coder = await coder_chain.invoke({
+        // send planning stage from here
+
+        const code_stream = await coder_chain.stream({
             plan: data.plan,
             files_likely_affected: data.files_likely_affected,
         });
 
-        console.log(coder.content);
+        for(const chunk of code_stream) {
+
+        }
 
     }
 
