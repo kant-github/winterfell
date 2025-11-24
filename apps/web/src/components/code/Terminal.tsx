@@ -16,7 +16,8 @@ import { useTerminalLogic } from '@/src/hooks/useTerminal';
 import { Line } from '@/src/types/terminal_types';
 import { cn } from '@/src/lib/utils';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
-import { CommandExecutionPayload, TerminalSocketData } from '@repo/types';
+import { IncomingPayload, TerminalSocketData } from '@repo/types';
+import { ParsedIncomingMessage } from '@/src/class/socket.client';
 
 export default function Terminal() {
     const [showTerminal, setShowTerminal] = useState<boolean>(false);
@@ -48,16 +49,20 @@ export default function Terminal() {
     });
 
     useEffect(() => {
-        function handleIncomingLogs(message: {
-            type: 'TERMINAL_STREAM';
-            payload: CommandExecutionPayload;
-        }) {
-            const { phase, line } = message.payload;
+        function handleIncoming(message: ParsedIncomingMessage<IncomingPayload>) {
+            if (message.type === TerminalSocketData.LOGS) {
+                const { line } = message.payload;
+                updateLogs(activeTab, [...currentTerminal.logs, { type: message.type, text: line }])
+            }
 
-            updateLogs(activeTab, [...currentTerminal.logs, { type: phase, text: line }]);
+            if (message.type === TerminalSocketData.CONNECTED) {
+                const {line } = message.payload;
+                updateLogs(activeTab, [...currentTerminal.logs, { type: message.type, text: line }])
+            }
         }
 
-        subscribeToHandler(handleIncomingLogs);
+        subscribeToHandler(TerminalSocketData.LOGS, handleIncoming);
+        subscribeToHandler(TerminalSocketData.CONNECTED, handleIncoming);
     }, [activeTab, currentTerminal.logs]);
 
     useShortcuts({
@@ -108,15 +113,15 @@ export default function Terminal() {
             const colorClass =
                 line.type === 'command'
                     ? ''
-                    : line.type === TerminalSocketData.INFO
-                      ? 'text-green-600'
-                      : line.type === TerminalSocketData.BUILD_ERROR
-                        ? 'text-[#E9524A]'
-                        : line.type === TerminalSocketData.EXECUTING_COMMAND
-                          ? 'text-primary-light/90'
-                          : line.type === TerminalSocketData.SERVER_MESSAGE
-                            ? 'text-cyan-500'
-                            : 'text-light/80 font-normal';
+                    : line.type === TerminalSocketData.LOGS
+                        ? 'text-green-600'
+                        : line.type === TerminalSocketData.BUILD_ERROR
+                            ? 'text-[#E9524A]'
+                            : line.type === TerminalSocketData.EXECUTING_COMMAND
+                                ? 'text-primary-light/90'
+                                : line.type === TerminalSocketData.SERVER_MESSAGE
+                                    ? 'text-cyan-500'
+                                    : 'text-light/80 font-normal';
 
             return (
                 <div key={i} className="whitespace-pre-wrap text-left">
@@ -242,9 +247,8 @@ export default function Terminal() {
                                     <Button
                                         // variant='ghost'
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`h-fit px-1.5! bg-transparent py-1 hover:bg-dark rounded-none cursor-pointer ${
-                                            activeTab === tab.id ? 'bg-dark' : 'text-light/70'
-                                        }`}
+                                        className={`h-fit px-1.5! bg-transparent py-1 hover:bg-dark rounded-none cursor-pointer ${activeTab === tab.id ? 'bg-dark' : 'text-light/70'
+                                            }`}
                                     >
                                         <PiTerminalWindow className="size-4" />
                                     </Button>

@@ -1,7 +1,7 @@
 import KubernetesClient from '../k8s/client.kubernetes';
 import KubernetesManager from '../k8s/manager.kubernetes';
-import RedisPubSub from '../queue/redis.pubsub';
-import RedisQueue from '../queue/redis.queue';
+import RedisPubSub from '../queue/redis.publisher';
+import RedisQueue from '../queue/redis.kubernetes.queue';
 import RedisLockService from './redis.services';
 
 export default class Services {

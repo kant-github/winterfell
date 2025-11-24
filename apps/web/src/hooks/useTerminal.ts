@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { COMMAND_WRITER, CommandResponse } from '../lib/terminal_commands';
 import { Line, TerminalTab } from '../types/terminal_types';
 import { useWebSocket } from './useWebSocket';
-import { COMMAND } from '@repo/types';
+import { COMMAND, TerminalSocketData } from '@repo/types';
 
 interface UseTerminalLogicProps {
     contractId: string;
@@ -93,7 +93,7 @@ export function useTerminalLogic({ token, addCommand }: UseTerminalLogicProps) {
             }
 
             appendLog(activeTab, { type: 'command', text: trimmed });
-            appendLog(activeTab, { type: 'output', text: output });
+            appendLog(activeTab, { type: TerminalSocketData, text: output });
         },
         [token, activeTab, addCommand, appendLog, updateLogs, sendSocketMessage],
     );
