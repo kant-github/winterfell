@@ -1,5 +1,7 @@
+import { TerminalSocketData } from '@repo/types';
+
 export interface Line {
-    type: 'command' | 'output';
+    type: 'command' | TerminalSocketData;
     text: string;
 }
 

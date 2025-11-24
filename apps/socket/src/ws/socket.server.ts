@@ -1,7 +1,7 @@
 import WebSocket, { WebSocketServer as WSServer } from 'ws';
 import { CustomWebSocket } from '../types/socket_types';
 import { COMMAND, TerminalSocketData, WSServerIncomingPayload } from '@repo/types';
-import RedisPubSub from '../queue/redis.pubsub';
+import RedisPubSub from './redis.pubsub';
 import { env } from '../configs/config.env';
 import CommandService from '../services/services.command';
 import { IncomingMessage } from 'http';
@@ -33,15 +33,33 @@ export default class WebSocketServer {
                 ws.close();
                 return;
             }
-            this.add_listeners(ws);
-            this.send_confirmation_connection(ws);
-            this.connection_mapping.set(contractId, ws);
             const topic = `${decoded?.id}_${contractId}`;
-            this.redis.subscribe(topic);
+            this.connection_mapping.set(topic, ws);
+
+            this.redis.subscribe(topic, (msg) => {
+                this.forward_pubsub_message(topic, msg);
+            });
+
+            this.add_listeners(ws, topic);
+            this.send_confirmation_connection(ws);
         });
     }
 
-    private add_listeners(ws: CustomWebSocket) {
+    private forward_pubsub_message(topic: string, message: string) {
+        const ws = this.connection_mapping.get(topic);
+        console.log('receiver ------------------------------------------>');
+        console.log({ message });
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(
+                JSON.stringify({
+                    type: 'TERMINAL_STREAM',
+                    payload: JSON.parse(message),
+                }),
+            );
+        }
+    }
+
+    private add_listeners(ws: CustomWebSocket, topic: string) {
         ws.on('message', (message) => {
             const parsed = JSON.parse(message.toString());
             this.handle_incoming_message(ws, parsed);
@@ -49,12 +67,13 @@ export default class WebSocketServer {
 
         ws.on('close', (code, reason) => {
             console.log('Socket closing - Code:', code, 'Reason:', reason.toString());
-            this.connection_mapping.delete(ws.contractId);
+            this.redis.unsubscribe(topic);
+            this.connection_mapping.delete(topic);
         });
 
         ws.on('error', (err) => {
             console.log('error is socket : ', err);
-            this.connection_mapping.delete(ws.contractId); // Changed from ws.user.id
+            this.connection_mapping.delete(topic); // Changed from ws.user.id
             ws.close();
         });
     }

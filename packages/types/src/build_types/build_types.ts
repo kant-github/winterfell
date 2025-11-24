@@ -1,4 +1,5 @@
 import { BuildStatus } from "@repo/database";
+import { TerminalSocketData } from "../socket/const";
 
 export interface BuildCacheCheck {
   isCached: boolean;
@@ -18,14 +19,33 @@ export enum COMMAND {
 }
 
 export interface BaseJobPayload {
-  jobId: string;
+  userId: string;
   contractId: string;
   contractName: string;
-  userId: string;
   timestamp: number;
+  jobId: string;
   retryCount?: number;
 }
 
 export interface BuildJobPayload extends BaseJobPayload {
   command: COMMAND;
+}
+
+export interface BuildJobCompletionPayload extends BaseJobPayload {
+  lines: string;
+  type: TerminalSocketData;
+}
+
+export interface WSServerIncomingPayload<T> {
+  type: TerminalSocketData;
+  payload: T;
+}
+
+export interface CommandExecutionPayload {
+  userId: string;
+  contractId: string;
+  jobId: string;
+  line: string;
+  timestamp: number;
+  phase: TerminalSocketData;
 }

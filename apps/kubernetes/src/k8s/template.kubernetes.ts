@@ -1,73 +1,73 @@
-import { V1Pod } from "@kubernetes/client-node";
-import { PodConfig } from "../types/types.kubernetes";
-import { env } from "../configs/configs.env";
-import { pod_resources } from "./resources.kubernetes";
+import { V1Pod } from '@kubernetes/client-node';
+import { PodConfig } from '../types/types.kubernetes';
+import { env } from '../configs/configs.env';
+import { pod_resources } from './resources.kubernetes';
 
 export default function podTemplate(configs: PodConfig) {
-  const { pod_name, job_id, contract_id, user_id, command } = configs;
+    const { pod_name, job_id, contract_id, user_id, command } = configs;
 
-  const podTemplate: V1Pod = {
-    apiVersion: "v1",
-    kind: "Pod",
-    metadata: {
-      name: pod_name,
-      namespace: env.KUBERNETES_NAMESPACE,
-      labels: {
-        app: "anchor-executor",
-        "job-id": job_id,
-        "contract-id": contract_id,
-        "user-id": user_id,
-        command: command,
-      },
-      annotations: {
-        "created-at": new Date().toISOString(),
-      },
-    },
-    spec: {
-      restartPolicy: "Never",
-      containers: [
-        {
-          name: "anchor-executor",
-          image: "winterfellhub/test:latest",
-          // Keep container alive - you'll run commands via exec
-          command: ["/bin/sh", "-c"],
-          args: ["tail -f /dev/null"],
-          workingDir: "/workspace",
-          volumeMounts: [
-            {
-              name: "workspace",
-              mountPath: "/workspace",
+    const podTemplate: V1Pod = {
+        apiVersion: 'v1',
+        kind: 'Pod',
+        metadata: {
+            name: pod_name,
+            namespace: env.KUBERNETES_NAMESPACE,
+            labels: {
+                app: 'anchor-executor',
+                'job-id': job_id,
+                'contract-id': contract_id,
+                'user-id': user_id,
+                command: command,
             },
-          ],
-          resources: pod_resources,
-          env: [
-            {
-              name: "RUST_BACKTRACE",
-              value: "1",
+            annotations: {
+                'created-at': new Date().toISOString(),
             },
-            {
-              name: "ANCHOR_WALLET",
-              value: "/workspace/.config/solana/id.json",
-            },
-            {
-              name: "JOB_ID",
-              value: job_id,
-            },
-            {
-              name: "CONTRACT_ID",
-              value: contract_id,
-            },
-          ],
-          imagePullPolicy: "Always",
         },
-      ],
-      volumes: [
-        {
-          name: "workspace",
-          emptyDir: {},
+        spec: {
+            restartPolicy: 'Never',
+            containers: [
+                {
+                    name: 'anchor-executor',
+                    image: 'winterfellhub/test:latest',
+                    // Keep container alive - you'll run commands via exec
+                    command: ['/bin/sh', '-c'],
+                    args: ['tail -f /dev/null'],
+                    workingDir: '/workspace',
+                    volumeMounts: [
+                        {
+                            name: 'workspace',
+                            mountPath: '/workspace',
+                        },
+                    ],
+                    resources: pod_resources,
+                    env: [
+                        {
+                            name: 'RUST_BACKTRACE',
+                            value: '1',
+                        },
+                        {
+                            name: 'ANCHOR_WALLET',
+                            value: '/workspace/.config/solana/id.json',
+                        },
+                        {
+                            name: 'JOB_ID',
+                            value: job_id,
+                        },
+                        {
+                            name: 'CONTRACT_ID',
+                            value: contract_id,
+                        },
+                    ],
+                    imagePullPolicy: 'Always',
+                },
+            ],
+            volumes: [
+                {
+                    name: 'workspace',
+                    emptyDir: {},
+                },
+            ],
         },
-      ],
-    },
-  };
-  return podTemplate;
+    };
+    return podTemplate;
 }
