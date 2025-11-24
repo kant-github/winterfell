@@ -92,7 +92,7 @@ export default class KubernetesManager {
                             statusCode?: number;
                             [key: string]: any;
                         };
-                    }
+                    };
                     if (err.statusCode === 404 || err.response?.statusCode === 404) {
                         console.log(`Pod ${pod_name} successfully deleted`);
                         return { success: true };

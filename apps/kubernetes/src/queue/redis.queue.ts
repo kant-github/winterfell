@@ -82,7 +82,7 @@ export default class RedisQueue {
                     contractId,
                     line: 'Failed to read codebase',
                     timestamp: Date.now(),
-                })
+                });
                 return;
             }
 
@@ -104,7 +104,7 @@ export default class RedisQueue {
                 contractId,
                 line: 'Winter is going through the codebase',
                 timestamp: Date.now(),
-            })
+            });
             await kubernetes_services.kubernetes_manager.copy_files_to_pod(
                 this.namespace,
                 pod_name,
@@ -148,20 +148,14 @@ export default class RedisQueue {
         } finally {
             const { userId, contractId } = payload;
             const topic = `${userId}_${contractId}`;
-            await kubernetes_services.kubernetes_manager.delete_pod(
-                userId,
-                contractId,
-            );
-            await kubernetes_services.redis_lock_service.release_lock(
-                userId,
-                contractId,
-            );
+            await kubernetes_services.kubernetes_manager.delete_pod(userId, contractId);
+            await kubernetes_services.redis_lock_service.release_lock(userId, contractId);
             await kubernetes_services.redis_publisher.send_completion_message(topic, {
                 userId,
                 contractId,
                 line: 'Command execution complete',
                 timestamp: Date.now(),
-            })
+            });
         }
     }
 

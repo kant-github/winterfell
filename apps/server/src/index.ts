@@ -9,16 +9,19 @@ import init_services from './services/init';
 import { loggingMiddleware } from './middlewares/middleware.logger';
 import { logger } from './utils/logger';
 import Agent from './generator/tools/agent';
+import cookieParser from 'cookie-parser';
 // import Agent from './generator/tools/agent';
 
 const app = express();
 const server = http.createServer(app);
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(loggingMiddleware);
 app.use(
     cors({
-        origin: '*',
+        origin: 'http://localhost:3000',
+        credentials: true,
     }),
 );
 

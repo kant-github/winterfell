@@ -1,5 +1,5 @@
-import Redis from "ioredis";
-import { wsserver } from "../services/services.init";
+import Redis from 'ioredis';
+import { wsserver } from '../services/services.init';
 
 export default class RedisPubSub {
     private subscriber: Redis;
@@ -10,7 +10,7 @@ export default class RedisPubSub {
     }
 
     private pubsub_processor() {
-        this.subscriber.on("message", (channel: string, message: string) => {
+        this.subscriber.on('message', (channel: string, message: string) => {
             console.log('channel is', channel);
             const socket = wsserver.connection_mapping.get(channel);
             if (!socket) return;

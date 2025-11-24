@@ -31,11 +31,30 @@ export const authOption: AuthOptions = {
     callbacks: {
         async signIn({ user, account }: { user: UserType; account: Account | null }) {
             try {
+                let turnstileToken = null;
+
+                if (typeof window === 'undefined') {
+                    try {
+                        const { cookies } = await import('next/headers');
+                        const cookieStore = await cookies();
+                        const tokenCookie = cookieStore.get('turnstile_token');
+                        turnstileToken = tokenCookie?.value;
+                    } catch (error) {
+                        console.error('Error reading cookies:', error);
+                    }
+                }
                 if (account?.provider === 'google' || account?.provider === 'github') {
-                    const response = await axios.post(`${SIGNIN_URL}`, {
-                        user,
-                        account,
-                    });
+                    const response = await axios.post(
+                        `${SIGNIN_URL}`,
+                        {
+                            user,
+                            account,
+                            turnstileToken,
+                        },
+                        {
+                            withCredentials: true,
+                        },
+                    );
                     const result = response.data;
                     if (result?.success) {
                         user.id = result.user.id;

@@ -3,17 +3,37 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '@repo/database';
 import ResponseWriter from '../../class/response_writer';
 import { get_github_owner } from '../../services/git_services';
+import axios from 'axios';
+import env from '../../configs/config.env';
 
 const SERVER_JWT_SECRET = process.env.SERVER_JWT_SECRET;
 
 export default async function signInController(req: Request, res: Response) {
-    const { user, account } = req.body;
-
+    const { user, account, turnstileToken } = req.body;
+    console.log('Received sign-in request:', turnstileToken);
     if (!user || !user.email) {
         console.error('Missing user or user.email');
         return res.status(400).json({
             success: false,
             error: 'Missing user email',
+        });
+    }
+
+    if (!turnstileToken) {
+        return res.status(400).json({
+            success: false,
+            error: 'Missing turnstile token',
+        });
+    }
+
+    const clientIp =
+        req.ip || (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+    const isValidToken = await verifyTurnstileToken(turnstileToken, clientIp);
+
+    if (!isValidToken) {
+        return res.status(403).json({
+            success: false,
+            error: 'Invalid captcha verification',
         });
     }
 
@@ -102,5 +122,23 @@ export default async function signInController(req: Request, res: Response) {
         ResponseWriter.error(res, 'Authentication failed', 500);
         console.error('error in sign in : ', err);
         return;
+    }
+}
+
+async function verifyTurnstileToken(token: string, ip?: string): Promise<boolean> {
+    try {
+        const response = await axios.post(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            {
+                secret: env.SERVER_TURNSTILE_SERVER_KEY,
+                response: token,
+                remoteip: ip,
+            },
+        );
+
+        return response.data.success === true;
+    } catch (error) {
+        console.error('Turnstile verification error:', error);
+        return false;
     }
 }

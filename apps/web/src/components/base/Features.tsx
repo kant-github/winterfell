@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
+import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from 'framer-motion';
 import { LiaServicestack } from 'react-icons/lia';
 import { FaBolt, FaShieldAlt } from 'react-icons/fa';
 import { FaRust } from 'react-icons/fa6';
@@ -163,15 +163,16 @@ export const AnimatedFeatureCard = React.memo(
         );
 
         return (
-            <motion.div
-                style={{
-                    y,
-                    opacity,
-                    rotate,
-                    x,
-                    scale,
-                }}
-                className="
+            <AnimatePresence>
+                <motion.div
+                    style={{
+                        y,
+                        opacity,
+                        rotate,
+                        x,
+                        scale,
+                    }}
+                    className="
                 h-[10rem] w-[7rem] sm:h-[12rem] sm:w-[9rem]
                 md:h-[22rem] md:w-[16rem]
                 rounded-[8px] flex flex-col justify-between
@@ -182,46 +183,47 @@ export const AnimatedFeatureCard = React.memo(
                 will-change-transform
                 overflow-hidden
             "
-            >
-                <div className="absolute top-0 right-0 w-20 h-20 md:w-32 md:h-32 bg-white/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-16 h-16 md:w-24 md:h-24 bg-white/15 rounded-full blur-2xl -ml-8 -mb-8 pointer-events-none" />
+                >
+                    <div className="absolute top-0 right-0 w-20 h-20 md:w-32 md:h-32 bg-white/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-16 h-16 md:w-24 md:h-24 bg-white/15 rounded-full blur-2xl -ml-8 -mb-8 pointer-events-none" />
 
-                <div className="relative z-10 flex justify-between items-start">
-                    <div className="text-[7px] sm:text-[9px] md:text-xs font-bold text-neutral-600 tracking-[0.15em] bg-white/70 backdrop-blur-sm px-2 py-1 rounded-[4px] shadow-sm">
-                        {topTitle}
+                    <div className="relative z-10 flex justify-between items-start">
+                        <div className="text-[7px] sm:text-[9px] md:text-xs font-bold text-neutral-600 tracking-[0.15em] bg-white/70 backdrop-blur-sm px-2 py-1 rounded-[4px] shadow-sm">
+                            {topTitle}
+                        </div>
+                        <div
+                            className="w-2 h-2 md:w-3 md:h-3 rounded-full"
+                            style={{
+                                backgroundColor: color,
+                                boxShadow: `0 0 8px ${color}80`,
+                            }}
+                        />
                     </div>
-                    <div
-                        className="w-2 h-2 md:w-3 md:h-3 rounded-full"
-                        style={{
-                            backgroundColor: color,
-                            boxShadow: `0 0 8px ${color}80`,
-                        }}
-                    />
-                </div>
 
-                <div className="relative z-10 flex flex-col items-center justify-center flex-1 gap-y-2 md:gap-y-3">
-                    <div
-                        className="p-3 md:p-5 rounded-[8px] bg-white/90 backdrop-blur-sm shadow-xl"
-                        style={{ boxShadow: `0 8px 24px ${color}25` }}
-                    >
-                        <Icon className="text-2xl sm:text-3xl md:text-5xl" style={{ color }} />
+                    <div className="relative z-10 flex flex-col items-center justify-center flex-1 gap-y-2 md:gap-y-3">
+                        <div
+                            className="p-3 md:p-5 rounded-[8px] bg-white/90 backdrop-blur-sm shadow-xl"
+                            style={{ boxShadow: `0 8px 24px ${color}25` }}
+                        >
+                            <Icon className="text-2xl sm:text-3xl md:text-5xl" style={{ color }} />
+                        </div>
+                        <div className="text-center space-y-0.5 md:space-y-1">
+                            <h3 className="text-xs sm:text-sm md:text-xl font-bold text-dark-base tracking-wide">
+                                {centerTitle}
+                            </h3>
+                            <p className="text-[8px] sm:text-[10px] md:text-xs tracking-wide text-neutral-600 font-medium hidden md:block px-2 leading-tight">
+                                {description}
+                            </p>
+                        </div>
                     </div>
-                    <div className="text-center space-y-0.5 md:space-y-1">
-                        <h3 className="text-xs sm:text-sm md:text-xl font-bold text-dark-base tracking-wide">
-                            {centerTitle}
-                        </h3>
-                        <p className="text-[8px] sm:text-[10px] md:text-xs tracking-wide text-neutral-600 font-medium hidden md:block px-2 leading-tight">
-                            {description}
-                        </p>
-                    </div>
-                </div>
 
-                <div className="relative z-10 flex items-center justify-center">
-                    <div className="text-[7px] sm:text-[9px] md:text-xs font-semibold text-dark-base bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full border border-neutral-200/70 shadow-sm">
-                        {bottomTitle}
+                    <div className="relative z-10 flex items-center justify-center">
+                        <div className="text-[7px] sm:text-[9px] md:text-xs font-semibold text-dark-base bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-full border border-neutral-200/70 shadow-sm">
+                            {bottomTitle}
+                        </div>
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
+            </AnimatePresence>
         );
     },
     (prevProps, nextProps) => {
