@@ -2,6 +2,7 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import env from '../configs/config.env';
 import { FileContent } from '../types/content_types';
+import axios from 'axios';
 
 export default class ObjectStore {
     private s3: S3Client;
@@ -64,11 +65,17 @@ export default class ObjectStore {
         return key;
     }
 
+    public async get_resource_files(contractId: string): Promise<FileContent[]> {
+        const res = await axios.get(`${this.get_resource_files_path(contractId)}`);
+        const contract_files: FileContent[] = res.data;
+        return contract_files;
+    }
+
     public get_raw_files(contractId: string) {
         return `${process.env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/raw/llm-response.txt`;
     }
 
-    public get_resource_files(contractId: string) {
+    public get_resource_files_path(contractId: string) {
         return `${process.env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/resource`;
     }
 }
