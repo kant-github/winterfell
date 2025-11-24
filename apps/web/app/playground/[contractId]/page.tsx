@@ -135,7 +135,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     }, [contractId]);
 
     function handleReviewSubmit(data: { rating: number; liked: string; disliked: string }) {
-        console.log('Review submitted:', data);
         localStorage.setItem(`${REVIEW_STORAGE_KEY}${contractId}`, 'true');
         setShowReviewCard(false);
         setHasShownReview(true);

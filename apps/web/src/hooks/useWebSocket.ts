@@ -44,7 +44,7 @@ export const useWebSocket = () => {
         };
     }, [session?.user?.token, contractId]);
 
-    function subscribeToHandler(handler: (payload: string) => void) {
+    function subscribeToHandler(handler: (payload: any) => void) {
         if (!socket.current) return;
         socket.current.subscribe_to_handlers('TERMINAL_STREAM', handler);
     }

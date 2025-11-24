@@ -11,7 +11,6 @@ import {
     RiTerminalBoxFill,
 } from 'react-icons/ri';
 import SafariBrowser from '../../ui/SafariBrowser';
-import Image from 'next/image';
 
 export default function BentoGrid() {
     return (

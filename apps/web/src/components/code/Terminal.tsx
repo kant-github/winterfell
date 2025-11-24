@@ -16,6 +16,7 @@ import { useTerminalLogic } from '@/src/hooks/useTerminal';
 import { Line } from '@/src/types/terminal_types';
 import { cn } from '@/src/lib/utils';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
+import { CommandExecutionPayload, TerminalSocketData } from '@repo/types';
 
 export default function Terminal() {
     const [showTerminal, setShowTerminal] = useState<boolean>(false);
@@ -26,7 +27,7 @@ export default function Terminal() {
     const contractId = params.contractId as string;
     const { session } = useUserSessionStore();
     const { addCommand, moveUp, moveDown, resetIndex } = useCommandHistoryStore();
-    const { isConnected } = useWebSocket();
+    const { isConnected, subscribeToHandler } = useWebSocket();
     const { height, startResize } = useTerminalResize({
         onClose: () => setShowTerminal(false),
     });
@@ -45,6 +46,19 @@ export default function Terminal() {
         token: session?.user?.token,
         addCommand,
     });
+
+    useEffect(() => {
+        function handleIncomingLogs(message: {
+            type: 'TERMINAL_STREAM';
+            payload: CommandExecutionPayload;
+        }) {
+            const { phase, line } = message.payload;
+
+            updateLogs(activeTab, [...currentTerminal.logs, { type: phase, text: line }]);
+        }
+
+        subscribeToHandler(handleIncomingLogs);
+    }, [activeTab, currentTerminal.logs]);
 
     useShortcuts({
         'meta+j': () => setShowTerminal((prev) => !prev),
@@ -90,17 +104,32 @@ export default function Terminal() {
     }
 
     const renderLines = (lines: Line[]) =>
-        lines.map((line, i) => (
-            <div key={i} className="whitespace-pre-wrap text-left">
-                {line.type === 'command' ? (
-                    <>
-                        <Prompt /> <span className="ml-2">{line.text}</span>
-                    </>
-                ) : (
-                    <span className="ml-6">{line.text}</span>
-                )}
-            </div>
-        ));
+        lines.map((line, i) => {
+            const colorClass =
+                line.type === 'command'
+                    ? ''
+                    : line.type === TerminalSocketData.INFO
+                      ? 'text-green-600'
+                      : line.type === TerminalSocketData.BUILD_ERROR
+                        ? 'text-[#E9524A]'
+                        : line.type === TerminalSocketData.EXECUTING_COMMAND
+                          ? 'text-primary-light/90'
+                          : line.type === TerminalSocketData.SERVER_MESSAGE
+                            ? 'text-cyan-500'
+                            : 'text-light/80 font-normal';
+
+            return (
+                <div key={i} className="whitespace-pre-wrap text-left">
+                    {line.type === 'command' ? (
+                        <>
+                            <Prompt /> <span className="ml-2">{line.text}</span>
+                        </>
+                    ) : (
+                        <span className={cn('ml-6 font-semibold', colorClass)}>{line.text}</span>
+                    )}
+                </div>
+            );
+        });
 
     const handleCurrentFileExtension = () => {
         if (!currentFile) return 'no selected file.';
