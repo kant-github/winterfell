@@ -37,8 +37,8 @@ export interface BuildJobCompletionPayload extends BaseJobPayload {
 }
 
 export interface IncomingPayload {
-  userId: string,
-  contractId: string,
-  line: string,
-  timestamp: number,
+  userId: string;
+  contractId: string;
+  line: string;
+  timestamp: number;
 }

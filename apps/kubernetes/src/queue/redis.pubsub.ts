@@ -18,7 +18,10 @@ export default class RedisPubSub {
         }
     }
 
-    private create_payload_structure(type: TerminalSocketData, payload: IncomingPayload): WSServerIncomingPayload<IncomingPayload> {
+    private create_payload_structure(
+        type: TerminalSocketData,
+        payload: IncomingPayload,
+    ): WSServerIncomingPayload<IncomingPayload> {
         return { type, payload };
     }
 
@@ -31,28 +34,44 @@ export default class RedisPubSub {
     }
 
     public send_command_exectuion(topic: string, payload: IncomingPayload) {
-        return this.publish(topic, this.create_payload_structure(TerminalSocketData.EXECUTING_COMMAND, payload)); // amber color
+        return this.publish(
+            topic,
+            this.create_payload_structure(TerminalSocketData.EXECUTING_COMMAND, payload),
+        ); // amber color
     }
 
     public send_build_error(topic: string, payload: IncomingPayload) {
-        return this.publish(topic, this.create_payload_structure(TerminalSocketData.BUILD_ERROR, payload)); // red color
+        return this.publish(
+            topic,
+            this.create_payload_structure(TerminalSocketData.BUILD_ERROR, payload),
+        ); // red color
     }
-    
+
     public send_error_message(topic: string, payload: IncomingPayload) {
-        return this.publish(topic, this.create_payload_structure(TerminalSocketData.ERROR_MESSAGE, payload)); //red color
+        return this.publish(
+            topic,
+            this.create_payload_structure(TerminalSocketData.ERROR_MESSAGE, payload),
+        ); //red color
     }
 
     public send_validation_error(topic: string, payload: IncomingPayload) {
-        return this.publish(topic, this.create_payload_structure(TerminalSocketData.VALIDATION_ERROR, payload));
+        return this.publish(
+            topic,
+            this.create_payload_structure(TerminalSocketData.VALIDATION_ERROR, payload),
+        );
     }
 
     public send_server_message(topic: string, payload: IncomingPayload) {
-        return this.publish(topic, this.create_payload_structure(TerminalSocketData.SERVER_MESSAGE, payload)); // amber color
+        return this.publish(
+            topic,
+            this.create_payload_structure(TerminalSocketData.SERVER_MESSAGE, payload),
+        ); // amber color
     }
 
     public send_completion_message(topic: string, payload: IncomingPayload) {
-        return this.publish(topic, this.create_payload_structure(TerminalSocketData.COMPLETED, payload));
+        return this.publish(
+            topic,
+            this.create_payload_structure(TerminalSocketData.COMPLETED, payload),
+        );
     }
-
-
 }
