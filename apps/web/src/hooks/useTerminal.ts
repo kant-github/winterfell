@@ -8,11 +8,12 @@ interface UseTerminalLogicProps {
     contractId: string;
     token: string | undefined | null;
     addCommand: (command: string) => void;
+    setIsRunning: (value: boolean) => void;
 }
 
-export function useTerminalLogic({ token, addCommand }: UseTerminalLogicProps) {
+export function useTerminalLogic({ token, addCommand, setIsRunning }: UseTerminalLogicProps) {
     const [terminals, setTerminals] = useState<TerminalTab[]>([
-        { id: '1', name: 'shell 1', logs: [], input: '' },
+        { id: '1', name: 'shell', logs: [], input: '' },
     ]);
 
     const [activeTab, setActiveTab] = useState<string>('1');
@@ -55,35 +56,26 @@ export function useTerminalLogic({ token, addCommand }: UseTerminalLogicProps) {
 
                 case COMMAND_WRITER.WINTERFELL_BUILD:
                 case COMMAND_WRITER.WINTERFELL_TEST:
-                case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET:
-                case COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET: {
+                case COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET:
+                case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET: {
                     output = CommandResponse[trimmed];
+                    setIsRunning(true);
+
                     switch (trimmed) {
                         case COMMAND_WRITER.WINTERFELL_BUILD:
-                            sendSocketMessage(
-                                COMMAND.WINTERFELL_BUILD,
-                                COMMAND_WRITER.WINTERFELL_BUILD,
-                            );
+                            sendSocketMessage(COMMAND.WINTERFELL_BUILD, trimmed);
                             break;
                         case COMMAND_WRITER.WINTERFELL_TEST:
-                            sendSocketMessage(
-                                COMMAND.WINTERFELL_TEST,
-                                COMMAND_WRITER.WINTERFELL_TEST,
-                            );
+                            sendSocketMessage(COMMAND.WINTERFELL_TEST, trimmed);
                             break;
                         case COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET:
-                            sendSocketMessage(
-                                COMMAND.WINTERFELL_DEPLOY_DEVNET,
-                                COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET,
-                            );
+                            sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_DEVNET, trimmed);
                             break;
                         case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET:
-                            sendSocketMessage(
-                                COMMAND.WINTERFELL_DEPLOY_MAINNET,
-                                COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET,
-                            );
+                            sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_MAINNET, trimmed);
                             break;
                     }
+
                     break;
                 }
 
@@ -93,32 +85,15 @@ export function useTerminalLogic({ token, addCommand }: UseTerminalLogicProps) {
             }
 
             appendLog(activeTab, { type: 'command', text: trimmed });
-            appendLog(activeTab, { type: TerminalSocketData, text: output });
+            appendLog(activeTab, { type: TerminalSocketData.SERVER_MESSAGE, text: output });
         },
         [token, activeTab, addCommand, appendLog, updateLogs, sendSocketMessage],
     );
 
-    const addNewTerminal = useCallback(() => {
-        const newId = crypto.randomUUID();
-        const newTab: TerminalTab = {
-            id: newId,
-            name: `shell ${terminals.length + 1}`,
-            logs: [],
-            input: '',
-        };
-        setTerminals((prev) => [...prev, newTab]);
-        setActiveTab(newId);
-    }, [terminals.length]);
-
-    const deleteTerminal = useCallback(
-        (id: string) => {
-            if (terminals.length === 1) return;
-            const filtered = terminals.filter((t) => t.id !== id);
-            setTerminals(filtered);
-            if (activeTab === id) setActiveTab(filtered[0].id);
-        },
-        [terminals, activeTab],
-    );
+    const deleteTerminal = useCallback((id: string) => {
+        // keep at least one terminal
+        return;
+    }, []);
 
     const currentTerminal = terminals.find((t) => t.id === activeTab)!;
 
@@ -130,7 +105,6 @@ export function useTerminalLogic({ token, addCommand }: UseTerminalLogicProps) {
         handleCommand,
         updateInput,
         updateLogs,
-        addNewTerminal,
         deleteTerminal,
     };
 }

@@ -73,8 +73,6 @@ export default class WebSocketClient {
     private handle_incoming_message(parsed_data: ParsedIncomingMessage<IncomingPayload>) {
         const { type } = parsed_data;
         const handlers = this.handlers.get(type);
-        console.log('message in frontend is =========> ', parsed_data);
-
         if (handlers) {
             handlers.forEach((handler) => handler(parsed_data));
         }

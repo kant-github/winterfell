@@ -1,7 +1,7 @@
 import { V1Pod } from '@kubernetes/client-node';
-import { PodConfig } from '../types/types.kubernetes';
 import { env } from '../configs/configs.env';
 import { pod_resources } from './resources.kubernetes';
+import { PodConfig } from '../types/types.kubernetes';
 
 export default function podTemplate(configs: PodConfig) {
     const { pod_name, job_id, contract_id, user_id, command } = configs;
@@ -17,10 +17,10 @@ export default function podTemplate(configs: PodConfig) {
                 'job-id': job_id,
                 'contract-id': contract_id,
                 'user-id': user_id,
-                command: command,
             },
             annotations: {
                 'created-at': new Date().toISOString(),
+                'anchor-command': command,
             },
         },
         spec: {

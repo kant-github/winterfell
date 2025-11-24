@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import WebSocketClient, { ParsedIncomingMessage, ParsedOutgoingMessage } from '../class/socket.client';
+import WebSocketClient, {
+    ParsedIncomingMessage,
+    ParsedOutgoingMessage,
+} from '../class/socket.client';
 import { cleanWebSocketClient, getWebSocketClient } from '../lib/singletonWebSocket';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
@@ -26,7 +29,7 @@ export const useWebSocket = () => {
                 setIsConnected(socket.current?.is_connected ?? false);
             }, 200);
         } catch (err) {
-            console.error("Failed to initialize WS:", err);
+            console.error('Failed to initialize WS:', err);
             setIsConnected(false);
         }
 
@@ -38,7 +41,10 @@ export const useWebSocket = () => {
         };
     }, [session?.user?.token, contractId]);
 
-    function subscribeToHandler(type: TerminalSocketData, handler: (message: ParsedIncomingMessage<IncomingPayload>) => void) {
+    function subscribeToHandler(
+        type: TerminalSocketData,
+        handler: (message: ParsedIncomingMessage<IncomingPayload>) => void,
+    ) {
         if (!socket.current) return;
         socket.current?.subscribe_to_handlers(type, handler);
     }

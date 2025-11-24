@@ -81,8 +81,6 @@ export default class WebSocketServer {
 
     public send_message<T>(ws: CustomWebSocket, message: WSServerIncomingPayload<T>) {
         if (ws.readyState === WebSocket.OPEN) {
-            console.log('message to frontend is ----------------------------------------------------------->');
-            console.log(message);
             ws.send(JSON.stringify(message));
         }
     }
@@ -124,6 +122,6 @@ export default class WebSocketServer {
                 timestamp: Date.now(),
             },
         };
-        this.send_message(ws, data);
+        // this.send_message(ws, data);
     }
 }

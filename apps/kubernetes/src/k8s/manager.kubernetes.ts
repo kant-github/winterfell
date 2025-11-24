@@ -90,7 +90,6 @@ export default class KubernetesManager {
                         statusCode?: number;
                         response?: {
                             statusCode?: number;
-                            [key: string]: any;
                         };
                     };
                     if (err.statusCode === 404 || err.response?.statusCode === 404) {
