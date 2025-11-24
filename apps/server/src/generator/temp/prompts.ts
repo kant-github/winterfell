@@ -43,6 +43,7 @@ export const new_chat_planner_prompt = new PromptTemplate({
         tsconfig.json
 
         make a plan and return affected files list.
+        if the user's instruction is not related to anchor solana contract then you should return the should_continue as false, to avoid the coder to not code.
 
     `,
     inputVariables: ['user_instruction'],
@@ -96,6 +97,7 @@ export const new_chat_coder_prompt = new PromptTemplate({
         <stage>Creating Files</stage>
         <stage>Finalizing</stage>
 
+        <context>context at the end of contract of what have you done in near about 20 words</context>
 
     `,
     inputVariables: ['plan', 'files_likely_affected'],
@@ -103,5 +105,5 @@ export const new_chat_coder_prompt = new PromptTemplate({
 
 export const old_chat_coder_prompt = new PromptTemplate({
     template: ``,
-    inputVariables: ['contract_id', 'plan', 'files_likely_affected'],
+    inputVariables: ['plan', 'contract_id', 'files_likely_affected'],
 });

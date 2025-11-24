@@ -10,6 +10,9 @@ import { loggingMiddleware } from './middlewares/middleware.logger';
 import { logger } from './utils/logger';
 import Agent from './generator/tools/agent';
 import cookieParser from 'cookie-parser';
+import Generator from './generator/temp/generator';
+import { prisma } from '@repo/database';
+import { MODEL } from './generator/types/model_types';
 // import Agent from './generator/tools/agent';
 
 const app = express();
@@ -41,9 +44,17 @@ process.on('SIGINT', () => {
     });
 });
 
-const trial = async () => {
-    const agent = new Agent();
-    await agent.final_call();
-};
+const gen = async () => {
 
-setTimeout(trial, 1000);
+    const gen = new Generator();
+
+    console.log('new contract generator called');
+
+    gen.generate(
+        'new',
+        'create me a counter program with only increment',
+        MODEL.GEMINI
+    );
+
+}
+setTimeout(gen, 1000);
