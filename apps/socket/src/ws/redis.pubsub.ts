@@ -1,49 +1,31 @@
-import Redis from 'ioredis';
+import Redis from "ioredis";
+import { wsserver } from "../services/services.init";
 
 export default class RedisPubSub {
-    private publisher: Redis;
     private subscriber: Redis;
-    private is_connected: boolean = false;
-    private handlers: Map<string, (message: string) => void> = new Map();
 
     constructor() {
-        this.publisher = new Redis('');
         this.subscriber = new Redis('');
-        this.is_connected = true;
+        this.pubsub_processor();
+    }
 
-        this.subscriber.on('message', (channel: string, message: string) => {
-            const handler = this.handlers.get(channel);
-            if (handler) handler(message);
+    private pubsub_processor() {
+        this.subscriber.on("message", (channel: string, message: string) => {
+            console.log('channel is', channel);
+            const socket = wsserver.connection_mapping.get(channel);
+            if (!socket) return;
+            console.log('received msg from k8s');
+            console.log(JSON.parse(message));
+            wsserver.send_message(socket, JSON.parse(message));
         });
     }
 
-    /**
-     * this method is used to subscribe to a topic in the redis channel
-     *
-     * @param topic
-     */
-    public subscribe(topic: string, handler: (message: string) => void) {
-        if (!this.is_connected) return;
-        this.handlers.set(topic, handler);
-        this.subscriber.subscribe(topic);
+    public async subscribe(channel: string) {
+        console.log(`subbed to: ${channel}`);
+        await this.subscriber.subscribe(channel);
     }
 
-    /**
-     * this method is used to publish a message
-     *
-     * @param topic
-     * @param message
-     */
-    public publish(topic: string, message: string) {
-        return this.publisher.publish(topic, message);
-    }
-
-    /**
-     *
-     * @param topic
-     */
-    public unsubscribe(topic: string) {
-        this.handlers.delete(topic);
-        this.subscriber.unsubscribe(topic);
+    public async unsubscribe(channel: string) {
+        await this.subscriber.unsubscribe(channel);
     }
 }

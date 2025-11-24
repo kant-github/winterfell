@@ -15,7 +15,7 @@ export interface ParsedMessage<T> {
 
 export default class WebSocketServer {
     private wss: WSServer | null = null;
-    private connection_mapping: Map<string, CustomWebSocket> = new Map();
+    public connection_mapping: Map<string, CustomWebSocket> = new Map();
     private redis: RedisPubSub;
 
     constructor(redis: RedisPubSub) {
@@ -36,27 +36,10 @@ export default class WebSocketServer {
             const topic = `${decoded?.id}_${contractId}`;
             this.connection_mapping.set(topic, ws);
 
-            this.redis.subscribe(topic, (msg) => {
-                this.forward_pubsub_message(topic, msg);
-            });
-
+            this.redis.subscribe(topic);
             this.add_listeners(ws, topic);
             this.send_confirmation_connection(ws);
         });
-    }
-
-    private forward_pubsub_message(topic: string, message: string) {
-        const ws = this.connection_mapping.get(topic);
-        console.log('receiver ------------------------------------------>');
-        console.log({ message });
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(
-                JSON.stringify({
-                    type: 'TERMINAL_STREAM',
-                    payload: JSON.parse(message),
-                }),
-            );
-        }
     }
 
     private add_listeners(ws: CustomWebSocket, topic: string) {

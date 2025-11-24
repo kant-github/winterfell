@@ -3,7 +3,7 @@ import WebSocketClient, { ParsedOutgoingMessage } from '../class/socket.client';
 import { cleanWebSocketClient, getWebSocketClient } from '../lib/singletonWebSocket';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
-import { COMMAND } from '@repo/types';
+import { COMMAND, TerminalSocketData } from '@repo/types';
 import { COMMAND_WRITER } from '../lib/terminal_commands';
 
 export const useWebSocket = () => {
@@ -46,7 +46,8 @@ export const useWebSocket = () => {
 
     function subscribeToHandler(handler: (payload: any) => void) {
         if (!socket.current) return;
-        socket.current.subscribe_to_handlers('TERMINAL_STREAM', handler);
+        // add subscribe handlers to all TerminalSocketData enum values
+        socket.current.subscribe_to_handlers('', handler);
     }
 
     // todo: @rishi this should also get the contract name
