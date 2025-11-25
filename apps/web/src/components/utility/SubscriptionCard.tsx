@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 import { LiaServicestack } from 'react-icons/lia';
 import ExpandableSubscriptionCard from './ExpandableSubscriptionCard';
 import { Button } from '../ui/button';
+import { useRouter } from 'next/navigation';
 
 export type PlanType = 'FREE' | 'PREMIUM' | 'PREMIUM_PLUS';
 export type BillingPeriod = 'MONTHLY' | 'YEARLY';
@@ -67,13 +68,12 @@ function SubscriptionCard({
                         </h2>
                     </div>
                     <div
-                        className={`p-2.5 rounded-lg backdrop-blur-sm ${
-                            plan === 'PREMIUM'
-                                ? 'bg-white/5'
-                                : plan === 'FREE'
-                                  ? 'bg-white/20'
-                                  : 'bg-white/15'
-                        }`}
+                        className={`p-2.5 rounded-lg backdrop-blur-sm ${plan === 'PREMIUM'
+                            ? 'bg-white/5'
+                            : plan === 'FREE'
+                                ? 'bg-white/20'
+                                : 'bg-white/15'
+                            }`}
                     >
                         <LiaServicestack className="size-7" />
                     </div>
@@ -84,13 +84,12 @@ function SubscriptionCard({
                         {features.slice(0, 4).map((feature, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
-                                    plan === 'PREMIUM'
-                                        ? 'bg-neutral-800/60'
-                                        : plan === 'FREE'
-                                          ? 'bg-white/25'
-                                          : 'bg-white/15'
-                                }`}
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${plan === 'PREMIUM'
+                                    ? 'bg-neutral-800/60'
+                                    : plan === 'FREE'
+                                        ? 'bg-white/25'
+                                        : 'bg-white/15'
+                                    }`}
                             >
                                 <Check className="size-3" />
                                 <span className="whitespace-nowrap">{feature}</span>
@@ -112,13 +111,12 @@ function SubscriptionCard({
                         </div>
                     </div>
                     <button
-                        className={`px-5 py-1.5 rounded-lg font-semibold transition-all shadow-lg ${
-                            plan === 'PREMIUM'
-                                ? 'bg-neutral-800 hover:bg-neutral-700 text-white'
-                                : plan === 'FREE'
-                                  ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
-                                  : 'bg-neutral-900 hover:bg-neutral-800 text-white'
-                        }`}
+                        className={`px-5 py-1.5 rounded-lg font-semibold transition-all shadow-lg ${plan === 'PREMIUM'
+                            ? 'bg-neutral-800 hover:bg-neutral-700 text-white'
+                            : plan === 'FREE'
+                                ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
+                                : 'bg-neutral-900 hover:bg-neutral-800 text-white'
+                            }`}
                     >
                         {plan === 'FREE' ? 'Start Free' : 'Upgrade'}
                     </button>
@@ -138,43 +136,44 @@ function SubscriptionCard({
     );
 }
 
+export const plans: Plan[] = [
+    {
+        plan: 'FREE',
+        priceMonthly: '₹0',
+        priceYearly: '₹0',
+        features: ['1 Contract / Week', '30 AI Messages', 'Devnet Only', 'Basic Support'],
+    },
+    {
+        plan: 'PREMIUM_PLUS',
+        priceMonthly: '₹1,999',
+        priceYearly: '₹19,990',
+        features: [
+            'Unlimited Contracts',
+            'Unlimited AI Chat',
+            'Mainnet Access',
+            '10+ Deployments',
+            'Fast Build Priority',
+            'Priority Support',
+        ],
+        isBest: true,
+    },
+    {
+        plan: 'PREMIUM',
+        priceMonthly: '₹799',
+        priceYearly: '₹7,990',
+        features: [
+            '10 Contracts / Month',
+            '300 AI Messages',
+            'Devnet + Testnet',
+            'Standard Support',
+        ],
+    },
+];
+
 export default function SubscriptionPlans() {
     const [billing, setBilling] = useState<BillingPeriod>('MONTHLY');
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-
-    const plans: Plan[] = [
-        {
-            plan: 'FREE',
-            priceMonthly: '₹0',
-            priceYearly: '₹0',
-            features: ['1 Contract / Week', '30 AI Messages', 'Devnet Only', 'Basic Support'],
-        },
-        {
-            plan: 'PREMIUM_PLUS',
-            priceMonthly: '₹1,999',
-            priceYearly: '₹19,990',
-            features: [
-                'Unlimited Contracts',
-                'Unlimited AI Chat',
-                'Mainnet Access',
-                '10+ Deployments',
-                'Fast Build Priority',
-                'Priority Support',
-            ],
-            isBest: true,
-        },
-        {
-            plan: 'PREMIUM',
-            priceMonthly: '₹799',
-            priceYearly: '₹7,990',
-            features: [
-                '10 Contracts / Month',
-                '300 AI Messages',
-                'Devnet + Testnet',
-                'Standard Support',
-            ],
-        },
-    ];
+    const router = useRouter()
 
     return (
         <section
@@ -197,21 +196,19 @@ export default function SubscriptionPlans() {
                 <Button
                     variant={'ghost'}
                     onClick={() => setBilling('MONTHLY')}
-                    className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${
-                        billing === 'MONTHLY'
-                            ? 'bg-[#7049FC] text-light'
-                            : 'text-light/70 hover:text-light'
-                    }`}
+                    className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${billing === 'MONTHLY'
+                        ? 'bg-[#7049FC] text-light'
+                        : 'text-light/70 hover:text-light'
+                        }`}
                 >
                     Monthly
                 </Button>
                 <button
                     onClick={() => setBilling('YEARLY')}
-                    className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${
-                        billing === 'YEARLY'
-                            ? 'bg-[#7049FC] text-light'
-                            : 'text-light/70 hover:text-light'
-                    }`}
+                    className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${billing === 'YEARLY'
+                        ? 'bg-[#7049FC] text-light'
+                        : 'text-light/70 hover:text-light'
+                        }`}
                 >
                     Yearly
                 </button>
@@ -232,7 +229,7 @@ export default function SubscriptionPlans() {
                         billing={billing}
                         features={planData.features}
                         isBest={planData.isBest}
-                        onClick={() => setSelectedPlan(planData)}
+                        onClick={() => router.push('/pricing')}
                     />
                 ))}
             </div>
