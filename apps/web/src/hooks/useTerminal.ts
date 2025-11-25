@@ -1,110 +1,64 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { COMMAND_WRITER, CommandResponse } from '../lib/terminal_commands';
-import { Line, TerminalTab } from '../types/terminal_types';
 import { useWebSocket } from './useWebSocket';
-import { COMMAND, TerminalSocketData } from '@repo/types';
+import { COMMAND } from '@repo/types';
+import { useTerminalLogStore } from '../store/code/useTerminalLogStore';
+import { useCommandHistoryStore } from '../store/code/useCommandHistoryStore';
 
-interface UseTerminalLogicProps {
-    contractId: string;
-    token: string | undefined | null;
-    addCommand: (command: string) => void;
-    setIsRunning: (value: boolean) => void;
-}
-
-export function useTerminalLogic({ token, addCommand, setIsRunning }: UseTerminalLogicProps) {
-    const [terminals, setTerminals] = useState<TerminalTab[]>([
-        { id: '1', name: 'shell', logs: [], input: '' },
-    ]);
-
-    const [activeTab, setActiveTab] = useState<string>('1');
+export function useTerminal() {
+    const { addLog, setLogs } = useTerminalLogStore();
     const { sendSocketMessage } = useWebSocket();
-
-    const appendLog = useCallback((tabId: string, line: Line) => {
-        setTerminals((prev) =>
-            prev.map((t) => (t.id === tabId ? { ...t, logs: [...t.logs, line] } : t)),
-        );
-    }, []);
-
-    const updateLogs = useCallback((tabId: string, logs: Line[]) => {
-        setTerminals((prev) => prev.map((t) => (t.id === tabId ? { ...t, logs } : t)));
-    }, []);
-
-    const updateInput = useCallback((tabId: string, input: string) => {
-        setTerminals((prev) => prev.map((t) => (t.id === tabId ? { ...t, input } : t)));
-    }, []);
+    const { addCommand } = useCommandHistoryStore();
 
     const handleCommand = useCallback(
         (command: string) => {
-            if (!token) return;
             const trimmed = command.trim() as COMMAND_WRITER;
             if (!trimmed) return;
 
             addCommand(trimmed);
-            let output = '';
+            addLog({ type: 'command', text: trimmed });
 
             switch (trimmed) {
                 case COMMAND_WRITER.CLEAR:
-                    updateLogs(activeTab, []);
+                    setLogs([]);
                     return;
 
                 case COMMAND_WRITER.HELP:
                 case COMMAND_WRITER.HOT_KEYS:
                 case COMMAND_WRITER.PLATFORM:
                 case COMMAND_WRITER.COMMANDS:
-                    output = CommandResponse[trimmed];
-                    break;
+                    addLog({ type: 'command', text: CommandResponse[trimmed] });
+                    return;
 
                 case COMMAND_WRITER.WINTERFELL_BUILD:
+                    addLog({ type: 'client', text: CommandResponse[trimmed] });
+                    sendSocketMessage(COMMAND.WINTERFELL_BUILD, trimmed);
+                    return;
+
                 case COMMAND_WRITER.WINTERFELL_TEST:
+                    addLog({ type: 'client', text: CommandResponse[trimmed] });
+                    sendSocketMessage(COMMAND.WINTERFELL_TEST, trimmed);
+                    return;
+
                 case COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET:
-                case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET: {
-                    output = CommandResponse[trimmed];
-                    setIsRunning(true);
+                    addLog({ type: 'client', text: CommandResponse[trimmed] });
+                    sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_DEVNET, trimmed);
+                    return;
 
-                    switch (trimmed) {
-                        case COMMAND_WRITER.WINTERFELL_BUILD:
-                            sendSocketMessage(COMMAND.WINTERFELL_BUILD, trimmed);
-                            break;
-                        case COMMAND_WRITER.WINTERFELL_TEST:
-                            sendSocketMessage(COMMAND.WINTERFELL_TEST, trimmed);
-                            break;
-                        case COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET:
-                            sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_DEVNET, trimmed);
-                            break;
-                        case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET:
-                            sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_MAINNET, trimmed);
-                            break;
-                    }
-
-                    break;
-                }
+                case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET:
+                    addLog({ type: 'client', text: CommandResponse[trimmed] });
+                    sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_MAINNET, trimmed);
+                    return;
 
                 default:
-                    output = `winterfell: command not found: ${trimmed}. Try --help`;
-                    break;
+                    addLog({
+                        type: 'error',
+                        text: `winterfell: command not found: ${trimmed}. Try --help`,
+                    });
             }
-
-            appendLog(activeTab, { type: 'command', text: trimmed });
-            appendLog(activeTab, { type: TerminalSocketData.SERVER_MESSAGE, text: output });
         },
-        [token, activeTab, addCommand, appendLog, updateLogs, sendSocketMessage],
+        [addCommand, sendSocketMessage, addLog, setLogs],
     );
 
-    const deleteTerminal = useCallback((id: string) => {
-        // keep at least one terminal
-        return;
-    }, []);
-
-    const currentTerminal = terminals.find((t) => t.id === activeTab)!;
-
-    return {
-        terminals,
-        activeTab,
-        currentTerminal,
-        setActiveTab,
-        handleCommand,
-        updateInput,
-        updateLogs,
-        deleteTerminal,
-    };
+    return { handleCommand };
 }

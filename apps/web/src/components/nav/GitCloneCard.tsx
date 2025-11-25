@@ -57,6 +57,7 @@ export default function GitCloneCard() {
 
             if (response.data.success) {
                 toast.success('Code exported to GitHub successfully!');
+                toast.success(response.data);
                 setRepoName('');
             } else {
                 toast.error(response.data.message || 'Failed to export');

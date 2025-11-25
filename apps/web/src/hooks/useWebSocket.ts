@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import WebSocketClient, {
-    ParsedIncomingMessage,
-    ParsedOutgoingMessage,
-} from '../class/socket.client';
+import WebSocketClient, { MessageHandler } from '../class/socket.client';
 import { cleanWebSocketClient, getWebSocketClient } from '../lib/singletonWebSocket';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
-import { COMMAND, IncomingPayload, TerminalSocketData } from '@repo/types';
+import { COMMAND } from '@repo/types';
 import { COMMAND_WRITER } from '../lib/terminal_commands';
 
 export const useWebSocket = () => {
@@ -41,12 +38,9 @@ export const useWebSocket = () => {
         };
     }, [session?.user?.token, contractId]);
 
-    function subscribeToHandler(
-        type: TerminalSocketData,
-        handler: (message: ParsedIncomingMessage<IncomingPayload>) => void,
-    ) {
+    function subscribeToHandler(handler: MessageHandler) {
         if (!socket.current) return;
-        socket.current?.subscribe_to_handlers(type, handler);
+        socket.current?.subscribe(handler);
     }
 
     function sendSocketMessage(command: COMMAND, message: COMMAND_WRITER) {

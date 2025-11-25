@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "esModuleInterop": true,
+    "target": "es2017",
     "forceConsistentCasingInFileNames": true,
     "allowImportingTsExtensions": true,
     "noEmit": true

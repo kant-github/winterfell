@@ -13,6 +13,7 @@ import { useChatStore } from '@/src/store/user/useChatStore';
 import React, { useEffect, useState, useCallback, useRef, use } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 import { useRouter } from 'next/navigation';
+import { IncomingPayload, WSServerIncomingPayload } from '@repo/types';
 
 const REVIEW_STORAGE_KEY = 'contract-reviewed-';
 
@@ -83,8 +84,13 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
         };
     }, [messages.length, hasShownReview]);
 
-    function handleIncomingTerminalLogs(logs: string) {
-        addLog(logs);
+    function handleIncomingTerminalLogs(message: WSServerIncomingPayload<IncomingPayload>) {
+        const { line } = message.payload;
+
+        addLog({
+            type: message.type,
+            text: line,
+        });
     }
 
     async function get_chat() {

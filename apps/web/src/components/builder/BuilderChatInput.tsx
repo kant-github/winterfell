@@ -11,7 +11,7 @@ import LoginModal from '../utility/LoginModal';
 import ModelSelect from '../base/ModelSelect';
 import { ChatRole, Message } from '@/src/types/prisma-types';
 import { useModelStore } from '@/src/store/model/useModelStore';
-import { CONTINUE_CHAT_URL, GENERATE_CONTRACT } from '@/routes/api_routes';
+import { GENERATE_CONTRACT } from '@/routes/api_routes';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import {
     FILE_STRUCTURE_TYPES,

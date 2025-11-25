@@ -7,6 +7,14 @@ import axios from 'axios';
 import env from '../../configs/config.env';
 
 const SERVER_JWT_SECRET = process.env.SERVER_JWT_SECRET;
+type UpdateUserData = {
+    name?: string | null;
+    image?: string | null;
+    provider?: string;
+    githubAccessToken?: string | null;
+    githubId?: string | null;
+    githubUsername?: string | null;
+};
 
 export default async function signInController(req: Request, res: Response) {
     const { user, account, turnstileToken } = req.body;
@@ -58,7 +66,7 @@ export default async function signInController(req: Request, res: Response) {
 
         const isGithub = account.provider === 'github';
         if (existingUser) {
-            const updateData: any = {
+            const updateData: UpdateUserData = {
                 name: user.name,
                 image: user.image,
             };

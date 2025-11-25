@@ -40,6 +40,7 @@ export default function useResize({ side, min, max, onClose }: useResizeProps) {
             window.removeEventListener('mousemove', doResize);
             window.removeEventListener('mouseup', stopResize);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isResizing, onClose]);
 
     return {
