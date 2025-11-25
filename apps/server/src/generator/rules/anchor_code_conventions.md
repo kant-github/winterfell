@@ -5,8 +5,11 @@
 - NO account definitions
 - NO business logic
 - Imports instruction contexts
+- use ``` only for writing any code
 
 ## EXAMPLE PATTERN FOR [lib.rs]
+
+<file>/programs/<contract-name>/src/lib.rs</file>
 
 ````rust
 use anchor_lang::prelude::*;

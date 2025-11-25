@@ -5,6 +5,7 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { tool_schema } from '../schema/tool_schema';
 import chalk from 'chalk';
 import { RunnableLambda } from '@langchain/core/runnables';
+import { objectStore } from '../../services/init';
 
 const RULES_DIR = path.resolve(process.cwd(), 'dist/rules');
 
@@ -28,6 +29,21 @@ export default class Tool {
             name: 'get_rule',
             description: 'fetches a rule document by name',
             schema: tool_schema,
+        },
+    );
+
+    public static get_file = tool(
+        async ({ file_path, contract_id }: { file_path: string, contract_id: string }) => {
+            
+            const contract_files = await objectStore.get_resource_files(contract_id);
+            const file = contract_files.find(f => f.path === file_path);
+
+            if(!file) throw new Error('file not found');
+            return file.content;
+        },
+        {
+            name: 'get_file',
+            description: "fetches a file content by it's path",
         },
     );
 

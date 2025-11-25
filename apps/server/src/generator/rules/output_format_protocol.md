@@ -2,7 +2,7 @@
 
 - return with a valid answer inside <context></context>
 
-## CONTRACT INSTRUCTIONS [know about staging from staging_schema.md]
+## CONTRACT INSTRUCTIONS [know about staging from staging_schema]
 
 - start with giving name
 - then give some context about what will be going on

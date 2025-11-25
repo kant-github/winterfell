@@ -17,6 +17,7 @@ import { cn } from '@/src/lib/utils';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
 import { IncomingPayload, TerminalSocketData } from '@repo/types';
 import { ParsedIncomingMessage } from '@/src/class/socket.client';
+import useResize from '@/src/hooks/useResize';
 
 export default function Terminal() {
     const [showTerminal, setShowTerminal] = useState<boolean>(false);
@@ -29,7 +30,10 @@ export default function Terminal() {
     const { session } = useUserSessionStore();
     const { addCommand, moveUp, moveDown, resetIndex } = useCommandHistoryStore();
     const { isConnected, subscribeToHandler } = useWebSocket();
-    const { height, startResize } = useTerminalResize({
+    const { dimension, startResize } = useResize({
+        side: 'height',
+        min: 100,
+        max: 600,
         onClose: () => setShowTerminal(false),
     });
 
@@ -163,7 +167,7 @@ export default function Terminal() {
                 <div
                     className="absolute bottom-6 left-0 right-0 bg-dark-base border-t border-neutral-800 text-neutral-200 font-mono shadow-lg flex flex-col z-999999 text-[12px] tracking-wider"
                     style={{
-                        height: `min(${height}px, calc(100% - 6rem))`,
+                        height: `min(${dimension}px, calc(100% - 6rem))`,
                         maxHeight: 'calc(100% - 6rem)',
                     }}
                 >
