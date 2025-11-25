@@ -1,24 +1,19 @@
 import { useState } from 'react';
-import { LiaServicestack } from 'react-icons/lia';
+import { MeshGradient, DotOrbit } from '@paper-design/shaders-react';
 import { Check } from 'lucide-react';
-import { Button } from '../ui/button';
-import NavItems, { NavItemsType } from '../nav/NavItems';
+import { LiaServicestack } from 'react-icons/lia';
+import ExpandableSubscriptionCard from './ExpandableSubscriptionCard';
 
-type PlanType = 'FREE' | 'PREMIUM' | 'PREMIUM_PLUS';
-type BillingPeriod = 'MONTHLY' | 'YEARLY';
+export type PlanType = 'FREE' | 'PREMIUM' | 'PREMIUM_PLUS';
+export type BillingPeriod = 'MONTHLY' | 'YEARLY';
 
-interface Plan {
+export interface Plan {
     plan: PlanType;
     priceMonthly: string;
     priceYearly: string;
     features: string[];
     isBest?: boolean;
 }
-
-const planItems: NavItemsType[] = [
-    { name: 'Monthly', link: '#pricing' },
-    { name: 'Yearly', link: '#features' },
-];
 
 const planStyles = {
     FREE: 'bg-neutral-200 text-neutral-900 border-neutral-400/30',
@@ -38,16 +33,19 @@ function SubscriptionCard({
     billing,
     features,
     isBest = false,
+    onClick,
 }: {
     plan: PlanType;
     price: string;
     billing: BillingPeriod;
     features: string[];
     isBest?: boolean;
+    onClick: () => void;
 }) {
     return (
         <div
-            className={`rounded-2xl relative overflow-hidden border backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl
+            onClick={onClick}
+            className={`rounded-2xl relative overflow-hidden border backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer
             ${isBest ? 'md:w-[480px] md:h-[285px]' : 'md:w-[480px] md:h-[260px]'} 
             w-full max-w-[420px] h-auto 
             ${planStyles[plan]} 
@@ -55,7 +53,6 @@ function SubscriptionCard({
             `}
         >
             <div className={`absolute inset-0 opacity-60 ${planAccents[plan]}`} />
-
             <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
             <div className="absolute -left-12 -bottom-12 w-40 h-40 rounded-full bg-black/10 blur-3xl" />
 
@@ -70,15 +67,14 @@ function SubscriptionCard({
                         </h2>
                     </div>
                     <div
-                        className={`p-2.5 rounded-xl backdrop-blur-sm ${
-                            plan === 'PREMIUM'
+                        className={`p-2.5 rounded-lg backdrop-blur-sm ${plan === 'PREMIUM'
                                 ? 'bg-white/5'
                                 : plan === 'FREE'
-                                  ? 'bg-white/20'
-                                  : 'bg-white/15'
-                        }`}
+                                    ? 'bg-white/20'
+                                    : 'bg-white/15'
+                            }`}
                     >
-                        <LiaServicestack className="size-6 sm:size-7" />
+                        <LiaServicestack className='size-7' />
                     </div>
                 </div>
 
@@ -87,13 +83,12 @@ function SubscriptionCard({
                         {features.slice(0, 4).map((feature, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
-                                    plan === 'PREMIUM'
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${plan === 'PREMIUM'
                                         ? 'bg-neutral-800/60'
                                         : plan === 'FREE'
-                                          ? 'bg-white/25'
-                                          : 'bg-white/15'
-                                }`}
+                                            ? 'bg-white/25'
+                                            : 'bg-white/15'
+                                    }`}
                             >
                                 <Check className="size-3" />
                                 <span className="whitespace-nowrap">{feature}</span>
@@ -114,17 +109,16 @@ function SubscriptionCard({
                             {billing === 'MONTHLY' ? 'per month' : 'per year'}
                         </div>
                     </div>
-                    <Button
-                        className={`px-5 py-1.5 rounded-lg font-semibold transition-all shadow-lg ${
-                            plan === 'PREMIUM'
+                    <button
+                        className={`px-5 py-1.5 rounded-lg font-semibold transition-all shadow-lg ${plan === 'PREMIUM'
                                 ? 'bg-neutral-800 hover:bg-neutral-700 text-white'
                                 : plan === 'FREE'
-                                  ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
-                                  : 'bg-neutral-900 hover:bg-neutral-800 text-white'
-                        }`}
+                                    ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
+                                    : 'bg-neutral-900 hover:bg-neutral-800 text-white'
+                            }`}
                     >
                         {plan === 'FREE' ? 'Start Free' : 'Upgrade'}
-                    </Button>
+                    </button>
                 </div>
             </div>
 
@@ -143,6 +137,7 @@ function SubscriptionCard({
 
 export default function SubscriptionPlans() {
     const [billing, setBilling] = useState<BillingPeriod>('MONTHLY');
+    const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
 
     const plans: Plan[] = [
         {
@@ -181,39 +176,48 @@ export default function SubscriptionPlans() {
     return (
         <section
             id="pricing"
-            className="w-full min-h-screen bg-[#0a0b0d] from-[#0a0b0d] via-[#0a0b0d] to-dark-base text-center text-white relative flex flex-col items-center justify-center z-20 px-4"
+            className="w-full min-h-screen bg-[#0a0b0d] text-center text-white relative flex flex-col items-center justify-center z-20 px-4 py-20"
         >
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neutral-900/20 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-b from-transparent via-neutral-900/20 to-transparent" />
 
-            <div className="relative z-10 mt-28 sm:mt-32 mb-12 sm:mb-15">
-                <h1 className="text-3xl sm:text-5xl font-extrabold text-light">
+            <div className="relative z-10 mb-12">
+                <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-4">
                     Choose Your Winterfell Plan
                 </h1>
-                <div className="mt-3 sm:mt-4 text-light/60 max-w-2xl mx-auto text-sm sm:text-lg tracking-wide px-2">
+                <p className="text-neutral-400 max-w-2xl mx-auto text-sm sm:text-lg">
                     Get access to premium features designed to boost productivity and simplify your
                     workflow with seamless performance
-                </div>
+                </p>
             </div>
 
-            <NavItems
-                items={planItems.map((item, index) => {
-                    if (index === 0) {
-                        return { ...item, onClick: () => setBilling('MONTHLY') };
-                    }
-                    if (index === 1) {
-                        return { ...item, onClick: () => setBilling('YEARLY') };
-                    }
-                    return item;
-                })}
-            />
+            <div className="flex gap-4 mb-8">
+                <button
+                    onClick={() => setBilling('MONTHLY')}
+                    className={`px-6 py-2 rounded-lg font-medium transition-all ${billing === 'MONTHLY'
+                            ? 'bg-[#7049FC] text-white'
+                            : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+                        }`}
+                >
+                    Monthly
+                </button>
+                <button
+                    onClick={() => setBilling('YEARLY')}
+                    className={`px-6 py-2 rounded-lg font-medium transition-all ${billing === 'YEARLY'
+                            ? 'bg-[#7049FC] text-white'
+                            : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+                        }`}
+                >
+                    Yearly
+                </button>
+            </div>
 
-            <span className="mb-12 sm:mb-15 tracking-wider text-light/60 text-xs sm:text-sm">
+            <span className="mb-12 text-neutral-500 text-xs sm:text-sm">
                 {billing === 'YEARLY'
                     ? 'Save up to 10% off with yearly billing'
                     : 'Switch to yearly for better savings'}
             </span>
 
-            <div className="relative z-10 flex justify-center items-center gap-6 sm:gap-8 flex-wrap px-2 sm:px-4 mb-16 sm:mb-20">
+            <div className="relative z-10 flex w-full max-w-[90%] justify-center items-center gap-6 flex-wrap mb-16">
                 {plans.map((planData) => (
                     <SubscriptionCard
                         key={planData.plan}
@@ -222,9 +226,19 @@ export default function SubscriptionPlans() {
                         billing={billing}
                         features={planData.features}
                         isBest={planData.isBest}
+                        onClick={() => setSelectedPlan(planData)}
                     />
                 ))}
             </div>
+
+            {selectedPlan && (
+                <ExpandableSubscriptionCard
+                    onClose={() => setSelectedPlan(null)}
+                    plan={selectedPlan}
+                    allPlans={plans}
+                    onSelectPlan={setSelectedPlan}
+                />
+            )}
         </section>
     );
 }

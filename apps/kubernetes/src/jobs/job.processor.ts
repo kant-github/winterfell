@@ -2,13 +2,9 @@ import { kubernetes_services } from '..';
 import { env } from '../configs/configs.env';
 import { PodServices } from '../services/pod.services';
 import { JobContext } from './job.context';
-// sevrer msg => amber
-// error msg => red
-// logs msg => green
-// command execution => primary-light
-// completion msg => cyan/ primary-light
 
 export default class JobProcessors {
+
     public async execute_build_in_pod(context: JobContext, jobId: string, command: string[]) {
         try {
             console.log('inside run buuild on pod');
@@ -92,3 +88,9 @@ export default class JobProcessors {
         }
     }
 }
+
+// sevrer msg => amber
+// error msg => red
+// logs msg => green
+// command execution => primary-light
+// completion msg => cyan/ primary-light
