@@ -7,9 +7,11 @@ import Tool from "../tools/tool";
 import { new_chat_coder_prompt, new_chat_planner_prompt, old_chat_coder_prompt, old_chat_planner_prompt } from "./prompts";
 import { AIMessageChunk, MessageStructure } from "@langchain/core/messages";
 import StreamParser from "../../services/stream_parser";
-import { ChatRole, prisma } from "@repo/database";
+import { ChatRole, Message, prisma } from "@repo/database";
 import GeneratorShape from "../../metadata/generator";
 import { Response } from "express";
+import { FILE_STRUCTURE_TYPES, PHASE_TYPES, StreamEvent, StreamEventData } from "../../types/stream_event_types";
+import { STAGE } from "../../types/content_types";
 
 type planner = RunnableSequence<{
     user_instruction: string;
@@ -17,6 +19,8 @@ type planner = RunnableSequence<{
 }, {
     should_continue: boolean;
     plan: string;
+    contract_name?: string;
+    context: string;
     files_likely_affected: {
         do: "create" | "update" | "delete";
         file_path: string;
@@ -34,6 +38,7 @@ export default class Generator extends GeneratorShape {
     protected gemini_planner: ChatGoogleGenerativeAI;
     protected gemini_coder: ChatGoogleGenerativeAI;
     protected claude_coder: ChatAnthropic;
+    protected parsers: Map<string, StreamParser>;
 
     constructor() {
         super();
@@ -50,6 +55,7 @@ export default class Generator extends GeneratorShape {
             model: 'claude-sonnet-4-5-20250929',
             streaming: true,
         });
+        this.parsers = new Map<string, StreamParser>()
     }
 
     public generate(
@@ -60,57 +66,108 @@ export default class Generator extends GeneratorShape {
         contract_id: string,
         idl?: Object[],
     ) {
+        const parser = this.get_parser(contract_id, res);
+        try {
+            this.create_stream(res);
 
-        console.log('gen.generator is called');
-        const { planner_chain, coder_chain } = this.get_chains(chat, model);
-        this.new_contract(
-            planner_chain,
-            coder_chain,
-            user_instruction,
-            contract_id,
-        );
+            console.log('gen.generator is called');
+            const { planner_chain, coder_chain } = this.get_chains(chat, model);
+            this.new_contract(
+                res,
+                planner_chain,
+                coder_chain,
+                user_instruction,
+                contract_id,
+                parser,
+            );
+        } catch (error) {
+            console.error('Error while generating: ', Error);
+            parser.reset();
+            this.delete_parser(contract_id);
+            res.end();
+        }
     }
 
     protected async new_contract(
+        res: Response,
         planner_chain: planner,
         coder_chain: any,
         user_instruction: string,
         contract_id: string,
+        parser: StreamParser,
     ) {
+        try {
 
-        const parser = new StreamParser();
+            const planner_data = await planner_chain.invoke({
+                user_instruction,
+            });
 
-        const data = await planner_chain.invoke({
-            user_instruction,
-        });
+            console.log(planner_data);
 
-        console.log(data);
-
-        if(!data.should_continue) {
-            console.log('planner said to not continue.');
-            return;
-        }
-
-        // send planning stage from here
-
-
-        const code_stream = await coder_chain.stream({
-            plan: data.plan,
-            files_likely_affected: data.files_likely_affected,
-        });
-
-        const system_message = await prisma.message.create({
+            const llm_message = await prisma.message.create({
                 data: {
+                    content: planner_data.context,
                     contractId: contract_id,
-                    role: ChatRole.SYSTEM,
-                    content: 'starting to generate in a few seconds',
+                    role: ChatRole.AI,
                 },
-        })
+            });
 
-        for await(const chunk of code_stream) {
-            if(chunk.text) {
-                parser.feed(chunk.text, system_message);
+            this.send_sse(
+                res,
+                STAGE.CONTEXT,
+                { 
+                    context: planner_data.context,
+                    llmMessage: llm_message,
+                },
+            );
+
+            if (!planner_data.should_continue) {
+                console.log('planner said to not continue.');
+                return;
             }
+
+            const result = await prisma.$transaction(async (tx) => {
+                const system_message = await tx.message.create({
+                    data: {
+                        contractId: contract_id,
+                        role: ChatRole.SYSTEM,
+                        content: 'starting to generate in a few seconds',
+                        planning: true,
+                    },
+                });
+                const update_contract = await tx.contract.update({
+                    where: {
+                        id: contract_id,
+                    },
+                    data: {
+                        title: planner_data.contract_name,
+                    },
+                });
+
+                return {
+                    system_message,
+                    contract: update_contract,
+                }
+            })
+
+            // send planning stage from here
+            this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, result.system_message);
+
+            const code_stream = await coder_chain.stream({
+                plan: planner_data.plan,
+                files_likely_affected: planner_data.files_likely_affected,
+            });
+
+            for await (const chunk of code_stream) {
+                if (chunk.text) {
+                    parser.feed(chunk.text, result.system_message);
+                }
+            }
+        } catch (error) {
+            console.error('Error while new contract generation: ', Error);
+            parser.reset();
+            this.delete_parser(contract_id);
+            res.end();
         }
 
     }
@@ -170,6 +227,95 @@ export default class Generator extends GeneratorShape {
                 };
             }
         }
+    }
+
+    private get_parser(contractId: string, res: Response): StreamParser {
+        if (!this.parsers.has(contractId)) {
+            const parser = new StreamParser();
+
+            parser.on(PHASE_TYPES.THINKING, ({ data, systemMessage }) =>
+                this.send_sse(res, PHASE_TYPES.THINKING, data, systemMessage),
+            );
+
+            parser.on(PHASE_TYPES.GENERATING, ({ data, systemMessage }) =>
+                this.send_sse(res, PHASE_TYPES.GENERATING, data, systemMessage),
+            );
+
+            parser.on(PHASE_TYPES.BUILDING, ({ data, systemMessage }) =>
+                this.send_sse(res, PHASE_TYPES.BUILDING, data, systemMessage),
+            );
+
+            parser.on(PHASE_TYPES.CREATING_FILES, ({ data, systemMessage }) =>
+                this.send_sse(res, PHASE_TYPES.CREATING_FILES, data, systemMessage),
+            );
+
+            parser.on(PHASE_TYPES.COMPLETE, ({ data, systemMessage }) =>
+                this.send_sse(res, PHASE_TYPES.COMPLETE, data, systemMessage),
+            );
+
+            parser.on(FILE_STRUCTURE_TYPES.EDITING_FILE, ({ data, systemMessage }) =>
+                this.send_sse(res, FILE_STRUCTURE_TYPES.EDITING_FILE, data, systemMessage),
+            );
+
+            parser.on(PHASE_TYPES.ERROR, ({ data, systemMessage }) =>
+                this.send_sse(res, PHASE_TYPES.ERROR, data, systemMessage),
+            );
+
+            parser.on(STAGE.CONTEXT, ({ data, systemMessage }) =>
+                this.send_sse(res, STAGE.CONTEXT, data, systemMessage),
+            );
+
+            parser.on(STAGE.PLANNING, ({ data, systemMessage }) =>
+                this.send_sse(res, STAGE.PLANNING, data, systemMessage),
+            );
+
+            parser.on(STAGE.GENERATING_CODE, ({ data, systemMessage }) =>
+                this.send_sse(res, STAGE.GENERATING_CODE, data, systemMessage),
+            );
+
+            parser.on(STAGE.BUILDING, ({ data, systemMessage }) =>
+                this.send_sse(res, STAGE.BUILDING, data, systemMessage),
+            );
+
+            parser.on(STAGE.CREATING_FILES, ({ data, systemMessage }) =>
+                this.send_sse(res, STAGE.CREATING_FILES, data, systemMessage),
+            );
+
+            parser.on(STAGE.FINALIZING, ({ data, systemMessage }) =>
+                this.send_sse(res, STAGE.FINALIZING, data, systemMessage),
+            );
+
+            this.parsers.set(contractId, parser);
+        }
+        return this.parsers.get(contractId) as StreamParser;
+    }
+
+    private delete_parser(contractId: string): void {
+        this.parsers.delete(contractId);
+    }
+
+    private send_sse(
+        res: Response,
+        type: PHASE_TYPES | FILE_STRUCTURE_TYPES | STAGE,
+        data: StreamEventData,
+        systemMessage?: Message,
+    ): void {
+        const event: StreamEvent = {
+            type,
+            data,
+            systemMessage: systemMessage as Message,
+            timestamp: Date.now(),
+        };
+
+        res.write(`data: ${JSON.stringify(event)}\n\n`);
+    }
+
+    protected create_stream(res: Response): void {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.flushHeaders();
     }
 
 }

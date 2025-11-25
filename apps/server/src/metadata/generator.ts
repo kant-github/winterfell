@@ -3,12 +3,14 @@ import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { MODEL } from "../generator/types/model_types";
 import { Runnable, RunnableSequence } from "@langchain/core/runnables";
 import { Response } from "express";
+import StreamParser from "../services/stream_parser";
 
 export default abstract class GeneratorShape {
 
     protected gemini_planner!: ChatGoogleGenerativeAI;
     protected gemini_coder!: ChatGoogleGenerativeAI;
     protected claude_coder!: ChatAnthropic;
+    protected parsers!: Map<string, StreamParser>;
 
     /**
      * this is a user exposed method which starts the generation process of the content
@@ -30,16 +32,20 @@ export default abstract class GeneratorShape {
 
     /**
      * this method is used to generate a new contract
+     * @param {Response} res
      * @param {RunnableSequence} planner_chain 
      * @param {Runnable} coder_chain 
      * @param {string} user_instruction 
      * @param {string} contract_id 
+     * @param {StreamParser} parser
      */
     protected abstract new_contract(
+        res: Response,
         planner_chain: RunnableSequence,
         coder_chain: Runnable,
         user_instruction: string,
         contract_id: string,
+        parser: StreamParser
     ): void;
 
     /**

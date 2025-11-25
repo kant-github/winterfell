@@ -1,6 +1,7 @@
-import { prisma } from "@repo/database";
+import { PlanType, prisma } from "@repo/database";
 import { Request, Response } from "express";
 import { generator } from "../../services/init";
+import { MODEL } from "../../generator/types/model_types";
 
 
 export default async function generateContractController(req: Request, res: Response) {
@@ -18,6 +19,29 @@ export default async function generateContractController(req: Request, res: Resp
         const body = req.body;
         // safe parse validation check
         const { contract_id, instruction, model } = body;
+
+        if(model === MODEL.CLAUDE) {
+            const existing_user = await prisma.user.findUnique({
+                where: {
+                    id: user.id,
+                    email: user.email,
+                },
+                include: {
+                    subscription: true,
+                },
+            });
+
+            const is_premium_user = 
+                existing_user?.subscription?.plan === PlanType.PREMIUM ||
+                existing_user?.subscription?.plan === PlanType.PREMIUM_PLUS;
+
+            if(!is_premium_user) {
+                res.status(403).json({
+                    success: false,
+                    message: 'you are not subscribed to use premium feature.',
+                });
+            }
+        }
 
         const existing_contract = await prisma.contract.findUnique({
             where: {
@@ -40,11 +64,22 @@ export default async function generateContractController(req: Request, res: Resp
             }
         } else {
             // call for new
-            await generator.generate(
+
+            const contract = await prisma.contract.create({
+                data: {
+                    id: contract_id,
+                    title: 'contractor',
+                    contractType: 'CUSTOM',
+                    userId: user.id,
+                },
+            });
+
+            generator.generate(
                 res,
                 'new',
                 instruction,
-
+                model,
+                contract.id,
             )
         }
 
