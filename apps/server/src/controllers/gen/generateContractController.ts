@@ -7,6 +7,7 @@ import { MODEL } from "../../generator/types/model_types";
 export default async function generateContractController(req: Request, res: Response) {
     try {
 
+        console.log('generate contract controller hit');
         const user = req.user;
         if (!user) {
             res.status(401).json({
@@ -19,6 +20,8 @@ export default async function generateContractController(req: Request, res: Resp
         const body = req.body;
         // safe parse validation check
         const { contract_id, instruction, model } = body;
+
+        console.log(body);
 
         if(model === MODEL.CLAUDE) {
             const existing_user = await prisma.user.findUnique({
@@ -78,7 +81,7 @@ export default async function generateContractController(req: Request, res: Resp
                 res,
                 'new',
                 instruction,
-                model,
+                model || MODEL.GEMINI,
                 contract.id,
             )
         }

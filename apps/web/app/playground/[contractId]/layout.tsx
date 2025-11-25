@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
 import SessionSetter from '@/src/lib/SessionSeter';
 import { authOption } from '@/app/api/auth/[...nextauth]/options';
-import { Toaster } from 'sonner';
 import ShortcutMenu from '@/src/components/utility/ShortcutMenuModal';
 
 interface Props {
@@ -25,26 +24,6 @@ export default async function RootLayout({ children }: Props) {
             >
                 {children}
                 <ShortcutMenu />
-                <Toaster
-                    theme="dark"
-                    closeButton
-                    visibleToasts={4}
-                    toastOptions={{
-                        style: {
-                            background: '#0c0d0e',
-                            color: '#FFFFFF',
-                            border: '1px solid #2C2C2E',
-                            borderRadius: '12px',
-                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
-                        },
-                        classNames: {
-                            title: 'text-white font-semibold',
-                            description: 'text-gray-300',
-                            actionButton: 'bg-indigo-600 text-white hover:bg-indigo-700',
-                            cancelButton: 'bg-gray-700 text-white hover:bg-gray-800',
-                        },
-                    }}
-                />
                 <SessionSetter session={session} />
             </body>
         </html>

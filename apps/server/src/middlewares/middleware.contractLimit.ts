@@ -34,27 +34,20 @@ export default async function contractLimit(req: Request, res: Response, next: N
         }
 
         const total_created_contracts = existing_user.contracts.length;
-
         const current_plan = existing_user.subscription?.plan;
 
+        // and this will also not proceed with second chat in same contract
         // there is a problem, what if the user refreshes the subscription, here he will be blocked after 10 contracts
         // but after re-payment of his subscription he should be allowed to create more
-        if((!current_plan || current_plan === PlanType.FREE) && total_created_contracts >= PLANS.FREE.limit) {
+        if(
+            ((!current_plan || current_plan === PlanType.FREE) && total_created_contracts >= PLANS.FREE.limit) ||
+            (current_plan === PlanType.PREMIUM && total_created_contracts >= PLANS.PREMIUM.limit) ||
+            (current_plan === PlanType.PREMIUM_PLUS && total_created_contracts >= PLANS.PREMIUM_PLUS.limit)
+        ) {
             res.status(423).json({
                 success: false,
                 message: 'contract limit reached',
-            });
-            return;
-        } else if(current_plan === PlanType.PREMIUM && total_created_contracts >= PLANS.PREMIUM.limit) {
-            res.status(423).json({
-                success: false,
-                message: 'contra. t limit reached',
-            });
-            return;
-        } else if(current_plan === PlanType.PREMIUM_PLUS && total_created_contracts >= PLANS.PREMIUM_PLUS.limit) {
-            res.status(423).json({
-                success: false,
-                message: 'contract limit reached',
+                goBack: true,
             });
             return;
         } else {

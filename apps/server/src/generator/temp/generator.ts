@@ -66,6 +66,7 @@ export default class Generator extends GeneratorShape {
         contract_id: string,
         idl?: Object[],
     ) {
+        console.log('generate contract hit');
         const parser = this.get_parser(contract_id, res);
         try {
             this.create_stream(res);
@@ -97,7 +98,7 @@ export default class Generator extends GeneratorShape {
         parser: StreamParser,
     ) {
         try {
-
+            console.log('generate new contract hit');
             const planner_data = await planner_chain.invoke({
                 user_instruction,
             });

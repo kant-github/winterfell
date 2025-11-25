@@ -3,9 +3,9 @@ import BuilderChatInput from './BuilderChatInput';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import Image from 'next/image';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
-import { NEW_CHAT_URL } from '@/routes/api_routes';
+import { GENERATE_CONTRACT, NEW_CHAT_URL } from '@/routes/api_routes';
 import {
     FILE_STRUCTURE_TYPES,
     FileContent,
@@ -21,6 +21,7 @@ import { Message } from '@/src/types/prisma-types';
 import { LayoutGrid } from '../ui/animated/layout-grid-icon';
 import { TextShimmer } from '../ui/shimmer-text';
 import { formatChatTime } from '@/src/lib/format_chat_time';
+import { toast } from 'sonner';
 
 export default function BuilderChats() {
     const { session } = useUserSessionStore();
@@ -33,6 +34,7 @@ export default function BuilderChats() {
     const { parseFileStructure, deleteFile } = useCodeEditor();
     const { messages, loading, setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
         useBuilderChatStore();
+    const router = useRouter();
 
     useEffect(() => {
         if (messageEndRef.current) {
@@ -58,17 +60,25 @@ export default function BuilderChats() {
     async function startChat(message: string) {
         try {
             setLoading(true);
-            const response = await fetch(NEW_CHAT_URL, {
+            const response = await fetch(GENERATE_CONTRACT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${session?.user.token}`,
                 },
                 body: JSON.stringify({
-                    contractId: contractId,
-                    message: message,
+                    contract_id: contractId,
+                    instruction: message,
                 }),
             });
+
+            if(response.status === 423) {
+                const data = await response.json();
+                if(data.goBack) {
+                    toast.error(data.message);
+                    router.push('/');
+                }               
+            }
 
             if (!response.ok) {
                 throw new Error('Failed to start chat');
