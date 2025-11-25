@@ -12,6 +12,9 @@ import GeneratorShape from "../../metadata/generator";
 import { Response } from "express";
 import { FILE_STRUCTURE_TYPES, PHASE_TYPES, StreamEvent, StreamEventData } from "../../types/stream_event_types";
 import { STAGE } from "../../types/content_types";
+import { objectStore } from "../../services/init";
+import { FileContent } from "@repo/types";
+import { mergeWithLLMFiles, prepareBaseTemplate } from "../../class/test";
 
 type planner = RunnableSequence<{
     user_instruction: string;
@@ -102,6 +105,7 @@ export default class Generator extends GeneratorShape {
             const planner_data = await planner_chain.invoke({
                 user_instruction,
             });
+            let full_response: string = '';
 
             console.log(planner_data);
 
@@ -162,8 +166,17 @@ export default class Generator extends GeneratorShape {
             for await (const chunk of code_stream) {
                 if (chunk.text) {
                     parser.feed(chunk.text, result.system_message);
+                    full_response += chunk.text;
                 }
             }
+
+            const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
+            const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
+            const final_code = mergeWithLLMFiles(base_files, llm_generated_files);
+
+            this.send_sse(res, STAGE.END, { data: final_code });
+            objectStore.uploadContractFiles(contract_id, final_code, full_response);
+
         } catch (error) {
             console.error('Error while new contract generation: ', Error);
             parser.reset();

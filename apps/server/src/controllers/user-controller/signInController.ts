@@ -10,7 +10,6 @@ const SERVER_JWT_SECRET = process.env.SERVER_JWT_SECRET;
 
 export default async function signInController(req: Request, res: Response) {
     const { user, account, turnstileToken } = req.body;
-    console.log('Received sign-in request:', turnstileToken);
     if (!user || !user.email) {
         console.error('Missing user or user.email');
         return res.status(400).json({
