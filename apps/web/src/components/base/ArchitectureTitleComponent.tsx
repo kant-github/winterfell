@@ -61,7 +61,7 @@ export default function ArchitectureTitleComponent({
         <section
             id="about"
             ref={ref}
-            className={cn('w-screen flex flex-col justify-center text-light gap-y-5 z-20', bgcolor)}
+            className={cn('w-screen flex flex-col justify-center text-light gap-y-5 z-10', bgcolor)}
         >
             <AnimatePresence>
                 <motion.div

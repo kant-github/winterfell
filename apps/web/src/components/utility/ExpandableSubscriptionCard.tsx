@@ -5,6 +5,9 @@ import { Button } from '../ui/button';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { cn } from '@/src/lib/utils';
+import OpacityBackground from './OpacityBackground';
+import Card from '../ui/Card';
+import { FaArrowLeft } from 'react-icons/fa';
 
 export default function ExpandableSubscriptionCard({
     onClose,
@@ -42,7 +45,7 @@ export default function ExpandableSubscriptionCard({
                 onClick={() => !isSelected && onSelectPlan(planData)}
                 className={`relative w-screen max-w-[320px] bg-[#1a1a1a] 
                     border border-neutral-800 rounded-2xl overflow-hidden
-                    ${!isSelected ? 'cursor-pointer opacity-70 hover:opacity-100' : ''}`}
+                    ${!isSelected ? 'cursor-pointer hover:opacity-100' : ''}`}
             >
                 <div className="relative w-full p-3 rounded-lg overflow-hidden">
                     <MeshGradient
@@ -122,19 +125,15 @@ export default function ExpandableSubscriptionCard({
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-
-            <div className="relative z-10 w-full max-w-6xl">
-                <button
+        <OpacityBackground className='bg-dark-base/30' onBackgroundClick={onClose}>
+            <div className="relative z-100 w-full max-w-7xl max-h-[80vh] h-full flex items-center justify-center">
+                <Button
                     onClick={onClose}
                     className="absolute -top-12 left-0 text-neutral-400 hover:text-white flex items-center gap-2"
                 >
-                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
-                    </svg>
+                    <FaArrowLeft />
                     <span className="text-sm">Back</span>
-                </button>
+                </Button>
 
                 <div className="flex items-center justify-center gap-6 flex-wrap lg:flex-nowrap">
                     {allPlans.map((planData) => (
@@ -144,6 +143,6 @@ export default function ExpandableSubscriptionCard({
                     ))}
                 </div>
             </div>
-        </div>
+        </OpacityBackground>
     );
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { LiaServicestack } from 'react-icons/lia';
 import ExpandableSubscriptionCard from './ExpandableSubscriptionCard';
+import { Button } from '../ui/button';
 
 export type PlanType = 'FREE' | 'PREMIUM' | 'PREMIUM_PLUS';
 export type BillingPeriod = 'MONTHLY' | 'YEARLY';
@@ -66,13 +67,12 @@ function SubscriptionCard({
                         </h2>
                     </div>
                     <div
-                        className={`p-2.5 rounded-lg backdrop-blur-sm ${
-                            plan === 'PREMIUM'
+                        className={`p-2.5 rounded-lg backdrop-blur-sm ${plan === 'PREMIUM'
                                 ? 'bg-white/5'
                                 : plan === 'FREE'
-                                  ? 'bg-white/20'
-                                  : 'bg-white/15'
-                        }`}
+                                    ? 'bg-white/20'
+                                    : 'bg-white/15'
+                            }`}
                     >
                         <LiaServicestack className="size-7" />
                     </div>
@@ -83,13 +83,12 @@ function SubscriptionCard({
                         {features.slice(0, 4).map((feature, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
-                                    plan === 'PREMIUM'
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${plan === 'PREMIUM'
                                         ? 'bg-neutral-800/60'
                                         : plan === 'FREE'
-                                          ? 'bg-white/25'
-                                          : 'bg-white/15'
-                                }`}
+                                            ? 'bg-white/25'
+                                            : 'bg-white/15'
+                                    }`}
                             >
                                 <Check className="size-3" />
                                 <span className="whitespace-nowrap">{feature}</span>
@@ -111,13 +110,12 @@ function SubscriptionCard({
                         </div>
                     </div>
                     <button
-                        className={`px-5 py-1.5 rounded-lg font-semibold transition-all shadow-lg ${
-                            plan === 'PREMIUM'
+                        className={`px-5 py-1.5 rounded-lg font-semibold transition-all shadow-lg ${plan === 'PREMIUM'
                                 ? 'bg-neutral-800 hover:bg-neutral-700 text-white'
                                 : plan === 'FREE'
-                                  ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
-                                  : 'bg-neutral-900 hover:bg-neutral-800 text-white'
-                        }`}
+                                    ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
+                                    : 'bg-neutral-900 hover:bg-neutral-800 text-white'
+                            }`}
                     >
                         {plan === 'FREE' ? 'Start Free' : 'Upgrade'}
                     </button>
@@ -178,7 +176,7 @@ export default function SubscriptionPlans() {
     return (
         <section
             id="pricing"
-            className="w-full min-h-screen bg-[#0a0b0d] text-center text-white relative flex flex-col items-center justify-center z-20 px-4 py-20"
+            className="w-full min-h-screen bg-[#0a0b0d] text-center text-white relative flex flex-col items-center justify-center z-10 px-4 py-20"
         >
             <div className="absolute inset-0 bg-linear-to-b from-transparent via-neutral-900/20 to-transparent" />
 
@@ -193,23 +191,22 @@ export default function SubscriptionPlans() {
             </div>
 
             <div className="flex gap-1 mb-4 z-20 border border-neutral-800 p-1 rounded-lg">
-                <button
+                <Button
+                    variant={'ghost'}
                     onClick={() => setBilling('MONTHLY')}
-                    className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${
-                        billing === 'MONTHLY'
+                    className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${billing === 'MONTHLY'
                             ? 'bg-[#7049FC] text-light'
                             : 'text-light/70 hover:text-light'
-                    }`}
+                        }`}
                 >
                     Monthly
-                </button>
+                </Button>
                 <button
                     onClick={() => setBilling('YEARLY')}
-                    className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${
-                        billing === 'YEARLY'
+                    className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${billing === 'YEARLY'
                             ? 'bg-[#7049FC] text-light'
                             : 'text-light/70 hover:text-light'
-                    }`}
+                        }`}
                 >
                     Yearly
                 </button>
