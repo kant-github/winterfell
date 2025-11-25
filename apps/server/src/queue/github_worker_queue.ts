@@ -1,9 +1,9 @@
-import { Job, Queue, Worker } from "bullmq";
-import { Octokit } from "@octokit/rest";
-import { RequestError } from "@octokit/request-error";
-import queue_config from "../configs/config.queue";
-import { FileContent, GithubPushJobData } from "../types/github_worker_queue_types";
-import { fetch_codebase } from "../services/git_services";
+import { Job, Queue, Worker } from 'bullmq';
+import { Octokit } from '@octokit/rest';
+import { RequestError } from '@octokit/request-error';
+import queue_config from '../configs/config.queue';
+import { FileContent, GithubPushJobData } from '../types/github_worker_queue_types';
+import { fetch_codebase } from '../services/git_services';
 
 export class GithubWorkerQueue {
     private queue: Queue<GithubPushJobData>;
@@ -19,10 +19,10 @@ export class GithubWorkerQueue {
     public async enqueue(job_data: GithubPushJobData) {
         const job_id = `${job_data.user_id}-${job_data.repo_name}-${Date.now()}`;
 
-        return this.queue.add("github-push", job_data, {
+        return this.queue.add('github-push', job_data, {
             jobId: job_id,
             attempts: 2,
-            backoff: { type: "exponential", delay: 2000 },
+            backoff: { type: 'exponential', delay: 2000 },
             removeOnComplete: false,
             removeOnFail: false,
         });
@@ -39,8 +39,8 @@ export class GithubWorkerQueue {
             await this.ensure_repo(octokit, owner, repo_name);
 
             const files = await fetch_codebase(contract_id);
-            console.log("files from s3 are -------------> ", files);
-            if (!files?.length) throw new Error("No files found in codebase");
+            console.log('files from s3 are -------------> ', files);
+            if (!files?.length) throw new Error('No files found in codebase');
 
             await this.upsert_code(octokit, owner, repo_name, files);
 
@@ -50,7 +50,7 @@ export class GithubWorkerQueue {
                 files_count: files.length,
             };
         } catch (err) {
-            const message = err instanceof Error ? err.message : "Unknown error";
+            const message = err instanceof Error ? err.message : 'Unknown error';
             throw new Error(`GitHub push failed: ${message}`);
         }
     }
@@ -77,16 +77,11 @@ export class GithubWorkerQueue {
     /**
      * upsert code method to synchronize the repository with the provided codebase.
      */
-    private async upsert_code(
-        octokit: Octokit,
-        owner: string,
-        repo: string,
-        files: FileContent[],
-    ) {
+    private async upsert_code(octokit: Octokit, owner: string, repo: string, files: FileContent[]) {
         const ref = await octokit.git.getRef({
             owner,
             repo,
-            ref: "heads/main",
+            ref: 'heads/main',
         });
         const base_sha = ref.data.object.sha;
 
@@ -100,12 +95,12 @@ export class GithubWorkerQueue {
             owner,
             repo,
             tree_sha: base_commit.data.tree.sha,
-            recursive: "true",
+            recursive: 'true',
         });
 
         const existing = new Map<string, string>();
         for (const item of tree_data.data.tree) {
-            if (item.type === "blob" && item.path) {
+            if (item.type === 'blob' && item.path) {
                 existing.set(item.path, item.sha!);
             }
         }
@@ -119,8 +114,8 @@ export class GithubWorkerQueue {
                 tree_entries.push({
                     path: file.path,
                     sha: old_sha,
-                    mode: "100644",
-                    type: "blob",
+                    mode: '100644',
+                    type: 'blob',
                 });
                 existing.delete(file.path);
                 continue;
@@ -130,14 +125,14 @@ export class GithubWorkerQueue {
                 owner,
                 repo,
                 content: file.content,
-                encoding: "utf-8",
+                encoding: 'utf-8',
             });
 
             tree_entries.push({
                 path: file.path,
                 sha: blob.data.sha,
-                mode: "100644",
-                type: "blob",
+                mode: '100644',
+                type: 'blob',
             });
 
             existing.delete(file.path);
@@ -147,8 +142,8 @@ export class GithubWorkerQueue {
             tree_entries.push({
                 path: removed_path,
                 sha: null,
-                mode: "100644",
-                type: "blob",
+                mode: '100644',
+                type: 'blob',
             });
         }
 
@@ -166,19 +161,19 @@ export class GithubWorkerQueue {
             tree: new_tree.data.sha,
             parents: [base_sha],
             author: {
-                name: "Winterfell",
-                email: "winterfell.dev.official@gmail.com",
+                name: 'Winterfell',
+                email: 'winterfell.dev.official@gmail.com',
             },
             committer: {
-                name: "Winterfell",
-                email: "winterfell.dev.official@gmail.com",
+                name: 'Winterfell',
+                email: 'winterfell.dev.official@gmail.com',
             },
         });
 
         await octokit.git.updateRef({
             owner,
             repo,
-            ref: "heads/main",
+            ref: 'heads/main',
             sha: commit.data.sha,
             force: false,
         });

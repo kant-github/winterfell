@@ -10,13 +10,10 @@ interface TerminalLogStore {
 
 export const useTerminalLogStore = create<TerminalLogStore>((set, get) => ({
     logs: [],
-    
-    addLog: (log: Line) => 
-        set({ logs: [...get().logs, log] }),
-    
-    setLogs: (logs: Line[]) => 
-        set({ logs }),
-    
-    clearLogs: () => 
-        set({ logs: [] }),
+
+    addLog: (log: Line) => set({ logs: [...get().logs, log] }),
+
+    setLogs: (logs: Line[]) => set({ logs }),
+
+    clearLogs: () => set({ logs: [] }),
 }));

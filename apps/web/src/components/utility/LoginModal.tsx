@@ -73,7 +73,6 @@ function LoginLeftPanel() {
 function LoginModalRight({ opensignInModal, setOpenSignInModal }: LoginModalProps) {
     const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
-    // FIX: track which provider is being signed in
     const [signingInProvider, setSigningInProvider] = useState<'GOOGLE' | 'GITHUB' | null>(null);
 
     async function handleSignIn(type: 'GOOGLE' | 'GITHUB') {

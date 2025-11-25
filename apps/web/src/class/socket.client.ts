@@ -1,11 +1,7 @@
-import { COMMAND, IncomingPayload, TerminalSocketData } from '@repo/types';
+import { COMMAND, IncomingPayload, WSServerIncomingPayload } from '@repo/types';
 
-export type MessageHandler = (message: ParsedIncomingMessage<IncomingPayload>) => void;
-export interface ParsedIncomingMessage<T> {
-    type: TerminalSocketData;
-    payload: T;
-}
-export interface ParsedOutgoingMessage<T> {
+export type MessageHandler = (message: WSServerIncomingPayload<IncomingPayload>) => void;
+export interface WSServerOutgoingPayload<T> {
     type: COMMAND;
     payload: T;
 }
@@ -20,7 +16,7 @@ export default class WebSocketClient {
     private reconnect_delay: number = 1000;
     private max_reconnect_delay: number = 30000;
     private persistent_reconnect_delay: number = 5000;
-    private handlers: Map<string, MessageHandler[]> = new Map();
+    private handlers: Set<MessageHandler> = new Set();
     private is_manually_closed: boolean = false;
 
     constructor(url: string, token: string) {
@@ -45,7 +41,9 @@ export default class WebSocketClient {
 
         this.ws.onmessage = (event: MessageEvent<string>) => {
             try {
-                const parsed_data: ParsedIncomingMessage<IncomingPayload> = JSON.parse(event.data);
+                const parsed_data: WSServerIncomingPayload<IncomingPayload> = JSON.parse(
+                    event.data,
+                );
                 this.handle_incoming_message(parsed_data);
             } catch (error) {
                 console.error('Failed to parse incoming WebSocket message:', event.data, error);
@@ -70,36 +68,19 @@ export default class WebSocketClient {
         };
     }
 
-    private handle_incoming_message(parsed_data: ParsedIncomingMessage<IncomingPayload>) {
-        const { type } = parsed_data;
-        const handlers = this.handlers.get(type);
-        if (handlers) {
-            handlers.forEach((handler) => handler(parsed_data));
-        }
+    private handle_incoming_message(parsed_data: WSServerIncomingPayload<IncomingPayload>) {
+        this.handlers.forEach((handler) => handler(parsed_data));
     }
 
-    public subscribe_to_handlers(type: string, handler: MessageHandler) {
-        if (!this.handlers.has(type)) {
-            this.handlers.set(type, []);
-        }
-        this.handlers.get(type)!.push(handler);
+    public subscribe(handler: MessageHandler) {
+        this.handlers.add(handler);
     }
 
-    public unsubscribe_to_handlers(type: string, handler: MessageHandler) {
-        const handler_list = this.handlers.get(type);
-        if (!handler_list) return;
-
-        const index = handler_list.indexOf(handler);
-        if (index !== -1) {
-            handler_list.splice(index, 1);
-        }
-
-        if (handler_list.length === 0) {
-            this.handlers.delete(type);
-        }
+    public unsubscribe(handler: MessageHandler) {
+        this.handlers.delete(handler);
     }
 
-    public send_message<T>(message: ParsedOutgoingMessage<T>) {
+    public send_message<T>(message: WSServerOutgoingPayload<T>) {
         if (this.is_connected && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify(message));
         }

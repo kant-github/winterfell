@@ -7,7 +7,7 @@ export async function fetch_codebase(contractId: string): Promise<FileContent[] 
     try {
         const { data } = await axios.get(`${env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/resource`);
         return data;
-    } catch(error) {
+    } catch (error) {
         console.error('Failed to fetch codebase', error);
         return null;
     }

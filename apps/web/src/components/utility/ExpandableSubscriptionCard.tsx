@@ -3,10 +3,8 @@ import { BillingPeriod, Plan } from './SubscriptionCard';
 import { Check } from 'lucide-react';
 import { Button } from '../ui/button';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import { cn } from '@/src/lib/utils';
 import OpacityBackground from './OpacityBackground';
-import Card from '../ui/Card';
 import { FaArrowLeft } from 'react-icons/fa';
 
 export default function ExpandableSubscriptionCard({

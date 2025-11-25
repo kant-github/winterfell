@@ -36,8 +36,6 @@ export default function GitCloneCard() {
             return toast.error('Please enter a repository name');
         }
         if (!contractId) {
-                
-            console.log('window url is: ', window.location.href);
             return toast.error('No contract found');
         }
 

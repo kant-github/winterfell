@@ -5,7 +5,7 @@ import { COMMAND } from '@repo/types';
 import { useTerminalLogStore } from '../store/code/useTerminalLogStore';
 import { useCommandHistoryStore } from '../store/code/useCommandHistoryStore';
 
-export function useTerminalLogic() {
+export function useTerminal() {
     const { addLog, setLogs } = useTerminalLogStore();
     const { sendSocketMessage } = useWebSocket();
     const { addCommand } = useCommandHistoryStore();
@@ -16,10 +16,9 @@ export function useTerminalLogic() {
             if (!trimmed) return;
 
             addCommand(trimmed);
-            addLog({ type: "command", text: trimmed });
+            addLog({ type: 'command', text: trimmed });
 
             switch (trimmed) {
-
                 case COMMAND_WRITER.CLEAR:
                     setLogs([]);
                     return;
@@ -28,37 +27,37 @@ export function useTerminalLogic() {
                 case COMMAND_WRITER.HOT_KEYS:
                 case COMMAND_WRITER.PLATFORM:
                 case COMMAND_WRITER.COMMANDS:
-                    addLog({ type: "command", text: CommandResponse[trimmed] });
+                    addLog({ type: 'command', text: CommandResponse[trimmed] });
                     return;
 
                 case COMMAND_WRITER.WINTERFELL_BUILD:
-                    addLog({ type: "client", text: CommandResponse[trimmed] });
+                    addLog({ type: 'client', text: CommandResponse[trimmed] });
                     sendSocketMessage(COMMAND.WINTERFELL_BUILD, trimmed);
                     return;
 
                 case COMMAND_WRITER.WINTERFELL_TEST:
-                    addLog({ type: "client", text: CommandResponse[trimmed] });
+                    addLog({ type: 'client', text: CommandResponse[trimmed] });
                     sendSocketMessage(COMMAND.WINTERFELL_TEST, trimmed);
                     return;
 
                 case COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET:
-                    addLog({ type: "client", text: CommandResponse[trimmed] });
+                    addLog({ type: 'client', text: CommandResponse[trimmed] });
                     sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_DEVNET, trimmed);
                     return;
 
                 case COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET:
-                    addLog({ type: "client", text: CommandResponse[trimmed] });
+                    addLog({ type: 'client', text: CommandResponse[trimmed] });
                     sendSocketMessage(COMMAND.WINTERFELL_DEPLOY_MAINNET, trimmed);
                     return;
 
                 default:
                     addLog({
-                        type: "error",
+                        type: 'error',
                         text: `winterfell: command not found: ${trimmed}. Try --help`,
                     });
             }
         },
-        [addCommand, sendSocketMessage, addLog, setLogs]
+        [addCommand, sendSocketMessage, addLog, setLogs],
     );
 
     return { handleCommand };

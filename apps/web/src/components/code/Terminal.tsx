@@ -8,14 +8,13 @@ import { IoIosClose } from 'react-icons/io';
 import { Button } from '../ui/button';
 import ToolTipComponent from '../ui/TooltipComponent';
 import { useTerminalResize } from '@/src/hooks/useTerminalResize';
-import { useTerminalLogic } from '@/src/hooks/useTerminalLogic';
 import { cn } from '@/src/lib/utils';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
-import { IncomingPayload, TerminalSocketData } from '@repo/types';
-import { ParsedIncomingMessage } from '@/src/class/socket.client';
+import { TerminalSocketData } from '@repo/types';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { Line } from '@/src/types/terminal_types';
 import { useCommandHistoryStore } from '@/src/store/code/useCommandHistoryStore';
+import { useTerminal } from '@/src/hooks/useTerminal';
 
 export default function Terminal() {
     const [showTerminal, setShowTerminal] = useState<boolean>(false);
@@ -25,23 +24,12 @@ export default function Terminal() {
     const inputRef = useRef<HTMLInputElement>(null);
     const { moveUp, moveDown, resetIndex } = useCommandHistoryStore();
     const { logs, addLog, clearLogs } = useTerminalLogStore();
-    const { isConnected, subscribeToHandler } = useWebSocket();
-    const { handleCommand } = useTerminalLogic();
+    const { isConnected } = useWebSocket();
+    const { handleCommand } = useTerminal();
 
     const { height, startResize } = useTerminalResize({
         onClose: () => setShowTerminal(false),
     });
-
-    useEffect(() => {
-        function handleIncoming(message: ParsedIncomingMessage<IncomingPayload>) {
-            const { line } = message.payload;
-            addLog({ type: message.type, text: line });
-        }
-
-        Object.values(TerminalSocketData).forEach((type) => {
-            subscribeToHandler(type, handleIncoming);
-        });
-    }, [subscribeToHandler, addLog]);
 
     useShortcuts({
         'meta+j': () => setShowTerminal((p) => !p),
@@ -66,7 +54,7 @@ export default function Terminal() {
             requestAnimationFrame(() => {
                 el.scrollTo({
                     top: el.scrollHeight,
-                    behavior: "smooth",
+                    behavior: 'smooth',
                 });
             });
         });
@@ -90,7 +78,6 @@ export default function Terminal() {
                 return 'File';
         }
     };
-
 
     function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
         if (e.ctrlKey && e.key === 'c') {
