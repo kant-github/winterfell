@@ -9,6 +9,7 @@ import { AIMessageChunk, MessageStructure } from "@langchain/core/messages";
 import StreamParser from "../../services/stream_parser";
 import { ChatRole, prisma } from "@repo/database";
 import GeneratorShape from "../../metadata/generator";
+import { Response } from "express";
 
 type planner = RunnableSequence<{
     user_instruction: string;
@@ -52,6 +53,7 @@ export default class Generator extends GeneratorShape {
     }
 
     public generate(
+        res: Response,
         chat: 'new' | 'old',
         user_instruction: string,
         model: MODEL,

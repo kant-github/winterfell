@@ -1,6 +1,7 @@
 import ObjectStore from '../class/object_store';
 import ContentGenerator from '../controllers/gen/content_generator';
 import { ContractServices } from '../generator/services/contract_services';
+import Generator from '../generator/temp/generator';
 import RazorpayGateway from '../payments/razorpay';
 import { GithubWorkerQueue } from '../queue/github_worker_queue';
 import ServerToOrchestratorQueue from '../queue/queue.redis';
@@ -11,6 +12,7 @@ export let razorpay: RazorpayGateway;
 export let server_orchestrator_queue: ServerToOrchestratorQueue;
 export let github_worker_queue: GithubWorkerQueue;
 export let contract_services: ContractServices;
+export let generator: Generator;
 
 export default function init_services() {
     contentGenerator = new ContentGenerator();
@@ -19,4 +21,5 @@ export default function init_services() {
     // server_orchestrator_queue = new ServerToOrchestratorQueue('server-to-orchestrator');
     github_worker_queue = new GithubWorkerQueue('github-push');
     contract_services = new ContractServices();
+    generator = new Generator();
 }

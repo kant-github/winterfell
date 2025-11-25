@@ -78,7 +78,8 @@ export const new_chat_coder_prompt = new PromptTemplate({
         and generate these files based on the plan
         {files_likely_affected}
 
-        and do follow this architecture of generation with the following order
+        and strictly follow this architecture of generation with the following order
+        you should not miss any stage or phase
 
         <stage>Generating Code</state>
 

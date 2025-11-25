@@ -2,6 +2,7 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { MODEL } from "../generator/types/model_types";
 import { Runnable, RunnableSequence } from "@langchain/core/runnables";
+import { Response } from "express";
 
 export default abstract class GeneratorShape {
 
@@ -11,6 +12,7 @@ export default abstract class GeneratorShape {
 
     /**
      * this is a user exposed method which starts the generation process of the content
+     * @param {Response} res
      * @param {'new' | 'old'} chat 
      * @param {string} user_instruction 
      * @param {MODEL} model 
@@ -18,6 +20,7 @@ export default abstract class GeneratorShape {
      * @param {Object[]} idl 
      */
     abstract generate(
+        res: Response,
         chat: 'new' | 'old',
         user_instruction: string,
         model: MODEL,
