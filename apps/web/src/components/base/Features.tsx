@@ -77,10 +77,7 @@ export default function Features() {
                     viewBox="0 0 100 20"
                     preserveAspectRatio="none"
                 >
-                    <path
-                        d="M0 0 L0 0 L40 0 L45 10 L55 10 L60 0 L100 0 L100 0 Z"
-                        fill='#'
-                    />
+                    <path d="M0 0 L0 0 L40 0 L45 10 L55 10 L60 0 L100 0 L100 0 Z" fill="#" />
                 </svg>
 
                 <div className="absolute top-0 left-0 w-full h-full bg-primary z-10"></div>
