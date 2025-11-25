@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { MeshGradient, DotOrbit } from '@paper-design/shaders-react';
 import { Check } from 'lucide-react';
 import { LiaServicestack } from 'react-icons/lia';
 import ExpandableSubscriptionCard from './ExpandableSubscriptionCard';
