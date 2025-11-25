@@ -323,6 +323,7 @@ export default class StreamParser {
             case 'generating': {
                 this.currentPhase = phase;
                 const data: GeneratingData = { phase: 'editing file' };
+                this.emit(STAGE.GENERATING_CODE, { stage: 'Generating Code' }, systemMessage),
                 this.emit(PHASE_TYPES.GENERATING, data, systemMessage);
                 break;
             }

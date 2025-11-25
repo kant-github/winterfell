@@ -13,8 +13,8 @@ import githubJobStatusController from '../controllers/github-deploy-controller/g
 import continueChatController from '../controllers/chat-controller/continueChatController';
 import getChatController from '../controllers/chat-controller/getChatController';
 import { createContractReview } from '../controllers/review/create_contract_review';
-import contractLimit from '../middlewares/middleware.contractLimit';
 import generateContractController from '../controllers/gen/generateContractController';
+import contractLimit from '../middlewares/middleware.contractLimit';
 
 const router: Router = Router();
 
@@ -26,12 +26,12 @@ router.get('/health', async (_req: Request, res: Response) => {
 });
 
 // code-routes
-router.post('/generate', authMiddleware, contractLimit, generateContractController);
+router.post('/generate', authMiddleware, contractLimit(true), generateContractController);
 router.post('/new', authMiddleware, startChatController);
 router.post('/continue', authMiddleware, continueChatController);
 router.post('/contract/export', authMiddleware, githubCodePushController);
 router.get('/contract/push-status', githubJobStatusController);
-router.post('/contract/get-chat', authMiddleware, getChatController);
+router.post('/contract/get-chat', authMiddleware, contractLimit(false), getChatController);
 
 // file-routes
 router.get('/files/:contractId', authMiddleware, getFilesController);
@@ -50,5 +50,13 @@ router.get('/subscription/get-plan', authMiddleware, getUserPlanController);
 
 // reviews
 router.post('/review', authMiddleware, createContractReview);
+
+// sign-in
+// health
+// contract
+// github
+// subscription
+// review
+// command
 
 export default router;

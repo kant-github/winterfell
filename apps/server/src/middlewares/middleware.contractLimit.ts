@@ -1,64 +1,72 @@
-import { PlanType, prisma } from '@repo/database';
-import { NextFunction, Request, Response } from 'express';
-import PLANS from '../configs/config.plans';
+import { PlanType, prisma } from "@repo/database";
+import { NextFunction, Request, Response } from "express";
+import PLANS from "../configs/config.plans";
 
-export default async function contractLimit(req: Request, res: Response, next: NextFunction) {
-    try {
-        const user = req.user;
-        if (!user) {
-            res.status(401).json({
-                success: false,
-                message: 'Unauthorized',
+export default function contractLimit(isCreating = false) {
+    return async function (req: Request, res: Response, next: NextFunction) {
+        try {
+            const user = req.user;
+            if (!user) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized",
+                });
+            }
+
+            const existing_user = await prisma.user.findUnique({
+                where: { id: user.id },
+                include: {
+                    subscription: true,
+                },
             });
-            return;
-        }
 
-        const existing_user = await prisma.user.findUnique({
-            where: {
-                id: user.id,
-            },
-            include: {
-                subscription: true,
-                contracts: true,
-            },
-        });
+            if (!existing_user) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized",
+                });
+            }
 
-        if (!existing_user) {
-            res.status(401).json({
-                success: false,
-                message: 'Unauthorized',
+            // if user is not createing a new contract then always allow
+            if (!isCreating) {
+                return next();
+            }
+
+            const sub = existing_user.subscription;
+
+            const plan = sub?.plan || PlanType.FREE;
+
+            const start = sub?.start || new Date(0);
+            const end = sub?.end || new Date(8640000000000000);
+
+            // count contracts ONLY in current billing cycle
+            const total_created_contracts = await prisma.contract.count({
+                where: {
+                    userId: user.id,
+                    createdAt: {
+                        gte: start, // greater than equal to
+                        lte: end, // less than equal to
+                    },
+                },
             });
-            return;
-        }
 
-        const total_created_contracts = existing_user.contracts.length;
-        const current_plan = existing_user.subscription?.plan;
+            const limit = PLANS[plan].limit;
 
-        // and this will also not proceed with second chat in same contract
-        // there is a problem, what if the user refreshes the subscription, here he will be blocked after 10 contracts
-        // but after re-payment of his subscription he should be allowed to create more
-        if (
-            ((!current_plan || current_plan === PlanType.FREE) &&
-                total_created_contracts >= PLANS.FREE.limit) ||
-            (current_plan === PlanType.PREMIUM && total_created_contracts >= PLANS.PREMIUM.limit) ||
-            (current_plan === PlanType.PREMIUM_PLUS &&
-                total_created_contracts >= PLANS.PREMIUM_PLUS.limit)
-        ) {
-            res.status(423).json({
-                success: false,
-                message: 'contract limit reached',
-                goBack: true,
-            });
-            return;
-        } else {
+            if (total_created_contracts >= limit) {
+                return res.status(423).json({
+                    success: false,
+                    message: "Contract limit reached for this billing cycle.",
+                    goBack: true,
+                });
+            }
+
             next();
+        } catch (error) {
+            console.error("Error in contract limit:", error);
+            res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
         }
-    } catch (error) {
-        console.error('Error in contract limit middleware: ', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-        });
-        return;
-    }
+    };
 }

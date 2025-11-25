@@ -47,7 +47,7 @@ export default function EditorSidePanel() {
                 setCollapsechat(!collapseChat)
                 handleToggleSidebar(SidePanelValues.CHAT)
             },
-            tooltip: 'GitHub Repository',
+            tooltip: 'Agent Sessions',
         },
     ];
 
