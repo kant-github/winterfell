@@ -2,9 +2,9 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [main]
+    branches: [prod]
   pull_request:
-    branches: [main]
+    branches: [prod]
 
 env:
   DOCKER_IMAGE_NAME: winterfellhub/winterfell-server

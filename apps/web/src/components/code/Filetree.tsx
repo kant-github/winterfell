@@ -87,21 +87,25 @@ export default function FileTree() {
                     }}
                     renderItemTitle={({ item, context }) => (
                         <div className="flex items-center gap-2">
-                            {item.isFolder ? (
-                                context.isExpanded ? (
-                                    <AiFillFolderOpen size={16} className="text-[#317FFF]" />
+                            <div className="h-5 w-5 flex items-center justify-center shrink-0 scale-100">
+                                {item.isFolder ? (
+                                    context.isExpanded ? (
+                                        <AiFillFolderOpen size={16} className="text-[#317FFF]" />
+                                    ) : (
+                                        <AiFillFolder size={16} className="text-[#317FFF]" />
+                                    )
                                 ) : (
-                                    <AiFillFolder size={16} className="text-[#317FFF]" />
-                                )
-                            ) : (
-                                <FileIcon
-                                    filename={item.data}
-                                    size={14}
-                                    className="text-neutral-400"
-                                />
-                            )}
-                            <span className="w-full text-sm truncate">{item.data}</span>
+                                    <FileIcon
+                                        filename={item.data}
+                                        size={14}
+                                        className="text-neutral-400"
+                                    />
+                                )}
+                            </div>
+
+                            <span className="w-full text-sm truncate scale-100">{item.data}</span>
                         </div>
+
                     )}
                 >
                     <div className="h-full">
