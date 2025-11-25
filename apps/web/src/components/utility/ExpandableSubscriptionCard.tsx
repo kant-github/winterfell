@@ -125,7 +125,7 @@ export default function ExpandableSubscriptionCard({
     };
 
     return (
-        <OpacityBackground className='bg-dark-base/30' onBackgroundClick={onClose}>
+        <OpacityBackground className="bg-dark-base/30" onBackgroundClick={onClose}>
             <div className="relative z-100 w-full max-w-7xl max-h-[80vh] h-full flex items-center justify-center">
                 <Button
                     onClick={onClose}

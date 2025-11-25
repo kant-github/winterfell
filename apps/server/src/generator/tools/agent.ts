@@ -49,11 +49,11 @@ export default class Agent {
      */
     public async final_call(
         contractId: string = '66e3dab4-cc7f-49de-9b64-c5b0c007ad58',
-        userPrompt: string = 'create a counter contract with only increment.'
+        userPrompt: string = 'create a counter contract with only increment.',
     ) {
         try {
             console.log('Starting AI call and response...');
-            
+
             const result = await this.agent_builder.invoke({
                 messages: [
                     {
@@ -204,10 +204,7 @@ export default class Agent {
         }
 
         // Check for END marker
-        if (
-            typeof last_message?.content === 'string' &&
-            last_message.content.includes('<END>')
-        ) {
+        if (typeof last_message?.content === 'string' && last_message.content.includes('<END>')) {
             return '__end__';
         }
 

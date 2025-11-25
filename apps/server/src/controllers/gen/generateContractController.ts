@@ -1,12 +1,11 @@
-import { PlanType, prisma } from "@repo/database";
-import { Request, Response } from "express";
-import { generator } from "../../services/init";
-import { MODEL } from "../../generator/types/model_types";
-
+import { PlanType, prisma } from '@repo/database';
+import { Request, Response } from 'express';
+import { generator } from '../../services/init';
+import { MODEL } from '../../generator/types/model_types';
+import ResponseWriter from '../../class/response_writer';
 
 export default async function generateContractController(req: Request, res: Response) {
     try {
-
         console.log('generate contract controller hit');
         const user = req.user;
         if (!user) {
@@ -23,7 +22,7 @@ export default async function generateContractController(req: Request, res: Resp
 
         console.log(body);
 
-        if(model === MODEL.CLAUDE) {
+        if (model === MODEL.CLAUDE) {
             const existing_user = await prisma.user.findUnique({
                 where: {
                     id: user.id,
@@ -34,15 +33,13 @@ export default async function generateContractController(req: Request, res: Resp
                 },
             });
 
-            const is_premium_user = 
+            const is_premium_user =
                 existing_user?.subscription?.plan === PlanType.PREMIUM ||
                 existing_user?.subscription?.plan === PlanType.PREMIUM_PLUS;
 
-            if(!is_premium_user) {
-                res.status(403).json({
-                    success: false,
-                    message: 'you are not subscribed to use premium feature.',
-                });
+            if (!is_premium_user) {
+                ResponseWriter.unauthorized(res, 'you are not subscribed to use premium feature.');
+                return;
             }
         }
 
@@ -53,7 +50,7 @@ export default async function generateContractController(req: Request, res: Resp
             },
             select: {
                 messages: true,
-            }
+            },
         });
 
         if (existing_contract) {
@@ -77,15 +74,8 @@ export default async function generateContractController(req: Request, res: Resp
                 },
             });
 
-            generator.generate(
-                res,
-                'new',
-                instruction,
-                model || MODEL.GEMINI,
-                contract.id,
-            )
+            generator.generate(res, 'new', instruction, model || MODEL.GEMINI, contract.id);
         }
-
     } catch (error) {
         console.error('Error in generate contract controller: ', error);
         if (!res.headersSent) {

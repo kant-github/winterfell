@@ -78,7 +78,6 @@ function LoginModalRight({ opensignInModal, setOpenSignInModal }: LoginModalProp
 
     async function handleSignIn(type: 'GOOGLE' | 'GITHUB') {
         if (!turnstileToken) {
-            alert('Please complete the security verification');
             return;
         }
 
@@ -92,7 +91,6 @@ function LoginModalRight({ opensignInModal, setOpenSignInModal }: LoginModalProp
             });
         } catch (error) {
             console.error('Sign in error:', error);
-            alert('An error occurred during sign in. Please try again.');
         } finally {
             setSigningInProvider(null);
         }

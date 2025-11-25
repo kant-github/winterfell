@@ -11,7 +11,6 @@ interface LogoutModalProps {
 
 export default function LogoutModal({ openLogoutModal, setOpenLogoutModal }: LogoutModalProps) {
     async function LogoutHandler() {
-        alert('singiwni');
         await signOut({
             callbackUrl: '/',
             redirect: true,
@@ -21,9 +20,7 @@ export default function LogoutModal({ openLogoutModal, setOpenLogoutModal }: Log
     return (
         <div>
             {openLogoutModal && (
-                <OpacityBackground
-                    onBackgroundClick={() => setOpenLogoutModal(false)}
-                >
+                <OpacityBackground onBackgroundClick={() => setOpenLogoutModal(false)}>
                     <div
                         onClick={(e) => e.stopPropagation()}
                         onMouseDown={(e) => e.stopPropagation()}
@@ -32,8 +29,8 @@ export default function LogoutModal({ openLogoutModal, setOpenLogoutModal }: Log
                             <div className="space-y-2">
                                 <h2 className="text-2xl font-semibold text-light">Log out ?</h2>
                                 <p className="text-sm text-neutral-400 font-normal tracking-wide">
-                                    You will be logged out of your session and redirected to the Sign in
-                                    Page.
+                                    You will be logged out of your session and redirected to the
+                                    Sign in Page.
                                 </p>
                             </div>
 

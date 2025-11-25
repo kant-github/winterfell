@@ -33,12 +33,11 @@ export default class Tool {
     );
 
     public static get_file = tool(
-        async ({ file_path, contract_id }: { file_path: string, contract_id: string }) => {
-            
+        async ({ file_path, contract_id }: { file_path: string; contract_id: string }) => {
             const contract_files = await objectStore.get_resource_files(contract_id);
-            const file = contract_files.find(f => f.path === file_path);
+            const file = contract_files.find((f) => f.path === file_path);
 
-            if(!file) throw new Error('file not found');
+            if (!file) throw new Error('file not found');
             return file.content;
         },
         {
