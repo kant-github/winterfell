@@ -36,6 +36,8 @@ export default function GitCloneCard() {
             return toast.error('Please enter a repository name');
         }
         if (!contractId) {
+                
+            console.log('window url is: ', window.location.href);
             return toast.error('No contract found');
         }
 
@@ -57,6 +59,7 @@ export default function GitCloneCard() {
 
             if (response.data.success) {
                 toast.success('Code exported to GitHub successfully!');
+                toast.success(response.data);
                 setRepoName('');
             } else {
                 toast.error(response.data.message || 'Failed to export');

@@ -1,70 +1,51 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { MdDelete, MdTerminal } from 'react-icons/md';
-import { useCodeEditor } from '@/src/store/code/useCodeEditor';
-import { useParams } from 'next/navigation';
-import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { useCommandHistoryStore } from '@/src/store/user/useCommandHistoryStore';
+import { MdTerminal } from 'react-icons/md';
+import { useTerminalLogStore } from '@/src/store/code/useTerminalLogStore';
 import useShortcuts from '@/src/hooks/useShortcut';
 import { PiBroomFill, PiTerminal } from 'react-icons/pi';
 import { IoIosClose } from 'react-icons/io';
 import { Button } from '../ui/button';
 import ToolTipComponent from '../ui/TooltipComponent';
 import { useTerminalResize } from '@/src/hooks/useTerminalResize';
-import { useTerminalLogic } from '@/src/hooks/useTerminal';
-import { Line } from '@/src/types/terminal_types';
+import { useTerminalLogic } from '@/src/hooks/useTerminalLogic';
 import { cn } from '@/src/lib/utils';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
 import { IncomingPayload, TerminalSocketData } from '@repo/types';
 import { ParsedIncomingMessage } from '@/src/class/socket.client';
-import useResize from '@/src/hooks/useResize';
+import { useCodeEditor } from '@/src/store/code/useCodeEditor';
+import { Line } from '@/src/types/terminal_types';
+import { useCommandHistoryStore } from '@/src/store/code/useCommandHistoryStore';
 
 export default function Terminal() {
     const [showTerminal, setShowTerminal] = useState<boolean>(false);
-    const [isRunning, setIsRunning] = useState(false);
+    const [currentInput, setCurrentInput] = useState<string>('');
+    const { currentFile } = useCodeEditor();
     const outputRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const { currentFile } = useCodeEditor();
-    const params = useParams();
-    const contractId = params.contractId as string;
-    const { session } = useUserSessionStore();
-    const { addCommand, moveUp, moveDown, resetIndex } = useCommandHistoryStore();
+    const { moveUp, moveDown, resetIndex } = useCommandHistoryStore();
+    const { logs, addLog, clearLogs } = useTerminalLogStore();
     const { isConnected, subscribeToHandler } = useWebSocket();
-    const { dimension, startResize } = useResize({
-        side: 'height',
-        min: 100,
-        max: 600,
+    const { handleCommand } = useTerminalLogic();
+
+    const { height, startResize } = useTerminalResize({
         onClose: () => setShowTerminal(false),
     });
-
-    const { activeTab, currentTerminal, handleCommand, updateInput, updateLogs, deleteTerminal } =
-        useTerminalLogic({
-            contractId,
-            token: session?.user?.token,
-            addCommand,
-            setIsRunning,
-        });
 
     useEffect(() => {
         function handleIncoming(message: ParsedIncomingMessage<IncomingPayload>) {
             const { line } = message.payload;
-
-            if (message.type === TerminalSocketData.COMPLETED) {
-                setIsRunning(false);
-            }
-
-            updateLogs(activeTab, [...currentTerminal.logs, { type: message.type, text: line }]);
+            addLog({ type: message.type, text: line });
         }
 
         Object.values(TerminalSocketData).forEach((type) => {
             subscribeToHandler(type, handleIncoming);
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab]);
+    }, [subscribeToHandler, addLog]);
 
     useShortcuts({
-        'meta+j': () => setShowTerminal((prev) => !prev),
-        'ctrl+j': () => setShowTerminal((prev) => !prev),
+        'meta+j': () => setShowTerminal((p) => !p),
+        'ctrl+j': () => setShowTerminal((p) => !p),
     });
 
     const Prompt = () => (
@@ -74,43 +55,67 @@ export default function Terminal() {
     );
 
     useEffect(() => {
-        if (showTerminal && !isRunning) inputRef.current?.focus();
-    }, [showTerminal, activeTab, isRunning]);
+        if (showTerminal) inputRef.current?.focus();
+    }, [showTerminal]);
 
     useEffect(() => {
-        outputRef.current?.scrollTo({
-            top: outputRef.current.scrollHeight,
-            behavior: 'smooth',
+        const el = outputRef.current;
+        if (!el) return;
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                el.scrollTo({
+                    top: el.scrollHeight,
+                    behavior: "smooth",
+                });
+            });
         });
-    }, [currentTerminal.logs]);
+    }, [logs]);
+
+    const handleCurrentFileExtension = () => {
+        if (!currentFile) return 'no selected file.';
+        const currentFileNameArray = currentFile.name.split('.');
+        const extension = currentFileNameArray[currentFileNameArray.length - 1];
+        switch (extension) {
+            case 'rs':
+                return 'Rust';
+            case 'ts':
+                return 'TypeScript';
+            case 'json':
+                return 'JSON';
+            case 'toml':
+                return 'TOML';
+            default:
+                if (extension.endsWith('ignore')) return 'ignore';
+                return 'File';
+        }
+    };
+
 
     function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (isRunning) return;
-
         if (e.ctrlKey && e.key === 'c') {
             e.preventDefault();
-            updateLogs(activeTab, [...currentTerminal.logs, { type: 'command', text: '^C' }]);
-            setIsRunning(false);
+            addLog({ type: 'command', text: '^C' });
             return;
         }
 
         if (e.key === 'Enter') {
             e.preventDefault();
-            handleCommand(currentTerminal.input);
-            updateInput(activeTab, '');
+            handleCommand(currentInput);
+            setCurrentInput('');
             resetIndex();
         }
 
         if (e.key === 'ArrowUp') {
             e.preventDefault();
             const prevCommand = moveUp();
-            if (prevCommand !== null) updateInput(activeTab, prevCommand);
+            if (prevCommand !== null) setCurrentInput(prevCommand);
         }
 
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            const nextCommand = moveDown();
-            updateInput(activeTab, nextCommand ?? '');
+            const next = moveDown();
+            setCurrentInput(next ?? '');
         }
     }
 
@@ -138,36 +143,19 @@ export default function Terminal() {
                             <Prompt /> <span className="ml-2">{line.text}</span>
                         </>
                     ) : (
-                        <span className={cn('ml-6 font-semibold', colorClass)}>{line.text}</span>
+                        <span className={cn('ml-6', colorClass)}>{line.text}</span>
                     )}
                 </div>
             );
         });
-    const handleCurrentFileExtension = () => {
-        if (!currentFile) return 'no selected file.';
-        const currentFileNameArray = currentFile.name.split('.');
-        const extension = currentFileNameArray[currentFileNameArray.length - 1];
-        switch (extension) {
-            case 'rs':
-                return 'Rust';
-            case 'ts':
-                return 'TypeScript';
-            case 'json':
-                return 'JSON';
-            case 'toml':
-                return 'TOML';
-            default:
-                if (extension.endsWith('ignore')) return 'ignore';
-                return 'File';
-        }
-    };
+
     return (
         <>
             {showTerminal && (
                 <div
-                    className="absolute bottom-6 left-0 right-0 bg-dark-base border-t border-neutral-800 text-neutral-200 font-mono shadow-lg flex flex-col z-999999 text-[12px] tracking-wider"
+                    className="absolute bottom-6 left-0 right-0 bg-dark-base border-t border-neutral-800 text-neutral-200 font-mono flex flex-col z-999999 text-[12px]"
                     style={{
-                        height: `min(${dimension}px, calc(100% - 6rem))`,
+                        height: `min(${height}px, calc(100% - 6rem))`,
                         maxHeight: 'calc(100% - 6rem)',
                     }}
                 >
@@ -176,45 +164,36 @@ export default function Terminal() {
                             e.preventDefault();
                             startResize();
                         }}
-                        className="h-0.5 w-full cursor-ns-resize bg-neutral-800 hover:bg-blue-500/20 active:bg-blue-500/40 transition-colors shrink-0"
+                        className="h-0.5 w-full cursor-ns-resize bg-neutral-800"
                     />
 
-                    <div className="text-light/50 py-1 px-4 flex justify-between items-center select-none bg-dark-base shrink-0">
-                        <Button
-                            disabled
-                            className="tracking-[2px] p-0 text-[11px] h-fit w-fit bg-transparent font-sans text-light/90 rounded-none"
-                        >
+                    <div className="text-light/50 py-1 px-4 flex justify-between items-center select-none bg-dark-base">
+                        <Button disabled className="tracking-[2px] p-0 text-[11px] bg-transparent">
                             TERMINAL
                         </Button>
-                        <div className="flex gap-x-1 items-center">
-                            <Button className="h-fit w-auto bg-transparent hover:bg-dark p-0 rounded cursor-pointer text-light/60 items-center">
+
+                        <div className="flex gap-0 items-center">
+                            <Button className="w-auto bg-transparent hover:bg-dark p-0 rounded cursor-pointer text-light/60 items-center">
                                 <PiTerminal className="size-4" />
                                 <span className="text-xs font-sans tracking-wide leading-0">
                                     winter
                                 </span>
                             </Button>
-                            <ToolTipComponent content="kill terminal">
-                                <Button
-                                    onClick={() => deleteTerminal(activeTab)}
-                                    className="h-fit w-0 bg-transparent hover:bg-dark p-0.5 rounded cursor-pointer"
-                                >
-                                    <MdDelete className="size-4 text-light/60" />
-                                </Button>
-                            </ToolTipComponent>
-
                             <ToolTipComponent content="clear">
                                 <Button
-                                    onClick={() => updateLogs(activeTab, [])}
-                                    className="h-fit w-0 bg-transparent hover:bg-dark p-0.5 rounded cursor-pointer"
+                                    onClick={clearLogs}
+                                    size={'mini'}
+                                    className="bg-transparent hover:bg-dark rounded"
                                 >
-                                    <PiBroomFill className="size-3 text-light/70" />
+                                    <PiBroomFill className="size-3 text-light/70 " />
                                 </Button>
                             </ToolTipComponent>
 
                             <ToolTipComponent content="close">
                                 <Button
                                     onClick={() => setShowTerminal(false)}
-                                    className="h-fit w-0 bg-transparent hover:bg-dark p-0.5 rounded cursor-pointer"
+                                    size={'mini'}
+                                    className="bg-transparent hover:bg-dark rounded"
                                 >
                                     <IoIosClose className="size-5 text-light/70" />
                                 </Button>
@@ -222,28 +201,26 @@ export default function Terminal() {
                         </div>
                     </div>
 
-                    <div className="flex flex-1 min-h-0 overflow-hidden">
+                    <div className="flex flex-1 overflow-hidden">
                         <div
                             ref={outputRef}
-                            onClick={() => !isRunning && inputRef.current?.focus()}
+                            onClick={() => inputRef.current?.focus()}
                             className="flex-1 cursor-text overflow-y-auto px-3 py-2 text-light/80 flex flex-col"
                         >
-                            {renderLines(currentTerminal.logs)}
+                            {renderLines(logs)}
 
-                            {!isRunning && (
-                                <div className="flex mt-1">
-                                    <Prompt />
-                                    <input
-                                        aria-label="terminal"
-                                        ref={inputRef}
-                                        type="text"
-                                        value={currentTerminal.input}
-                                        onChange={(e) => updateInput(activeTab, e.target.value)}
-                                        onKeyDown={handleInputKeyDown}
-                                        className="outline-none bg-transparent text-light/80 caret-green-400 ml-2 flex-1"
-                                    />
-                                </div>
-                            )}
+                            <div className="flex mt-1">
+                                <Prompt />
+                                <input
+                                    aria-label="terminal"
+                                    ref={inputRef}
+                                    type="text"
+                                    value={currentInput}
+                                    onChange={(e) => setCurrentInput(e.target.value)}
+                                    onKeyDown={handleInputKeyDown}
+                                    className="outline-none bg-transparent text-light/80 ml-2 flex-1"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

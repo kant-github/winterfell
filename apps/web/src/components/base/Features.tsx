@@ -72,6 +72,14 @@ export default function Features() {
             style={{ height: '350vh' }}
         >
             <div className="sticky top-0 w-screen h-screen flex flex-col items-center justify-start pt-26 px-4 md:px-10 gap-x-16 overflow-hidden rounded-[4px]">
+                {/* <svg
+                    className="absolute top-0 left-0 w-full h-16 z-20 "
+                    viewBox="0 0 100 20"
+                    preserveAspectRatio="none"
+                >
+                    <path d="M0 0 L0 0 L40 0 L42 10 58 10 L60 0 L100 0 L100 0 Z" fill="#" />
+                </svg> */}
+
                 <div className="absolute top-0 left-0 w-full h-full bg-primary z-10"></div>
 
                 <div className="w-full md:max-w-[60%] md:text-5xl text-lg sm:text-2xl font-bold tracking-wider text-[#FDF9F0] md:leading-[1.2] relative text-center z-30">

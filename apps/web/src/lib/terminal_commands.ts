@@ -51,7 +51,7 @@ export enum COMMAND_WRITER {
 }
 
 export const CommandResponse: Record<COMMAND_WRITER, string> = {
-    [COMMAND_WRITER.CLEAR]: 'no clear action',
+    [COMMAND_WRITER.CLEAR]: '',
     [COMMAND_WRITER.HELP]: helpResponse,
     [COMMAND_WRITER.HOT_KEYS]: hotKeysResponse,
     [COMMAND_WRITER.PLATFORM]: platformResponse,

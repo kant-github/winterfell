@@ -1,7 +1,7 @@
 import { TerminalSocketData } from '@repo/types';
 
 export interface Line {
-    type: 'command' | TerminalSocketData;
+    type: 'command' | TerminalSocketData | 'client' | 'error';
     text: string;
 }
 

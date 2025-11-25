@@ -12,19 +12,19 @@ export default async function githubCodePushController(req: Request, res: Respon
         return;
     }
 
-    const { repo_name, contract_id, hasGithub } = req.body;
-
-    if (!hasGithub || hasGithub === null) {
-        ResponseWriter.unauthorized(res, 'GitHub authentication required');
-        return;
-    }
+    const { repo_name, contract_id } = req.body;
 
     const user = await prisma.user.findUnique({
         where: { id: user_id },
     });
 
-    if (!user || !user.githubAccessToken) {
-        ResponseWriter.not_found(res, 'Github authentication failed.');
+    if (!user) {
+        ResponseWriter.unauthorized(res, 'User not found');
+        return;
+    }
+
+    if (!user.githubAccessToken) {
+        ResponseWriter.not_found(res, 'Github authentication required.');
         return;
     }
 
