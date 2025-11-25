@@ -38,7 +38,6 @@ export default function SidePanel() {
                 maxWidth: 'calc(100% - 6rem)',
             }}
         >
-            <div className="w-[3px] cursor-ew-resize bg-neutral-800" onMouseDown={startResize} />
             <div className="flex-1 flex-col h-full select-none cursor-default ">
                 <div className="w-full h-full ">{renderSidePanels()}</div>
             </div>

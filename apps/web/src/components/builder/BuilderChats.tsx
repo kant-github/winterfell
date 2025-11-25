@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
-import { GENERATE_CONTRACT, NEW_CHAT_URL } from '@/routes/api_routes';
+import { GENERATE_CONTRACT } from '@/routes/api_routes';
 import {
     FILE_STRUCTURE_TYPES,
     FileContent,
@@ -44,18 +44,13 @@ export default function BuilderChats() {
 
     useEffect(() => {
         if (hasInitialized.current) return;
-        hasInitialized.current = true;
-
-        const initialMessage = messages.find(
-            (msg) => msg.contractId === contractId && msg.role === 'USER',
-        );
-        if (initialMessage) {
-            startChat(initialMessage.content);
+        if (messages.length === 1 && messages[0].role === 'USER' && messages[0].contractId === contractId) {
+            hasInitialized.current = true;
+            startChat(messages[0].content);
             setContractId(contractId);
         }
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [contractId]);
+    }, [contractId, messages.length]);
 
     async function startChat(message: string) {
         try {

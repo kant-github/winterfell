@@ -68,8 +68,8 @@ export default function ExpandableSubscriptionCard({
                         </span>
                     </div>
 
-                    {/* Toggle */}
-                    <div className="relative w-[90px] h-6 border rounded border-neutral-800 bg-dark-base/80 p-1 flex items-center justify-between text-[10px]">
+
+                    <div className="relative w-[90px] h-6 border rounded-[5.5px] border-neutral-800 bg-dark-base/80 flex items-center justify-between text-[10px]">
                         <motion.div
                             className="absolute h-[18px] w-[39px] rounded-[3px] bg-light"
                             animate={{ left: billing === 'MONTHLY' ? 4 : 46 }}
@@ -79,7 +79,7 @@ export default function ExpandableSubscriptionCard({
                         <div
                             onClick={() => setBilling('MONTHLY')}
                             className={cn(
-                                'z-10 w-[42px] text-center cursor-pointer transition-colors',
+                                'z-10 w-[45px] text-center cursor-pointer transition-colors',
                                 billing === 'MONTHLY' ? 'text-dark-base' : 'text-light',
                             )}
                         >
@@ -89,7 +89,7 @@ export default function ExpandableSubscriptionCard({
                         <div
                             onClick={() => setBilling('YEARLY')}
                             className={cn(
-                                'z-10 w-[42px] text-center cursor-pointer transition-colors',
+                                'z-10 w-[45px] text-center cursor-pointer transition-colors',
                                 billing === 'YEARLY' ? 'text-dark-base' : 'text-light',
                             )}
                         >
@@ -125,9 +125,10 @@ export default function ExpandableSubscriptionCard({
     };
 
     return (
-        <OpacityBackground className="bg-dark-base/30" onBackgroundClick={onClose}>
-            <div className="relative z-100 w-full max-w-7xl max-h-[80vh] h-full flex items-center justify-center">
+        <OpacityBackground className="bg-dark-base/30 z-100" onBackgroundClick={onClose}>
+            <div className="relative z-100 w-fit flex items-center justify-center">
                 <Button
+                variant={'ghost'}
                     onClick={onClose}
                     className="absolute -top-12 left-0 text-neutral-400 hover:text-white flex items-center gap-2"
                 >

@@ -18,7 +18,7 @@ export default function GithubPanel() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-full w-full text-light/90">
+        <div className="flex flex-col items-center justify-start h-full w-full text-light/90">
             <div className="flex flex-col items-center gap-y-4 px-5 py-6">
                 <PiGithubLogoFill size={48} />
                 <h2 className="text-lg font-semibold">Connect your GitHub</h2>
