@@ -32,7 +32,7 @@ export default class AgentStreamParser {
 
         for (const line of lines) {
             const trimmed = line.trim();
-            
+
             // Skip empty lines when not in code block
             if (!trimmed && !this.insideCodeBlock) continue;
 
@@ -49,7 +49,7 @@ export default class AgentStreamParser {
             if (contextMatch && !this.insideCodeBlock) {
                 this.context = contextMatch[1].trim();
                 console.log(chalk.red('Context:'), this.context);
-                
+
                 // Save context to database
                 try {
                     await prisma.message.create({
@@ -99,7 +99,9 @@ export default class AgentStreamParser {
                             path: this.currentFile,
                             content: content,
                         });
-                        console.log(chalk.blue(`✓ Saved: ${this.currentFile} (${content.length} chars)`));
+                        console.log(
+                            chalk.blue(`✓ Saved: ${this.currentFile} (${content.length} chars)`),
+                        );
                     }
                     this.insideCodeBlock = false;
                     this.currentCodeBlock = '';
@@ -149,11 +151,11 @@ export default class AgentStreamParser {
     } {
         const totalLines = this.generatedFiles.reduce(
             (sum, file) => sum + file.content.split('\n').length,
-            0
+            0,
         );
         const totalCharacters = this.generatedFiles.reduce(
             (sum, file) => sum + file.content.length,
-            0
+            0,
         );
 
         return {

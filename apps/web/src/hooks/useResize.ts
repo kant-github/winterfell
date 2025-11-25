@@ -1,5 +1,5 @@
-"use client";
-import { useCallback, useEffect, useState } from "react";
+'use client';
+import { useCallback, useEffect, useState } from 'react';
 
 interface useResizeProps {
     side: 'height' | 'width';
@@ -9,30 +9,29 @@ interface useResizeProps {
 }
 
 export default function useResize({ side, min, max, onClose }: useResizeProps) {
-
     const [dimension, setDimension] = useState<number>(min);
     const [isResizing, setIsResizing] = useState<boolean>(false);
 
     const startResize = useCallback(() => {
-            setIsResizing(true);
+        setIsResizing(true);
     }, []);
 
     useEffect(() => {
-
         const doResize = (e: MouseEvent) => {
-            if(!isResizing) return;
-            const newDimension = side === 'height' ? (window.innerHeight - e.clientY) : (window.innerWidth - e.clientX)
-            if(newDimension < 50) {
+            if (!isResizing) return;
+            const newDimension =
+                side === 'height' ? window.innerHeight - e.clientY : window.innerWidth - e.clientX;
+            if (newDimension < 50) {
                 onClose();
                 setIsResizing(false);
                 return;
             }
-            if(newDimension > min && newDimension < max) setDimension(newDimension);
-        }
+            if (newDimension > min && newDimension < max) setDimension(newDimension);
+        };
 
         const stopResize = () => setIsResizing(false);
 
-        if(isResizing) {
+        if (isResizing) {
             window.addEventListener('mousemove', doResize);
             window.addEventListener('mouseup', stopResize);
         }
@@ -40,8 +39,7 @@ export default function useResize({ side, min, max, onClose }: useResizeProps) {
         return () => {
             window.removeEventListener('mousemove', doResize);
             window.removeEventListener('mouseup', stopResize);
-        }
-
+        };
     }, [isResizing, onClose]);
 
     return {

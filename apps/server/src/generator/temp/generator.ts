@@ -1,43 +1,58 @@
-import { ChatAnthropic } from "@langchain/anthropic";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { MODEL } from "../types/model_types";
-import { RunnableSequence } from "@langchain/core/runnables";
-import { new_planner_output_schema, old_planner_output_schema } from "./schema";
-import Tool from "../tools/tool";
-import { new_chat_coder_prompt, new_chat_planner_prompt, old_chat_coder_prompt, old_chat_planner_prompt } from "./prompts";
-import { AIMessageChunk, MessageStructure } from "@langchain/core/messages";
-import StreamParser from "../../services/stream_parser";
-import { ChatRole, Message, prisma } from "@repo/database";
-import GeneratorShape from "../../metadata/generator";
-import { Response } from "express";
-import { FILE_STRUCTURE_TYPES, PHASE_TYPES, StreamEvent, StreamEventData } from "../../types/stream_event_types";
-import { STAGE } from "../../types/content_types";
-import { objectStore } from "../../services/init";
-import { FileContent } from "@repo/types";
-import { mergeWithLLMFiles, prepareBaseTemplate } from "../../class/test";
+import { ChatAnthropic } from '@langchain/anthropic';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { MODEL } from '../types/model_types';
+import { RunnableSequence } from '@langchain/core/runnables';
+import { new_planner_output_schema, old_planner_output_schema } from './schema';
+import Tool from '../tools/tool';
+import {
+    new_chat_coder_prompt,
+    new_chat_planner_prompt,
+    old_chat_coder_prompt,
+    old_chat_planner_prompt,
+} from './prompts';
+import { AIMessageChunk, MessageStructure } from '@langchain/core/messages';
+import StreamParser from '../../services/stream_parser';
+import { ChatRole, Message, prisma } from '@repo/database';
+import GeneratorShape from '../../metadata/generator';
+import { Response } from 'express';
+import {
+    FILE_STRUCTURE_TYPES,
+    PHASE_TYPES,
+    StreamEvent,
+    StreamEventData,
+} from '../../types/stream_event_types';
+import { STAGE } from '../../types/content_types';
+import { objectStore } from '../../services/init';
+import { FileContent } from '@repo/types';
+import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
 
-type planner = RunnableSequence<{
-    user_instruction: string;
-    idl?: Object[];
-}, {
-    should_continue: boolean;
-    plan: string;
-    contract_name?: string;
-    context: string;
-    files_likely_affected: {
-        do: "create" | "update" | "delete";
-        file_path: string;
-        what_to_do: string;
-    }[];
-}>;
+type planner = RunnableSequence<
+    {
+        user_instruction: string;
+        idl?: Object[];
+    },
+    {
+        should_continue: boolean;
+        plan: string;
+        contract_name?: string;
+        context: string;
+        files_likely_affected: {
+            do: 'create' | 'update' | 'delete';
+            file_path: string;
+            what_to_do: string;
+        }[];
+    }
+>;
 
-type coder = RunnableSequence<{
-    plan: any;
-    files_likely_affected: any;
-}, AIMessageChunk<MessageStructure>>
+type coder = RunnableSequence<
+    {
+        plan: any;
+        files_likely_affected: any;
+    },
+    AIMessageChunk<MessageStructure>
+>;
 
 export default class Generator extends GeneratorShape {
-
     protected gemini_planner: ChatGoogleGenerativeAI;
     protected gemini_coder: ChatGoogleGenerativeAI;
     protected claude_coder: ChatAnthropic;
@@ -58,7 +73,7 @@ export default class Generator extends GeneratorShape {
             model: 'claude-sonnet-4-5-20250929',
             streaming: true,
         });
-        this.parsers = new Map<string, StreamParser>()
+        this.parsers = new Map<string, StreamParser>();
     }
 
     public generate(
@@ -117,14 +132,10 @@ export default class Generator extends GeneratorShape {
                 },
             });
 
-            this.send_sse(
-                res,
-                STAGE.CONTEXT,
-                { 
-                    context: planner_data.context,
-                    llmMessage: llm_message,
-                },
-            );
+            this.send_sse(res, STAGE.CONTEXT, {
+                context: planner_data.context,
+                llmMessage: llm_message,
+            });
 
             if (!planner_data.should_continue) {
                 console.log('planner said to not continue.');
@@ -152,8 +163,8 @@ export default class Generator extends GeneratorShape {
                 return {
                     system_message,
                     contract: update_contract,
-                }
-            })
+                };
+            });
 
             // send planning stage from here
             this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, result.system_message);
@@ -176,14 +187,12 @@ export default class Generator extends GeneratorShape {
 
             this.send_sse(res, STAGE.END, { data: final_code });
             objectStore.uploadContractFiles(contract_id, final_code, full_response);
-
         } catch (error) {
             console.error('Error while new contract generation: ', Error);
             parser.reset();
             this.delete_parser(contract_id);
             res.end();
         }
-
     }
 
     protected async old_contract(
@@ -193,7 +202,6 @@ export default class Generator extends GeneratorShape {
         contract_id: string,
         idl: Object[],
     ) {
-
         const data = await planner_chain.invoke({
             user_instruction,
         });
@@ -202,11 +210,9 @@ export default class Generator extends GeneratorShape {
             plan: data.plan,
             files_likely_affected: data.files_likely_affected,
         });
-
     }
 
     protected get_chains(chat: 'new' | 'old', model: MODEL) {
-
         let planner_chain;
         let coder_chain;
 
@@ -219,7 +225,7 @@ export default class Generator extends GeneratorShape {
                     this.gemini_planner.withStructuredOutput(new_planner_output_schema),
                 ]);
 
-                coder_chain = new_chat_coder_prompt.pipe(coder)
+                coder_chain = new_chat_coder_prompt.pipe(coder);
 
                 return {
                     planner_chain: planner_chain,
@@ -331,5 +337,4 @@ export default class Generator extends GeneratorShape {
         res.setHeader('X-Accel-Buffering', 'no');
         res.flushHeaders();
     }
-
 }

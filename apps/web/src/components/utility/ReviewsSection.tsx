@@ -178,7 +178,7 @@ export default function ReviewsSection(): JSX.Element {
     const secondRow = reviews.slice(8, 16);
 
     return (
-        <div className="min-h-screen bg-primary z-20">
+        <div className="min-h-screen bg-primary z-10">
             <ArchitectureTitleComponent
                 firstText="Winter tales"
                 secondText="from the Wall"

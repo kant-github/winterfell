@@ -72,12 +72,12 @@ export default function BuilderChats() {
                 }),
             });
 
-            if(response.status === 423) {
+            if (response.status === 423) {
                 const data = await response.json();
-                if(data.goBack) {
+                if (data.goBack) {
                     toast.error(data.message);
                     router.push('/');
-                }               
+                }
             }
 
             if (!response.ok) {

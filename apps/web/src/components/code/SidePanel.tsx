@@ -15,7 +15,7 @@ export default function SidePanel() {
         min: 240,
         max: 288,
         onClose: () => setCollapseFileTree(false),
-    })
+    });
 
     if (!collapseFileTree) return null;
 

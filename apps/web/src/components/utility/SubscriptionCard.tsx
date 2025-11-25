@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { LiaServicestack } from 'react-icons/lia';
 import ExpandableSubscriptionCard from './ExpandableSubscriptionCard';
+import { Button } from '../ui/button';
 
 export type PlanType = 'FREE' | 'PREMIUM' | 'PREMIUM_PLUS';
 export type BillingPeriod = 'MONTHLY' | 'YEARLY';
@@ -178,7 +179,7 @@ export default function SubscriptionPlans() {
     return (
         <section
             id="pricing"
-            className="w-full min-h-screen bg-[#0a0b0d] text-center text-white relative flex flex-col items-center justify-center z-20 px-4 py-20"
+            className="w-full min-h-screen bg-[#0a0b0d] text-center text-white relative flex flex-col items-center justify-center z-10 px-4 py-20"
         >
             <div className="absolute inset-0 bg-linear-to-b from-transparent via-neutral-900/20 to-transparent" />
 
@@ -193,7 +194,8 @@ export default function SubscriptionPlans() {
             </div>
 
             <div className="flex gap-1 mb-4 z-20 border border-neutral-800 p-1 rounded-lg">
-                <button
+                <Button
+                    variant={'ghost'}
                     onClick={() => setBilling('MONTHLY')}
                     className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${
                         billing === 'MONTHLY'
@@ -202,7 +204,7 @@ export default function SubscriptionPlans() {
                     }`}
                 >
                     Monthly
-                </button>
+                </Button>
                 <button
                     onClick={() => setBilling('YEARLY')}
                     className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${

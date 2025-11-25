@@ -1,13 +1,11 @@
-import { PlanType, prisma } from "@repo/database";
-import { NextFunction, Request, Response } from "express";
-import PLANS from "../configs/config.plans";
-
+import { PlanType, prisma } from '@repo/database';
+import { NextFunction, Request, Response } from 'express';
+import PLANS from '../configs/config.plans';
 
 export default async function contractLimit(req: Request, res: Response, next: NextFunction) {
     try {
-        
         const user = req.user;
-        if(!user) {
+        if (!user) {
             res.status(401).json({
                 success: false,
                 message: 'Unauthorized',
@@ -22,10 +20,10 @@ export default async function contractLimit(req: Request, res: Response, next: N
             include: {
                 subscription: true,
                 contracts: true,
-            }
+            },
         });
 
-        if(!existing_user) {
+        if (!existing_user) {
             res.status(401).json({
                 success: false,
                 message: 'Unauthorized',
@@ -39,10 +37,12 @@ export default async function contractLimit(req: Request, res: Response, next: N
         // and this will also not proceed with second chat in same contract
         // there is a problem, what if the user refreshes the subscription, here he will be blocked after 10 contracts
         // but after re-payment of his subscription he should be allowed to create more
-        if(
-            ((!current_plan || current_plan === PlanType.FREE) && total_created_contracts >= PLANS.FREE.limit) ||
+        if (
+            ((!current_plan || current_plan === PlanType.FREE) &&
+                total_created_contracts >= PLANS.FREE.limit) ||
             (current_plan === PlanType.PREMIUM && total_created_contracts >= PLANS.PREMIUM.limit) ||
-            (current_plan === PlanType.PREMIUM_PLUS && total_created_contracts >= PLANS.PREMIUM_PLUS.limit)
+            (current_plan === PlanType.PREMIUM_PLUS &&
+                total_created_contracts >= PLANS.PREMIUM_PLUS.limit)
         ) {
             res.status(423).json({
                 success: false,

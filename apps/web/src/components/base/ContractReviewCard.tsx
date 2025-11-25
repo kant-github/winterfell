@@ -75,7 +75,7 @@ export default function ContractReviewCard({
             });
 
             if (!validatedData.success) {
-                alert('wrong inputs');
+                return;
             }
 
             const response = await axios.post(REVIEW_URL, validatedData.data, {
