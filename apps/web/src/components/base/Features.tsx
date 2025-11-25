@@ -68,11 +68,24 @@ export default function Features() {
         <section
             id="feature"
             ref={containerRef}
-            className="relative bg-dark-base"
+            className="relative bg-transparent"
             style={{ height: '350vh' }}
         >
-            <div className="sticky top-0 w-screen h-screen flex flex-col items-center justify-start pt-26 px-4 md:px-10 gap-x-16 bg-primary z-10 overflow-hidden rounded-[4px]">
-                <div className="w-full md:max-w-[60%] md:text-5xl text-lg sm:text-2xl font-bold tracking-wider text-[#FDF9F0] md:leading-[1.2] relative text-center">
+            <div className="sticky top-0 w-screen h-screen flex flex-col items-center justify-start pt-26 px-4 md:px-10 gap-x-16 overflow-hidden rounded-[4px]">
+                <svg
+                    className="absolute top-0 left-0 w-full h-16 z-20 "
+                    viewBox="0 0 100 20"
+                    preserveAspectRatio="none"
+                >
+                    <path
+                        d="M0 0 L0 0 L40 0 L45 10 L55 10 L60 0 L100 0 L100 0 Z"
+                        fill='#'
+                    />
+                </svg>
+
+                <div className="absolute top-0 left-0 w-full h-full bg-primary z-10"></div>
+
+                <div className="w-full md:max-w-[60%] md:text-5xl text-lg sm:text-2xl font-bold tracking-wider text-[#FDF9F0] md:leading-[1.2] relative text-center z-30">
                     BECAUSE CODING SHOULDN&apos;T RUIN YOUR SLEEP SCHEDULE
                     <div className="absolute text-[10px] sm:text-[12px] md:text-[15px] -top-6 font-extralight w-full flex justify-center text-[#d6caae]">
                         fin-tastic features. zero-hassle.
@@ -80,7 +93,7 @@ export default function Features() {
                 </div>
 
                 <motion.div
-                    className="mt-40 flex flex-col w-full space-y-3 pointer-events-none"
+                    className="mt-40 flex flex-col w-full space-y-3 pointer-events-none z-30"
                     style={{ opacity: subtitleOpacity }}
                 >
                     <div className="mt-4 w-full flex justify-center text-[7px] sm:text-sm md:text-2xl tracking-widest text-dark-base font-semibold text-center px-4">
@@ -92,7 +105,7 @@ export default function Features() {
                     </div>
                 </motion.div>
 
-                <div className="absolute w-full flex justify-center items-center top-65 md:mt-20 gap-2 sm:gap-4 md:space-x-2">
+                <div className="absolute w-full flex justify-center items-center top-65 md:mt-20 gap-2 sm:gap-4 md:space-x-2 z-30">
                     {featureData.map((feature, index) => (
                         <AnimatedFeatureCard
                             key={index}
