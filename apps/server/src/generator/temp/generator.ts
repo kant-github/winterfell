@@ -176,6 +176,7 @@ export default class Generator extends GeneratorShape {
 
             for await (const chunk of code_stream) {
                 if (chunk.text) {
+                    console.log(chunk.text);
                     parser.feed(chunk.text, result.system_message);
                     full_response += chunk.text;
                 }

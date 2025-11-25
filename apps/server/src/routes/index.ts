@@ -26,12 +26,12 @@ router.get('/health', async (_req: Request, res: Response) => {
 });
 
 // code-routes
-router.post('/generate', authMiddleware, contractLimit(true), generateContractController);
+router.post('/generate', authMiddleware, generateContractController);
 router.post('/new', authMiddleware, startChatController);
 router.post('/continue', authMiddleware, continueChatController);
 router.post('/contract/export', authMiddleware, githubCodePushController);
 router.get('/contract/push-status', githubJobStatusController);
-router.post('/contract/get-chat', authMiddleware, contractLimit(false), getChatController);
+router.post('/contract/get-chat', authMiddleware, getChatController);
 
 // file-routes
 router.get('/files/:contractId', authMiddleware, getFilesController);

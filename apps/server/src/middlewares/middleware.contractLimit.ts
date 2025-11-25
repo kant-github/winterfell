@@ -37,7 +37,7 @@ export default function contractLimit(isCreating = false) {
             const plan = sub?.plan || PlanType.FREE;
 
             const start = sub?.start || new Date(0);
-            const end = sub?.end || new Date(8640000000000000);
+            const end = sub?.end || new Date("2100-01-01T00:00:00.000Z");
 
             // count contracts ONLY in current billing cycle
             const total_created_contracts = await prisma.contract.count({
