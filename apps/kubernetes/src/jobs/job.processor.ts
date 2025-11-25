@@ -4,7 +4,6 @@ import { PodServices } from '../services/pod.services';
 import { JobContext } from './job.context';
 
 export default class JobProcessors {
-
     public async execute_build_in_pod(context: JobContext, jobId: string, command: string[]) {
         try {
             console.log('inside run buuild on pod');
