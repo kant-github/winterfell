@@ -26,12 +26,14 @@ export default function FileTree() {
         function flattenNode(node: FileNode): void {
             const isFolder = node.type === NODE.FOLDER;
 
+            const sortedChildren = isFolder && node.children ? sortNodes(node.children) : undefined;
+
             flattened[node.id] = {
                 index: node.id,
                 data: node.name,
                 isFolder: isFolder,
                 children:
-                    isFolder && node.children ? node.children.map((child) => child.id) : undefined,
+                    isFolder && sortedChildren ? sortedChildren.map((child) => child.id) : undefined,
             };
 
             if (isFolder && node.children) {
@@ -43,6 +45,16 @@ export default function FileTree() {
 
         return flattened;
     }, [fileTree]);
+
+    function sortNodes(nodes: FileNode[]) {
+        return [...nodes].sort((a, b) => {
+            if(a.type !== b.type) {
+                return a.type === NODE.FOLDER ? -1 : 1;
+            }
+
+            return a.name.localeCompare(b.name);
+        })
+    }
 
     const dataProvider = new StaticTreeDataProvider(treeData, (item, data) => ({
         ...item,

@@ -1,12 +1,12 @@
 'use client';
-import { JSX, useCallback } from 'react';
+import { JSX, useCallback, useEffect } from 'react';
 import { Editor, Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { LiaServicestack } from 'react-icons/lia';
 
 export default function CodeEditor(): JSX.Element {
-    const { currentCode, currentFile } = useCodeEditor();
+    const { currentCode, currentFile, collapseFileTree } = useCodeEditor();
 
     const handleEditorWillMount = useCallback((monaco: Monaco) => {
         monaco.editor.defineTheme('clean-dark', {
@@ -99,18 +99,17 @@ export default function CodeEditor(): JSX.Element {
     }, []);
 
     const handleEditorDidMount = useCallback(
-        (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
-            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyP, () => {
-                const event = new CustomEvent('open-search-bar');
-                window.dispatchEvent(event);
-            });
+        (editorInstance: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+            editorInstance.addCommand(
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyP,
+                () => {
+                    const event = new CustomEvent('open-search-bar');
+                    window.dispatchEvent(event);
+                },
+            );
         },
         [],
     );
-
-    // useEffect(() => {
-    //     setTimeout(() => )
-    // }, [collapseFileTree]);
 
     function filePathModifier(filePath: string | undefined) {
         return filePath ? filePath.replaceAll('/', ' / ') : '';
@@ -125,6 +124,7 @@ export default function CodeEditor(): JSX.Element {
                             {filePathModifier(currentFile?.id)}
                         </div>
                         <Editor
+                            key={collapseFileTree ? 'tree-collapsed' : 'tree-expanded'}
                             height="100%"
                             language="rust"
                             beforeMount={handleEditorWillMount}
@@ -134,6 +134,9 @@ export default function CodeEditor(): JSX.Element {
                                 readOnly: true,
                                 readOnlyMessage: {
                                     value: 'This feature is available for Premium+ users only.',
+                                },
+                                minimap: {
+                                    enabled: true,
                                 },
                             }}
                             value={currentCode}

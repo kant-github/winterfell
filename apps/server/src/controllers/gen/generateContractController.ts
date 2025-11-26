@@ -1,4 +1,4 @@
-import { PlanType, prisma } from '@winterfell/database';
+import { ChatRole, PlanType, prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
 import { generator } from '../../services/init';
 import { MODEL } from '../../generator/types/model_types';
@@ -6,13 +6,9 @@ import ResponseWriter from '../../class/response_writer';
 
 export default async function generateContractController(req: Request, res: Response) {
     try {
-        console.log('generate contract controller hit');
         const user = req.user;
         if (!user) {
-            res.status(401).json({
-                success: false,
-                message: 'Unauthorized',
-            });
+            ResponseWriter.unauthorized(res, 'Unauthorized');
             return;
         }
 
@@ -48,7 +44,7 @@ export default async function generateContractController(req: Request, res: Resp
                 id: contract_id,
                 userId: user.id,
             },
-            select: {
+            include: {
                 messages: true,
             },
         });
@@ -56,15 +52,20 @@ export default async function generateContractController(req: Request, res: Resp
         if (existing_contract) {
             // call for update
             if (existing_contract.messages.length >= 5) {
-                res.status(403).json({
-                    success: false,
-                    message: 'message limit reached!',
-                });
+                ResponseWriter.error(res, 'message limit reached!', 403);
                 return;
             }
+
+            // create user message
+            await prisma.message.create({
+                data: {
+                    role: ChatRole.USER,
+                    content: instruction,
+                    contractId: existing_contract.id,
+                },
+            });
         } else {
             // call for new
-
             const contract = await prisma.contract.create({
                 data: {
                     id: contract_id,
@@ -74,14 +75,22 @@ export default async function generateContractController(req: Request, res: Resp
                 },
             });
 
+            // create user message
+            await prisma.message.create({
+                data: {
+                    role: ChatRole.USER,
+                    content: instruction,
+                    contractId: contract_id,
+                },
+            });
+            
             generator.generate(res, 'new', instruction, model || MODEL.GEMINI, contract.id);
         }
     } catch (error) {
         console.error('Error in generate contract controller: ', error);
         if (!res.headersSent) {
-            res.status(500).json({
-                error: 'Internal server error',
-            });
+            ResponseWriter.server_error(res);
+            return;
         } else {
             res.write(
                 `data: ${JSON.stringify({
