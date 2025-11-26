@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@winterfell/database';
-import ResponseWriter from '../../class/response_writer';
 import { get_github_owner } from '../../services/git_services';
 import axios from 'axios';
 import env from '../../configs/config.env';
+import { github_services } from '../../services/init';
 
 type UpdateUserData = {
     provider?: string;
@@ -115,7 +115,7 @@ export default async function signInController(req: Request, res: Response) {
 
         if (isGithub) {
             console.log('fetching github username');
-            owner = await get_github_owner(account.access_token);
+            owner = await github_services.get_github_owner(account.access_token);
             console.log('github owner:', owner);
 
             updateData.githubAccessToken = account.access_token;
@@ -136,7 +136,7 @@ export default async function signInController(req: Request, res: Response) {
 
         if (isGithub) {
             console.log('fetching github username for new user');
-            owner = await get_github_owner(account.access_token);
+            owner = await github_services.get_github_owner(account.access_token);
             console.log('github owner:', owner);
         }
 
