@@ -46,25 +46,40 @@ type SystemMessageProps =
 export default function SystemMessage(systemMessage: SystemMessageProps) {
     const { currentStage } = dataFetcher(systemMessage);
 
+    const stagesExceptCompleted = stages.filter(
+        (s) => s.stage !== STAGE.COMPLETED
+    );
+
+    const completedStage = stages.find(
+        (s) => s.stage === STAGE.COMPLETED
+    )!;
+
+    /**
+     * ✅ END is the ONLY state that means everything is done
+     */
+    const allCompleted = currentStage === STAGE.END;
+
+    /**
+     * ✅ END means all prior stages are completed
+     * ✅ FINALIZING remains an in-progress stage
+     */
     const currentIndex =
         currentStage === STAGE.END
-            ? stages.length
-            : stages.findIndex((s) => s.stage === currentStage);
-
-    const stagesExceptCompleted = stages.filter((s) => s.stage !== STAGE.COMPLETED);
-    const completedStage = stages.find((s) => s.stage === STAGE.COMPLETED)!;
-
-    const allCompleted =
-        currentStage === STAGE.COMPLETED || currentIndex >= stagesExceptCompleted.length;
+            ? stagesExceptCompleted.length
+            : stagesExceptCompleted.findIndex(
+                  (s) => s.stage === currentStage
+              );
 
     return (
         <div className="relative w-[80%] rounded-[4px] overflow-hidden border border-neutral-800 bg-[#0e0e0f] text-neutral-300 select-none">
+            {/* Header */}
             <div className="px-5 pt-4 flex items-center gap-x-1.5 text-light/90">
                 <FaListUl />
-                <div className="leading-0">Execution strategy</div>
+                <div>Execution strategy</div>
             </div>
 
-            <div className="relative z-10 w-full flex flex-col items-start justify-center gap-y-3 px-5 py-4.5 text-neutral-300">
+            {/* Stage List */}
+            <div className="relative z-10 w-full flex flex-col gap-y-3 px-5 py-4.5">
                 {stagesExceptCompleted.map(({ stage, show }, index) => {
                     const status =
                         index < currentIndex
@@ -79,39 +94,43 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
 
                     return (
                         <div key={stage} className="flex items-center gap-x-3">
+                            {/* Indicator */}
                             <div
                                 className={cn(
                                     'flex items-center justify-center rounded-full transition-all',
                                     isCompleted &&
-                                        'bg-transparent border-[1px] border-green-600 text-green-600 w-3.5 h-3.5 p-0.5',
+                                        'border border-green-600 text-green-600 w-3.5 h-3.5 p-0.5',
                                     isBuffering && 'w-4 h-4',
-                                    isHung && 'border-[1px] border-neutral-700 w-4 h-4 p-0.5',
+                                    isHung &&
+                                        'border border-neutral-700 w-4 h-4 p-0.5'
                                 )}
                             >
                                 {isBuffering ? (
                                     <CircleDotDashed
-                                        className="size-4 text-light/70 animate-spin duration-500"
-                                        shouldAnimate={true}
+                                        className="size-4 text-light/70 animate-spin"
+                                        shouldAnimate
                                     />
                                 ) : isCompleted ? (
                                     <Check strokeWidth={3} className="size-2" />
                                 ) : null}
                             </div>
 
-                            <div className="flex flex-col items-start justify-center gap-y-1.5">
+                            {/* Text */}
+                            <div className="flex flex-col gap-y-1.5">
                                 <div
                                     className={cn(
-                                        'tracking-wider transition-all text-[13px]',
+                                        'tracking-wider text-[13px] transition-all',
                                         isHung && 'opacity-50',
-                                        isCompleted && 'text-light/70',
+                                        isCompleted && 'text-light/70'
                                     )}
                                 >
                                     {show}
                                 </div>
 
                                 {stage === STAGE.GENERATING_CODE &&
-                                    currentStage === STAGE.GENERATING_CODE && (
-                                        <div className="pl-5 opacity-50 text-xs ">
+                                    currentStage ===
+                                        STAGE.GENERATING_CODE && (
+                                        <div className="pl-5 text-xs opacity-50">
                                             editing files
                                         </div>
                                     )}
@@ -121,9 +140,10 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
                 })}
             </div>
 
+            {/* ✅ Completed Footer (ONLY ON END) */}
             {allCompleted && (
-                <div className="px-5 pb-4 mt flex items-center gap-x-3 transition-opacity duration-500 animate-fade-in">
-                    <div className="flex items-center justify-center rounded-full text-green-600">
+                <div className="px-5 pb-4 flex items-center gap-x-3 animate-fade-in">
+                    <div className="text-green-600">
                         <BsCheck2All className="size-4" />
                     </div>
                     <div className="text-light/70 tracking-wider text-[13px]">
@@ -135,20 +155,26 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
     );
 }
 
+/* ---------------------------------- */
+/* Helpers */
+/* ---------------------------------- */
+
 function dataFetcher({ message, data }: SystemMessageProps): {
     currentStage: STAGE;
     currentPhase?: PHASE_TYPES | FILE_STRUCTURE_TYPES;
     currentFile?: string;
 } {
-    let currentStage;
+    let currentStage: STAGE;
     let currentPhase;
     let currentFile;
+
     if (message) {
         if (message.error) currentStage = STAGE.ERROR;
         else if (message.finalzing) currentStage = STAGE.END;
         else if (message.creatingFiles) currentStage = STAGE.CREATING_FILES;
         else if (message.building) currentStage = STAGE.BUILDING;
-        else if (message.generatingCode) currentStage = STAGE.GENERATING_CODE;
+        else if (message.generatingCode)
+            currentStage = STAGE.GENERATING_CODE;
         else if (message.planning) currentStage = STAGE.PLANNING;
         else currentStage = STAGE.START;
     } else {
@@ -156,9 +182,11 @@ function dataFetcher({ message, data }: SystemMessageProps): {
         currentPhase = data.currentPhase;
         currentFile = data.currentFile;
     }
+
     return {
         currentStage,
         currentPhase,
         currentFile,
     };
 }
+
