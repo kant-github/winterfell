@@ -68,12 +68,13 @@ function SubscriptionCard({
                         </h2>
                     </div>
                     <div
-                        className={`p-2.5 rounded-lg backdrop-blur-sm ${plan === 'PREMIUM'
-                            ? 'bg-white/5'
-                            : plan === 'FREE'
-                                ? 'bg-white/20'
-                                : 'bg-white/15'
-                            }`}
+                        className={`p-2.5 rounded-lg backdrop-blur-sm ${
+                            plan === 'PREMIUM'
+                                ? 'bg-white/5'
+                                : plan === 'FREE'
+                                  ? 'bg-white/20'
+                                  : 'bg-white/15'
+                        }`}
                     >
                         <LiaServicestack className="size-7" />
                     </div>
@@ -84,12 +85,13 @@ function SubscriptionCard({
                         {features.slice(0, 4).map((feature, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${plan === 'PREMIUM'
-                                    ? 'bg-neutral-800/60'
-                                    : plan === 'FREE'
-                                        ? 'bg-white/25'
-                                        : 'bg-white/15'
-                                    }`}
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
+                                    plan === 'PREMIUM'
+                                        ? 'bg-neutral-800/60'
+                                        : plan === 'FREE'
+                                          ? 'bg-white/25'
+                                          : 'bg-white/15'
+                                }`}
                             >
                                 <Check className="size-3" />
                                 <span className="whitespace-nowrap">{feature}</span>
@@ -111,12 +113,13 @@ function SubscriptionCard({
                         </div>
                     </div>
                     <button
-                        className={`px-5 py-1.5 rounded-lg font-semibold transition-all shadow-lg ${plan === 'PREMIUM'
-                            ? 'bg-neutral-800 hover:bg-neutral-700 text-white'
-                            : plan === 'FREE'
-                                ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
-                                : 'bg-neutral-900 hover:bg-neutral-800 text-white'
-                            }`}
+                        className={`px-5 py-1.5 rounded-lg font-semibold transition-all shadow-lg ${
+                            plan === 'PREMIUM'
+                                ? 'bg-neutral-800 hover:bg-neutral-700 text-white'
+                                : plan === 'FREE'
+                                  ? 'bg-[#7049FC] hover:bg-[#754fff] text-white'
+                                  : 'bg-neutral-900 hover:bg-neutral-800 text-white'
+                        }`}
                     >
                         {plan === 'FREE' ? 'Start Free' : 'Upgrade'}
                     </button>
@@ -173,7 +176,7 @@ export const plans: Plan[] = [
 export default function SubscriptionPlans() {
     const [billing, setBilling] = useState<BillingPeriod>('MONTHLY');
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-    const router = useRouter()
+    const router = useRouter();
 
     return (
         <section
@@ -196,19 +199,21 @@ export default function SubscriptionPlans() {
                 <Button
                     variant={'ghost'}
                     onClick={() => setBilling('MONTHLY')}
-                    className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${billing === 'MONTHLY'
-                        ? 'bg-[#7049FC] text-light'
-                        : 'text-light/70 hover:text-light'
-                        }`}
+                    className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${
+                        billing === 'MONTHLY'
+                            ? 'bg-[#7049FC] text-light'
+                            : 'text-light/70 hover:text-light'
+                    }`}
                 >
                     Monthly
                 </Button>
                 <button
                     onClick={() => setBilling('YEARLY')}
-                    className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${billing === 'YEARLY'
-                        ? 'bg-[#7049FC] text-light'
-                        : 'text-light/70 hover:text-light'
-                        }`}
+                    className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${
+                        billing === 'YEARLY'
+                            ? 'bg-[#7049FC] text-light'
+                            : 'text-light/70 hover:text-light'
+                    }`}
                 >
                     Yearly
                 </button>

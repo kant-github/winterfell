@@ -20,7 +20,9 @@ export default function PricingPage() {
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
                     <h1 className="text-6xl font-bold text-white mb-6">Choose Your Plan</h1>
-                    <p className="text-2xl text-neutral-400">Select the perfect plan for your needs</p>
+                    <p className="text-2xl text-neutral-400">
+                        Select the perfect plan for your needs
+                    </p>
 
                     <div className="flex justify-center mt-10">
                         <div className="relative w-[200px] h-14 border-2 rounded-[4px] border-neutral-800 bg-[#1a1a1a] flex items-center justify-between text-base font-medium">
@@ -31,7 +33,9 @@ export default function PricingPage() {
                             />
 
                             <div
-                                onClick={function () { setBilling('MONTHLY'); }}
+                                onClick={function () {
+                                    setBilling('MONTHLY');
+                                }}
                                 className={cn(
                                     'z-10 w-[100px] text-center cursor-pointer transition-colors',
                                     billing === 'MONTHLY' ? 'text-dark-base' : 'text-light',
@@ -41,7 +45,9 @@ export default function PricingPage() {
                             </div>
 
                             <div
-                                onClick={function () { setBilling('YEARLY'); }}
+                                onClick={function () {
+                                    setBilling('YEARLY');
+                                }}
                                 className={cn(
                                     'z-10 w-[100px] text-center cursor-pointer transition-colors',
                                     billing === 'YEARLY' ? 'text-dark-base' : 'text-light',

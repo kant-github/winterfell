@@ -66,7 +66,6 @@ export default function ExpandableSubscriptionCard({
                         </span>
                     </div>
 
-
                     <div className="relative w-[90px] h-6 border rounded-[5.5px] border-neutral-800 bg-dark-base/80 flex items-center justify-between text-[10px]">
                         <motion.div
                             className="absolute h-[18px] w-[39px] rounded-[3px] bg-light"
@@ -126,7 +125,7 @@ export default function ExpandableSubscriptionCard({
         <OpacityBackground className="bg-dark-base/30 z-100" onBackgroundClick={onClose}>
             <div className="relative z-100 w-fit flex items-center justify-center">
                 <Button
-                variant={'ghost'}
+                    variant={'ghost'}
                     onClick={onClose}
                     className="absolute -top-12 left-0 text-neutral-400 hover:text-white flex items-center gap-2"
                 >

@@ -44,7 +44,11 @@ export default function BuilderChats() {
 
     useEffect(() => {
         if (hasInitialized.current) return;
-        if (messages.length === 1 && messages[0].role === 'USER' && messages[0].contractId === contractId) {
+        if (
+            messages.length === 1 &&
+            messages[0].role === 'USER' &&
+            messages[0].contractId === contractId
+        ) {
             hasInitialized.current = true;
             startChat(messages[0].content);
             setContractId(contractId);
@@ -155,7 +159,7 @@ export default function BuilderChats() {
 
                             case STAGE.END:
                                 if ('data' in event.data && event.data.data) {
-                                    if(event.systemMessage) {
+                                    if (event.systemMessage) {
                                         upsertMessage(event.systemMessage);
                                     }
                                     parseFileStructure(event.data.data as FileContent[]);
@@ -169,7 +173,6 @@ export default function BuilderChats() {
                     } catch (error) {
                         console.warn('Skipping incomplete stream event chunk', error);
                     }
-                    
                 }
             }
 

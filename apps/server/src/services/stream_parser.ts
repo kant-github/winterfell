@@ -53,7 +53,6 @@ export default class StreamParser {
 
         this.pendingIdl = null;
         this.generatedIdl = null;
-
     }
 
     public on(
@@ -128,7 +127,6 @@ export default class StreamParser {
             if (this.pendingIdl !== null || idlMatch) {
                 await this.handleIdl(systemMessage);
             }
-
 
             // Handle files
             const fileMatch = trimmed.match(/<file>(.*?)<\/file>/);
@@ -349,8 +347,8 @@ export default class StreamParser {
             case 'thinking': {
                 this.currentPhase = phase;
                 const data: ThinkingData = { phase: 'thinking' };
-                this.emit(STAGE.GENERATING_CODE, { stage: 'Generating Code' }, systemMessage),
-                    this.emit(PHASE_TYPES.THINKING, data, systemMessage);
+                (this.emit(STAGE.GENERATING_CODE, { stage: 'Generating Code' }, systemMessage),
+                    this.emit(PHASE_TYPES.THINKING, data, systemMessage));
                 break;
             }
             case 'generating': {
@@ -437,10 +435,7 @@ export default class StreamParser {
                     console.error('Failed to parse IDL: ', err);
                 }
 
-                this.buffer = afterStart
-                    .split(endMatch[0])
-                    .slice(1)
-                    .join(endMatch[0]);
+                this.buffer = afterStart.split(endMatch[0]).slice(1).join(endMatch[0]);
 
                 return true;
             }
@@ -453,7 +448,6 @@ export default class StreamParser {
 
         return false;
     }
-
 
     public getGeneratedFiles(): FileContent[] {
         return this.generatedFiles;

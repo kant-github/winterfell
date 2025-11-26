@@ -30,13 +30,15 @@ export default function GitCloneCard() {
     const sshURL = `git@github.com:${session?.user.githubUsername}/${repoName}.git`;
 
     const finalURL = activeTab === CloneOptions.HTTPS ? httpsURL : sshURL;
+    let c_id: string = '';
 
     async function handleCodePushToGithub() {
         if (!repoName.trim()) {
             return toast.error('Please enter a repository name');
         }
         if (!contractId) {
-            return toast.error('No contract found');
+            c_id = window.location.pathname.split('/playground/')[1];
+            // toast.info(c_id);
         }
 
         try {
@@ -44,7 +46,7 @@ export default function GitCloneCard() {
                 EXPORT_CONTRACT_URL,
                 {
                     repo_name: repoName,
-                    contract_id: contractId,
+                    contract_id: contractId ? contractId : c_id,
                     hasGithub: session?.user.token,
                 },
                 {
@@ -57,7 +59,7 @@ export default function GitCloneCard() {
 
             if (response.data.success) {
                 toast.success('Code exported to GitHub successfully!');
-                toast.success(response.data);
+                // toast.success(response.data);
                 setRepoName('');
             } else {
                 toast.error(response.data.message || 'Failed to export');

@@ -22,65 +22,87 @@ export interface CustomSession {
 }
 
 export const authOption: AuthOptions = {
-    pages: {
-        signIn: '/',
-    },
-    session: {
-        strategy: 'jwt',
-    },
+    pages: { signIn: '/' },
+    session: { strategy: 'jwt' },
+
     callbacks: {
         async signIn({ user, account }: { user: UserType; account: Account | null }) {
             try {
-                let turnstileToken = null;
+                let turnstileToken: string | null = null;
+                let linkingUserId: string | null = null;
 
                 if (typeof window === 'undefined') {
                     try {
                         const { cookies } = await import('next/headers');
                         const cookieStore = await cookies();
-                        const tokenCookie = cookieStore.get('turnstile_token');
-                        turnstileToken = tokenCookie?.value;
+                        const turnstileCookie = cookieStore.get('turnstile_token');
+                        const linkingCookie = cookieStore.get('linking_user_id');
+
+                        turnstileToken = turnstileCookie?.value || null;
+                        linkingUserId = linkingCookie?.value || null;
                     } catch (error) {
-                        console.error('Error reading cookies:', error);
+                        console.error('error reading cookies in signin callback:', error);
                     }
                 }
+
                 if (account?.provider === 'google' || account?.provider === 'github') {
                     const response = await axios.post(
-                        `${SIGNIN_URL}`,
+                        SIGNIN_URL,
                         {
                             user,
                             account,
                             turnstileToken,
+                            linkingUserId,
                         },
-                        {
-                            withCredentials: true,
-                        },
+                        { withCredentials: true },
                     );
+
                     const result = response.data;
+
                     if (result?.success) {
                         user.id = result.user.id;
-                        user.token = result.token;
+                        user.name = result.user.name;
+                        user.email = result.user.email;
+                        user.image = result.user.image;
+                        user.provider = result.user.provider;
                         user.hasGithub = result.user.hasGithub;
                         user.githubUsername = result.user.githubUsername;
+
+                        if (result.token) {
+                            user.token = result.token;
+                        }
+
                         return true;
                     }
                 }
+
                 return false;
             } catch (err) {
-                console.error('SignIn error:', err);
+                console.error('signin error:', err);
                 return false;
             }
         },
+
         async jwt({ token, user }) {
             if (user) {
-                token.user = user as UserType;
+                const prev = token.user as UserType | undefined;
+                const incoming = user as UserType;
+
+                token.user = {
+                    ...prev,
+                    ...incoming,
+                    token: incoming.token ?? prev?.token ?? null,
+                };
             }
             return token;
         },
+
         async session({ session, token }: { session: CustomSession; token: JWT }) {
             session.user = token.user as UserType;
             return session;
         },
     },
+
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID || '',

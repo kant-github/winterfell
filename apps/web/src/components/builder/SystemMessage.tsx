@@ -46,39 +46,31 @@ type SystemMessageProps =
 export default function SystemMessage(systemMessage: SystemMessageProps) {
     const { currentStage } = dataFetcher(systemMessage);
 
-    const stagesExceptCompleted = stages.filter(
-        (s) => s.stage !== STAGE.COMPLETED
-    );
+    const stagesExceptCompleted = stages.filter((s) => s.stage !== STAGE.COMPLETED);
 
-    const completedStage = stages.find(
-        (s) => s.stage === STAGE.COMPLETED
-    )!;
+    const completedStage = stages.find((s) => s.stage === STAGE.COMPLETED)!;
 
     /**
-     * ✅ END is the ONLY state that means everything is done
+     * END is the ONLY state that means everything is done
      */
     const allCompleted = currentStage === STAGE.END;
 
     /**
-     * ✅ END means all prior stages are completed
-     * ✅ FINALIZING remains an in-progress stage
+     * END means all prior stages are completed
+     * FINALIZING remains an in-progress stage
      */
     const currentIndex =
         currentStage === STAGE.END
             ? stagesExceptCompleted.length
-            : stagesExceptCompleted.findIndex(
-                  (s) => s.stage === currentStage
-              );
+            : stagesExceptCompleted.findIndex((s) => s.stage === currentStage);
 
     return (
         <div className="relative w-[80%] rounded-[4px] overflow-hidden border border-neutral-800 bg-[#0e0e0f] text-neutral-300 select-none">
-            {/* Header */}
             <div className="px-5 pt-4 flex items-center gap-x-1.5 text-light/90">
                 <FaListUl />
                 <div>Execution strategy</div>
             </div>
 
-            {/* Stage List */}
             <div className="relative z-10 w-full flex flex-col gap-y-3 px-5 py-4.5">
                 {stagesExceptCompleted.map(({ stage, show }, index) => {
                     const status =
@@ -94,15 +86,13 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
 
                     return (
                         <div key={stage} className="flex items-center gap-x-3">
-                            {/* Indicator */}
                             <div
                                 className={cn(
                                     'flex items-center justify-center rounded-full transition-all',
                                     isCompleted &&
                                         'border border-green-600 text-green-600 w-3.5 h-3.5 p-0.5',
                                     isBuffering && 'w-4 h-4',
-                                    isHung &&
-                                        'border border-neutral-700 w-4 h-4 p-0.5'
+                                    isHung && 'border border-neutral-700 w-4 h-4 p-0.5',
                                 )}
                             >
                                 {isBuffering ? (
@@ -115,24 +105,20 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
                                 ) : null}
                             </div>
 
-                            {/* Text */}
                             <div className="flex flex-col gap-y-1.5">
                                 <div
                                     className={cn(
                                         'tracking-wider text-[13px] transition-all',
                                         isHung && 'opacity-50',
-                                        isCompleted && 'text-light/70'
+                                        isCompleted && 'text-light/70',
                                     )}
                                 >
                                     {show}
                                 </div>
 
                                 {stage === STAGE.GENERATING_CODE &&
-                                    currentStage ===
-                                        STAGE.GENERATING_CODE && (
-                                        <div className="pl-5 text-xs opacity-50">
-                                            editing files
-                                        </div>
+                                    currentStage === STAGE.GENERATING_CODE && (
+                                        <div className="pl-5 text-xs opacity-50">editing files</div>
                                     )}
                             </div>
                         </div>
@@ -140,7 +126,6 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
                 })}
             </div>
 
-            {/* ✅ Completed Footer (ONLY ON END) */}
             {allCompleted && (
                 <div className="px-5 pb-4 flex items-center gap-x-3 animate-fade-in">
                     <div className="text-green-600">
@@ -154,10 +139,6 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
         </div>
     );
 }
-
-/* ---------------------------------- */
-/* Helpers */
-/* ---------------------------------- */
 
 function dataFetcher({ message, data }: SystemMessageProps): {
     currentStage: STAGE;
@@ -173,8 +154,7 @@ function dataFetcher({ message, data }: SystemMessageProps): {
         else if (message.finalzing) currentStage = STAGE.END;
         else if (message.creatingFiles) currentStage = STAGE.CREATING_FILES;
         else if (message.building) currentStage = STAGE.BUILDING;
-        else if (message.generatingCode)
-            currentStage = STAGE.GENERATING_CODE;
+        else if (message.generatingCode) currentStage = STAGE.GENERATING_CODE;
         else if (message.planning) currentStage = STAGE.PLANNING;
         else currentStage = STAGE.START;
     } else {
@@ -189,4 +169,3 @@ function dataFetcher({ message, data }: SystemMessageProps): {
         currentFile,
     };
 }
-

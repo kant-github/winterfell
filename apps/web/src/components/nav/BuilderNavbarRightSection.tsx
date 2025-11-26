@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { getSession, signIn } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import { IoIosPaperPlane, IoLogoGithub } from 'react-icons/io';
 import { FaGithub } from 'react-icons/fa';
 import ToolTipComponent from '../ui/TooltipComponent';
@@ -14,7 +14,7 @@ import { cn } from '@/src/lib/utils';
 import ExportPanel from './ExportPanel.';
 
 export default function BuilderNavbarRightSection() {
-    const { session, setSession } = useUserSessionStore();
+    const { session } = useUserSessionStore();
     const [openWalletPanel, setOpenWalletPanel] = useState<boolean>(false);
     const [showRepoPanel, setShowRepoPanel] = useState<boolean>(false);
     const [openProfileMenu, setOpenProfleMenu] = useState<boolean>(false);
@@ -39,27 +39,25 @@ export default function BuilderNavbarRightSection() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('githubLinked') === 'true') {
             toast.success('GitHub connected successfully!');
-
-            getSession().then((newSession) => {
-                if (newSession) {
-                    setSession(newSession);
-                }
-            });
-
             window.history.replaceState({}, '', window.location.pathname);
         }
-    }, [setSession]);
+    }, []);
 
     async function handleConnectGitHub() {
         try {
             setIsConnectingGithub(true);
+
+            if (session?.user?.id) {
+                document.cookie = `linking_user_id=${session.user.id}; path=/; max-age=300`;
+            }
+
             await signIn('github', {
                 callbackUrl: `${window.location.pathname}?githubLinked=true`,
                 redirect: true,
             });
         } catch (error) {
             toast.error('Failed to connect GitHub');
-            console.error('GitHub connection error:', error);
+            console.error('github connection error:', error);
             setIsConnectingGithub(false);
         }
     }
