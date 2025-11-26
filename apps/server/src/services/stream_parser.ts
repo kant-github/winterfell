@@ -23,6 +23,7 @@ interface StreamEventPayload {
 export default class StreamParser {
     private buffer: string;
     private currentPhase: string | null;
+    private currentStage: string | null;
     private currentFile: string | null;
     private currentCodeBlock: string;
     private insideCodeBlock: boolean;
@@ -35,9 +36,13 @@ export default class StreamParser {
     private pendingContext: string | null = null;
     private contractName: string;
 
+    private pendingIdl: string | null;
+    private generatedIdl: Object[] | null;
+
     constructor() {
         this.buffer = '';
         this.currentPhase = null;
+        this.currentStage = null;
         this.currentFile = null;
         this.currentCodeBlock = '';
         this.insideCodeBlock = false;
@@ -45,6 +50,10 @@ export default class StreamParser {
         this.generatedFiles = [];
         this.eventHandlers = new Map();
         this.contractName = '';
+
+        this.pendingIdl = null;
+        this.generatedIdl = null;
+
     }
 
     public on(
@@ -113,6 +122,13 @@ export default class StreamParser {
                 await this.phaseMatch(phase, systemMessage);
                 continue;
             }
+
+            const idlMatch = trimmed.match(/<idl>/);
+
+            if (this.pendingIdl !== null || idlMatch) {
+                await this.handleIdl(systemMessage);
+            }
+
 
             // Handle files
             const fileMatch = trimmed.match(/<file>(.*?)<\/file>/);
@@ -241,6 +257,7 @@ export default class StreamParser {
                         planning: true,
                     },
                 });
+                this.currentStage = stage;
                 this.emit(STAGE.PLANNING, { stage }, systemMessage);
                 break;
 
@@ -254,6 +271,7 @@ export default class StreamParser {
                         generatingCode: true,
                     },
                 });
+                this.currentStage = stage;
                 this.emit(STAGE.GENERATING_CODE, { stage }, systemMessage);
                 break;
 
@@ -266,6 +284,7 @@ export default class StreamParser {
                         building: true,
                     },
                 });
+                this.currentStage = stage;
                 this.emit(STAGE.BUILDING, { stage }, systemMessage);
                 break;
 
@@ -278,6 +297,7 @@ export default class StreamParser {
                         creatingFiles: true,
                     },
                 });
+                this.currentStage = stage;
                 this.emit(STAGE.CREATING_FILES, { stage }, systemMessage);
                 break;
 
@@ -290,6 +310,7 @@ export default class StreamParser {
                         finalzing: true,
                     },
                 });
+                this.currentStage = stage;
                 this.emit(STAGE.FINALIZING, { stage }, systemMessage);
                 break;
 
@@ -306,6 +327,7 @@ export default class StreamParser {
                         error: true,
                     },
                 });
+                this.currentStage = null;
                 this.handleError(new Error('Invalid stage'), errorData);
                 break;
             }
@@ -313,17 +335,27 @@ export default class StreamParser {
     }
 
     private async phaseMatch(phase: string, systemMessage: Message) {
+        if (this.currentStage !== STAGE.GENERATING_CODE && !systemMessage.generatingCode) {
+            await prisma.message.update({
+                where: {
+                    id: systemMessage.id,
+                },
+                data: {
+                    generatingCode: true,
+                },
+            });
+        }
         switch (phase) {
             case 'thinking': {
                 this.currentPhase = phase;
                 const data: ThinkingData = { phase: 'thinking' };
-                this.emit(PHASE_TYPES.THINKING, data, systemMessage);
+                this.emit(STAGE.GENERATING_CODE, { stage: 'Generating Code' }, systemMessage),
+                    this.emit(PHASE_TYPES.THINKING, data, systemMessage);
                 break;
             }
             case 'generating': {
                 this.currentPhase = phase;
                 const data: GeneratingData = { phase: 'editing file' };
-                this.emit(STAGE.GENERATING_CODE, { stage: 'Generating Code' }, systemMessage),
                 this.emit(PHASE_TYPES.GENERATING, data, systemMessage);
                 break;
             }
@@ -361,12 +393,78 @@ export default class StreamParser {
         }
     }
 
+    private async handleIdl(systemMessage: Message): Promise<boolean> {
+        // Case 1: already buffering IDL
+        if (this.pendingIdl !== null) {
+            this.pendingIdl += '\n' + this.buffer;
+
+            const endMatch = this.pendingIdl.match(/<\/idl>/i);
+            if (endMatch) {
+                const raw = this.pendingIdl
+                    .replace(/<idl>/i, '')
+                    .replace(/<\/idl>/i, '')
+                    .trim();
+
+                try {
+                    console.log('the idl: ', chalk.blue('IDL'));
+                    this.generatedIdl = JSON.parse(raw);
+                } catch (err) {
+                    console.error('Failed to parse IDL', err);
+                }
+
+                this.pendingIdl = null;
+                this.buffer = '';
+                return true;
+            }
+
+            this.buffer = '';
+            return false;
+        }
+
+        // Case 2: start of IDL detected
+        const startMatch = this.buffer.match(/<idl>/i);
+        if (startMatch) {
+            const afterStart = this.buffer.split(startMatch[0])[1] || '';
+            const endMatch = afterStart.match(/<\/idl>/i);
+
+            if (endMatch) {
+                // IDL fully in buffer
+                const raw = afterStart.split(endMatch[0])[0].trim();
+
+                try {
+                    this.generatedIdl = JSON.parse(raw);
+                } catch (err) {
+                    console.error('Failed to parse IDL: ', err);
+                }
+
+                this.buffer = afterStart
+                    .split(endMatch[0])
+                    .slice(1)
+                    .join(endMatch[0]);
+
+                return true;
+            }
+
+            // IDL is streaming
+            this.pendingIdl = afterStart;
+            this.buffer = this.buffer.split(startMatch[0])[0];
+            return false;
+        }
+
+        return false;
+    }
+
+
     public getGeneratedFiles(): FileContent[] {
         return this.generatedFiles;
     }
 
     public getContractName(): string {
         return this.contractName;
+    }
+
+    public getGeneratedIdl(): Object[] | null {
+        return this.generatedIdl;
     }
 
     public reset(): void {
@@ -377,6 +475,9 @@ export default class StreamParser {
         this.insideCodeBlock = false;
         this.isJsonBlock = false;
         this.generatedFiles = [];
+        this.pendingContext = null;
+        this.pendingIdl = null;
+        this.generatedIdl = null;
     }
 
     public handleError(err: Error, errorData?: ErrorData): void {
