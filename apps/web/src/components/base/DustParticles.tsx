@@ -11,12 +11,12 @@ interface DustParticlesProps {
     spread?: number;
 }
 
-export default function DustParticles({ 
+export default function DustParticles({
     className = '',
     particleCount = 300,
     particleColor = 0xffff00,
     particleSize = 0.01,
-    spread = 5
+    spread = 5,
 }: DustParticlesProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -25,13 +25,13 @@ export default function DustParticles({
     useEffect(() => {
         if (!containerRef.current) return;
 
-        const renderer = new THREE.WebGLRenderer({ 
+        const renderer = new THREE.WebGLRenderer({
             antialias: true,
-            alpha: true 
+            alpha: true,
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setClearColor(0x000000, 0);
-        
+
         containerRef.current.appendChild(renderer.domElement);
         rendererRef.current = renderer;
 
@@ -39,7 +39,7 @@ export default function DustParticles({
             75,
             window.innerWidth / window.innerHeight,
             0.1,
-            1000
+            1000,
         );
         camera.position.z = 5;
 
@@ -60,16 +60,8 @@ export default function DustParticles({
 
         for (let i = 0; i < particleCount; i++) {
             const particle = new THREE.Mesh(particleGeometry, particleMaterial);
-            particle.position.set(
-                mathRandom(spread),
-                mathRandom(spread),
-                mathRandom(spread)
-            );
-            particle.rotation.set(
-                mathRandom(Math.PI),
-                mathRandom(Math.PI),
-                mathRandom(Math.PI)
-            );
+            particle.position.set(mathRandom(spread), mathRandom(spread), mathRandom(spread));
+            particle.rotation.set(mathRandom(Math.PI), mathRandom(Math.PI), mathRandom(Math.PI));
             particles.add(particle);
         }
 
@@ -127,8 +119,8 @@ export default function DustParticles({
     }, [particleCount, particleColor, particleSize, spread]);
 
     return (
-        <div 
-            ref={containerRef} 
+        <div
+            ref={containerRef}
             className={`fixed inset-0 pointer-events-none ${className}`}
             style={{ zIndex: 9 }}
         />

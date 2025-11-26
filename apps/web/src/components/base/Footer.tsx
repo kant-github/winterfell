@@ -76,7 +76,7 @@ export default function Footer() {
                                         return (
                                             <a
                                                 href={link.link}
-                                                target='_blank'
+                                                target="_blank"
                                                 key={link.name}
                                                 className="cursor-pointer hover:text-primary transition-colors flex items-center gap-x-2"
                                             >

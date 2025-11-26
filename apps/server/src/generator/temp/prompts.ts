@@ -137,7 +137,7 @@ export const finalizer_prompt = new PromptTemplate({
         <context>context at the end of contract of what this contract is about in near about 20 words</context>
     `,
     inputVariables: ['generated_files'],
-})
+});
 
 export const reviewer_prompt = new PromptTemplate({
     template: `
@@ -176,4 +176,4 @@ export const reviewer_prompt = new PromptTemplate({
     tsconfig.json
     `,
     inputVariables: ['generated_files'],
-})
+});

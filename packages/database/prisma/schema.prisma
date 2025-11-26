@@ -16,7 +16,7 @@ model User {
   password String? // if using credentials login
   provider String?
 
-  githubId          String?
+  githubId          String? @unique
   githubAccessToken String?
   githubUsername    String?
 

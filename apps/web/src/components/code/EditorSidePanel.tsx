@@ -5,25 +5,23 @@ import { Dispatch, SetStateAction } from 'react';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { cn } from '@/src/lib/utils';
-import { RiChat4Fill } from "react-icons/ri";
-
+import { RiChat4Fill } from 'react-icons/ri';
 
 export enum SidePanelValues {
     FILE = 'FILE',
     GITHUB = 'GITHUB',
-    CHAT = 'CHAT'
+    CHAT = 'CHAT',
 }
-
-
 
 interface EditorSidePanel {
     setSidePanelRenderer:
-    | Dispatch<SetStateAction<SidePanelValues>>
-    | ((value: SidePanelValues | null) => void);
+        | Dispatch<SetStateAction<SidePanelValues>>
+        | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {
-    const { collapseFileTree, setCollapseFileTree, setCollapsechat, collapseChat } = useCodeEditor();
+    const { collapseFileTree, setCollapseFileTree, setCollapsechat, collapseChat } =
+        useCodeEditor();
     const { setCurrentState } = useSidePanelStore();
     const { currentState } = useSidePanelStore();
 
@@ -44,8 +42,8 @@ export default function EditorSidePanel() {
             icon: <RiChat4Fill size={19} />,
             value: SidePanelValues.CHAT,
             onClick: () => {
-                setCollapsechat(!collapseChat)
-                handleToggleSidebar(SidePanelValues.CHAT)
+                setCollapsechat(!collapseChat);
+                handleToggleSidebar(SidePanelValues.CHAT);
             },
             tooltip: 'Agent Sessions',
         },
@@ -54,9 +52,9 @@ export default function EditorSidePanel() {
     function handleToggleSidebar(value: SidePanelValues) {
         if (collapseFileTree) {
             if (value === currentState) {
-                setCollapseFileTree(false)
+                setCollapseFileTree(false);
             } else {
-                setCurrentState(value)
+                setCurrentState(value);
             }
         } else {
             setCollapseFileTree(true);

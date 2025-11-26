@@ -105,7 +105,6 @@ export default function FileTree() {
 
                             <span className="w-full text-sm truncate scale-100">{item.data}</span>
                         </div>
-
                     )}
                 >
                     <div className="h-full">

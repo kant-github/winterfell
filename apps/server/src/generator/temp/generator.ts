@@ -55,7 +55,6 @@ type coder = RunnableSequence<
 >;
 
 export default class Generator extends GeneratorShape {
-
     protected gemini_planner: ChatGoogleGenerativeAI;
     protected gemini_coder: ChatGoogleGenerativeAI;
     protected claude_coder: ChatAnthropic;
@@ -102,7 +101,7 @@ export default class Generator extends GeneratorShape {
             console.log('gen.generator is called');
             const { planner_chain, coder_chain, finalizer_chain } = this.get_chains(chat, model);
 
-            switch(chat) {
+            switch (chat) {
                 case 'new': {
                     this.new_contract(
                         res,
@@ -116,10 +115,8 @@ export default class Generator extends GeneratorShape {
                     return;
                 }
                 case 'old': {
-
                 }
             }
-
         } catch (error) {
             console.error('Error while generating: ', Error);
             parser.reset();
@@ -191,7 +188,7 @@ export default class Generator extends GeneratorShape {
 
             // send planning stage from here
             console.log('the stage: ', chalk.green('Planning'));
-            this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' },  system_message);
+            this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
 
             const code_stream = await coder_chain.stream({
                 plan: planner_data.plan,
@@ -214,7 +211,7 @@ export default class Generator extends GeneratorShape {
                 data: {
                     creatingFiles: true,
                 },
-            }); 
+            });
 
             console.log('the stage: ', chalk.green('Creating Files'));
             this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
@@ -222,7 +219,6 @@ export default class Generator extends GeneratorShape {
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
             const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
             const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
-
 
             this.new_finalizer(
                 res,
@@ -233,7 +229,6 @@ export default class Generator extends GeneratorShape {
                 parser,
                 system_message,
             );
-
         } catch (error) {
             console.error('Error while new contract generation: ', Error);
             parser.reset();
@@ -251,7 +246,6 @@ export default class Generator extends GeneratorShape {
         parser: StreamParser,
         system_message: Message,
     ) {
-
         await prisma.message.update({
             where: {
                 id: system_message.id,
@@ -270,9 +264,9 @@ export default class Generator extends GeneratorShape {
         });
 
         for await (const chunk of finalizer_stream) {
-            if(chunk.text) {
-                console.log(chunk.text);
-                parser.feed(chunk.text, system_message);                
+            if (chunk.text) {
+                // console.log(chunk.text);
+                parser.feed(chunk.text, system_message);
             }
         }
 
@@ -293,7 +287,6 @@ export default class Generator extends GeneratorShape {
 
         // make a private var to store idl in stream parser
         // save the idl to db
-
     }
 
     protected async old_contract(
