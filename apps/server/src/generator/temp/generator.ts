@@ -5,6 +5,7 @@ import { RunnableSequence } from '@langchain/core/runnables';
 import { new_planner_output_schema, old_planner_output_schema } from './schema';
 import Tool from '../tools/tool';
 import {
+    finalizer_prompt,
     new_chat_coder_prompt,
     new_chat_planner_prompt,
     old_chat_coder_prompt,
@@ -25,6 +26,7 @@ import { STAGE } from '../../types/content_types';
 import { objectStore } from '../../services/init';
 import { FileContent } from '@repo/types';
 import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
+import chalk from 'chalk';
 
 type planner = RunnableSequence<
     {
@@ -53,9 +55,12 @@ type coder = RunnableSequence<
 >;
 
 export default class Generator extends GeneratorShape {
+
     protected gemini_planner: ChatGoogleGenerativeAI;
     protected gemini_coder: ChatGoogleGenerativeAI;
     protected claude_coder: ChatAnthropic;
+    protected gemini_finalizer: ChatGoogleGenerativeAI;
+
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
@@ -73,6 +78,11 @@ export default class Generator extends GeneratorShape {
             model: 'claude-sonnet-4-5-20250929',
             streaming: true,
         });
+        this.gemini_finalizer = new ChatGoogleGenerativeAI({
+            model: 'gemini-2.5-flash',
+            temperature: 0.2,
+        });
+
         this.parsers = new Map<string, StreamParser>();
     }
 
@@ -90,15 +100,26 @@ export default class Generator extends GeneratorShape {
             this.create_stream(res);
 
             console.log('gen.generator is called');
-            const { planner_chain, coder_chain } = this.get_chains(chat, model);
-            this.new_contract(
-                res,
-                planner_chain,
-                coder_chain,
-                user_instruction,
-                contract_id,
-                parser,
-            );
+            const { planner_chain, coder_chain, finalizer_chain } = this.get_chains(chat, model);
+
+            switch(chat) {
+                case 'new': {
+                    this.new_contract(
+                        res,
+                        planner_chain,
+                        coder_chain,
+                        finalizer_chain,
+                        user_instruction,
+                        contract_id,
+                        parser,
+                    );
+                    return;
+                }
+                case 'old': {
+
+                }
+            }
+
         } catch (error) {
             console.error('Error while generating: ', Error);
             parser.reset();
@@ -111,6 +132,7 @@ export default class Generator extends GeneratorShape {
         res: Response,
         planner_chain: planner,
         coder_chain: any,
+        finalizer_chain: any,
         user_instruction: string,
         contract_id: string,
         parser: StreamParser,
@@ -122,7 +144,7 @@ export default class Generator extends GeneratorShape {
             });
             let full_response: string = '';
 
-            console.log(planner_data);
+            // console.log(planner_data);
 
             const llm_message = await prisma.message.create({
                 data: {
@@ -132,6 +154,7 @@ export default class Generator extends GeneratorShape {
                 },
             });
 
+            console.log('the context: ', chalk.red(planner_data.context));
             this.send_sse(res, STAGE.CONTEXT, {
                 context: planner_data.context,
                 llmMessage: llm_message,
@@ -142,7 +165,7 @@ export default class Generator extends GeneratorShape {
                 return;
             }
 
-            const result = await prisma.$transaction(async (tx) => {
+            const { system_message, contract } = await prisma.$transaction(async (tx) => {
                 const system_message = await tx.message.create({
                     data: {
                         contractId: contract_id,
@@ -167,7 +190,8 @@ export default class Generator extends GeneratorShape {
             });
 
             // send planning stage from here
-            this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, result.system_message);
+            console.log('the stage: ', chalk.green('Planning'));
+            this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' },  system_message);
 
             const code_stream = await coder_chain.stream({
                 plan: planner_data.plan,
@@ -176,23 +200,100 @@ export default class Generator extends GeneratorShape {
 
             for await (const chunk of code_stream) {
                 if (chunk.text) {
-                    parser.feed(chunk.text, result.system_message);
+                    // console.log(chunk.text);
+                    parser.feed(chunk.text, system_message);
                     full_response += chunk.text;
                 }
             }
 
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    creatingFiles: true,
+                },
+            }); 
+
+            console.log('the stage: ', chalk.green('Creating Files'));
+            this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
+
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
             const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
-            const final_code = mergeWithLLMFiles(base_files, llm_generated_files);
+            const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
 
-            this.send_sse(res, STAGE.END, { data: final_code });
-            objectStore.uploadContractFiles(contract_id, final_code, full_response);
+
+            this.new_finalizer(
+                res,
+                finalizer_chain,
+                final_code,
+                full_response,
+                contract_id,
+                parser,
+                system_message,
+            );
+
         } catch (error) {
             console.error('Error while new contract generation: ', Error);
             parser.reset();
             this.delete_parser(contract_id);
             res.end();
         }
+    }
+
+    protected async new_finalizer(
+        res: Response,
+        finalizer_chain: any,
+        generated_files: FileContent[],
+        full_response: string,
+        contract_id: string,
+        parser: StreamParser,
+        system_message: Message,
+    ) {
+
+        await prisma.message.update({
+            where: {
+                id: system_message.id,
+                contractId: contract_id,
+            },
+            data: {
+                finalzing: true,
+            },
+        });
+
+        console.log('the stage: ', chalk.green('Finalizing'));
+        this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
+
+        const finalizer_stream = await finalizer_chain.stream({
+            generated_files: generated_files,
+        });
+
+        for await (const chunk of finalizer_stream) {
+            if(chunk.text) {
+                console.log(chunk.text);
+                parser.feed(chunk.text, system_message);                
+            }
+        }
+
+        await prisma.message.update({
+            where: {
+                id: system_message.id,
+                contractId: contract_id,
+            },
+            data: {
+                End: true,
+            },
+        });
+        console.log('the stage: ', chalk.green('END'));
+        this.send_sse(res, STAGE.END, { data: generated_files });
+        objectStore.uploadContractFiles(contract_id, generated_files, full_response);
+
+        console.log('generated idl: ', parser.getGeneratedIdl());
+
+        // make a private var to store idl in stream parser
+        // save the idl to db
+
     }
 
     protected async old_contract(
@@ -215,6 +316,7 @@ export default class Generator extends GeneratorShape {
     protected get_chains(chat: 'new' | 'old', model: MODEL) {
         let planner_chain;
         let coder_chain;
+        let finalizer_chain;
 
         const coder = model === MODEL.CLAUDE ? this.claude_coder : this.gemini_coder;
 
@@ -227,9 +329,12 @@ export default class Generator extends GeneratorShape {
 
                 coder_chain = new_chat_coder_prompt.pipe(coder);
 
+                finalizer_chain = finalizer_prompt.pipe(this.gemini_finalizer);
+
                 return {
                     planner_chain: planner_chain,
                     coder_chain: coder_chain,
+                    finalizer_chain: finalizer_chain,
                 };
             }
 
@@ -240,6 +345,8 @@ export default class Generator extends GeneratorShape {
                 ]);
 
                 coder_chain = old_chat_coder_prompt.pipe(coder.bindTools([Tool.get_file]));
+
+                finalizer_chain = finalizer_prompt.pipe(this.gemini_finalizer);
 
                 return {
                     planner_chain: planner_chain,

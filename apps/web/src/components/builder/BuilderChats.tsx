@@ -155,7 +155,11 @@ export default function BuilderChats() {
 
                             case STAGE.END:
                                 if ('data' in event.data && event.data.data) {
+                                    if(event.systemMessage) {
+                                        upsertMessage(event.systemMessage);
+                                    }
                                     parseFileStructure(event.data.data as FileContent[]);
+                                    setLoading(false);
                                 }
                                 break;
 
@@ -165,6 +169,7 @@ export default function BuilderChats() {
                     } catch (error) {
                         console.warn('Skipping incomplete stream event chunk', error);
                     }
+                    
                 }
             }
 

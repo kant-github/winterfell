@@ -130,6 +130,7 @@ model Message {
   building       Boolean @default(false)
   creatingFiles  Boolean @default(false)
   finalzing      Boolean @default(false)
+  End            Boolean @default(false)
   error          Boolean @default(false)
 
   // isCodeBuilt Boolean? @default(false)

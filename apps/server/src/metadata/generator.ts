@@ -42,6 +42,7 @@ export default abstract class GeneratorShape {
         res: Response,
         planner_chain: RunnableSequence,
         coder_chain: Runnable,
+        finalizer_chain: Runnable,
         user_instruction: string,
         contract_id: string,
         parser: StreamParser,

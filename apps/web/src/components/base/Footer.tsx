@@ -35,8 +35,8 @@ const footerLinks = [
     {
         title: 'Connect',
         links: [
-            { name: 'Twitter', icon: FaTwitter },
-            { name: 'GitHub', icon: FaGithub },
+            { name: 'Twitter', icon: FaTwitter, link: 'https://x.com/winterfell_dev' },
+            // { name: 'GitHub', icon: FaGithub },
             { name: 'Discord', icon: FaDiscord },
             { name: 'LinkedIn', icon: FaLinkedin },
         ],
@@ -74,13 +74,15 @@ export default function Footer() {
                                     if (typeof link === 'object' && 'icon' in link) {
                                         const Icon = link.icon;
                                         return (
-                                            <span
+                                            <a
+                                                href={link.link}
+                                                target='_blank'
                                                 key={link.name}
                                                 className="cursor-pointer hover:text-primary transition-colors flex items-center gap-x-2"
                                             >
                                                 <Icon className="text-xl size-4" />
                                                 {link.name}
-                                            </span>
+                                            </a>
                                         );
                                     }
                                     return (

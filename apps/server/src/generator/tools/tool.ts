@@ -2,10 +2,10 @@ import path from 'path';
 import fs, { readFileSync } from 'fs';
 import { tool } from '@langchain/core/tools';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import { tool_schema } from '../schema/tool_schema';
 import chalk from 'chalk';
 import { RunnableLambda } from '@langchain/core/runnables';
 import { objectStore } from '../../services/init';
+import { tool_schema } from '../schema/tool_schema';
 
 const RULES_DIR = path.resolve(process.cwd(), 'dist/rules');
 
