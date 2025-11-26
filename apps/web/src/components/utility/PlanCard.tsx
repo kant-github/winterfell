@@ -69,7 +69,7 @@ export default function PlanCard({ planData, billing }: PlanCardProps) {
                         {planData.features.map(function (feature, idx) {
                             return (
                                 <div key={idx} className="flex items-start gap-4">
-                                    <Check className="size-6 text-white mt-0.5 flex-shrink-0" />
+                                    <Check className="size-6 text-green-500 mt-0.5 flex-shrink-0" />
                                     <span className="text-lg text-neutral-200">{feature}</span>
                                 </div>
                             );

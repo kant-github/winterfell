@@ -306,7 +306,10 @@ export default class Generator extends GeneratorShape {
         });
     }
 
-    protected get_chains(chat: 'new' | 'old', model: MODEL): { planner_chain: any, coder_chain: any, finalizer_chain: any } {
+    protected get_chains(
+        chat: 'new' | 'old',
+        model: MODEL,
+    ): { planner_chain: any; coder_chain: any; finalizer_chain: any } {
         let planner_chain;
         let coder_chain;
         let finalizer_chain;

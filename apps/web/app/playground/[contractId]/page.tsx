@@ -86,7 +86,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
 
     function handleIncomingTerminalLogs(message: WSServerIncomingPayload<IncomingPayload>) {
         const { line } = message.payload;
-
+        console.log("message is : ", message);
         addLog({
             type: message.type,
             text: line,

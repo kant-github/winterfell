@@ -11,12 +11,6 @@ export default function PricingPage() {
 
     return (
         <div className="min-h-screen bg-dark-base py-20 px-6 relative">
-            {/* <div
-                className="absolute inset-0 z-0"
-                style={{
-                    background: "radial-gradient(125% 125% at 50% 90%, #000000 40%, #0f091e 100%)",
-                }}
-            /> */}
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
                     <h1 className="text-6xl font-bold text-white mb-6">Choose Your Plan</h1>
