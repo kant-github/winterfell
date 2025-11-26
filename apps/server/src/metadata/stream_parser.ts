@@ -1,5 +1,12 @@
 import { Message } from '@winterfell/database';
-import { ErrorData, FILE_STRUCTURE_TYPES, FileContent, PHASE_TYPES, STAGE, StreamEventData } from "@winterfell/types";
+import {
+    ErrorData,
+    FILE_STRUCTURE_TYPES,
+    FileContent,
+    PHASE_TYPES,
+    STAGE,
+    StreamEventData,
+} from '@winterfell/types';
 
 export interface StreamEventPayload {
     data: StreamEventData;

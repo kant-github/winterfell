@@ -4,7 +4,13 @@ import { MODEL } from '../generator/types/model_types';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import { Response } from 'express';
 import StreamParser from '../services/stream_parser';
-import { FILE_STRUCTURE_TYPES, FileContent, PHASE_TYPES, STAGE, StreamEventData } from '@winterfell/types';
+import {
+    FILE_STRUCTURE_TYPES,
+    FileContent,
+    PHASE_TYPES,
+    STAGE,
+    StreamEventData,
+} from '@winterfell/types';
 import { Message } from '@winterfell/database';
 
 export default abstract class GeneratorShape {
@@ -52,13 +58,13 @@ export default abstract class GeneratorShape {
 
     /**
      * it's role is to generate an idl from the generated code from coder
-     * @param {Response} res 
-     * @param {Runnable} finalizer_chain 
-     * @param {FileContent[]} generated_files 
-     * @param {string} full_response 
-     * @param {string} contract_id 
-     * @param {StreamParser} parser 
-     * @param {Message} system_message 
+     * @param {Response} res
+     * @param {Runnable} finalizer_chain
+     * @param {FileContent[]} generated_files
+     * @param {string} full_response
+     * @param {string} contract_id
+     * @param {StreamParser} parser
+     * @param {Message} system_message
      */
     protected abstract new_finalizer(
         res: Response,
@@ -95,28 +101,28 @@ export default abstract class GeneratorShape {
     protected abstract get_chains(
         chat: 'new' | 'old',
         model: MODEL,
-    ): { planner_chain: any; coder_chain: any, finalizer_chain: any };
+    ): { planner_chain: any; coder_chain: any; finalizer_chain: any };
 
     /**
      * returns a stream-parser based on contract_id in mapping
-     * @param {string} contract_id 
-     * @param {Response} res 
+     * @param {string} contract_id
+     * @param {Response} res
      * @returns {StreamParser}
      */
     protected abstract get_parser(contract_id: string, res: Response): StreamParser;
 
     /**
      * deletes a contract's stream-parser from the mapping
-     * @param {string} contract_id 
+     * @param {string} contract_id
      */
     protected abstract delete_parser(contract_id: string): void;
 
     /**
      * sends sse to the client
-     * @param {Response} res 
-     * @param {PHASE_TYPES | FILE_STRUCTURE_TYPES | STAGE} type 
-     * @param {StreamEventData} data 
-     * @param {Message} systemMessage 
+     * @param {Response} res
+     * @param {PHASE_TYPES | FILE_STRUCTURE_TYPES | STAGE} type
+     * @param {StreamEventData} data
+     * @param {Message} systemMessage
      */
     protected abstract send_sse(
         res: Response,
@@ -127,7 +133,7 @@ export default abstract class GeneratorShape {
 
     /**
      * creates stream from client
-     * @param {Response} res 
+     * @param {Response} res
      */
     protected abstract create_stream(res: Response): void;
 }
