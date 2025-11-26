@@ -20,8 +20,6 @@ model User {
   githubAccessToken String?
   githubUsername    String?
 
-  githubRepoName    String?
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -39,6 +37,8 @@ model Contract {
   code         String?
   codeHash     String?
   s3_url       String?
+
+  githubRepoName    String?
 
   lastBuildStatus BuildStatus @default(NEVER_BUILT)
   lastBuildId     String?

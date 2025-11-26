@@ -7,7 +7,7 @@ export default function ExportPanel() {
         <div
             className={cn(
                 'absolute top-11 right-0 bg-dark-base border border-neutral-800 rounded-md shadow-lg z-20',
-                'flex flex-col min-w-[20rem] w-full pb-2',
+                'flex flex-col gap-y-1 min-w-[28rem] w-full pb-2',
             )}
         >
             <div className="text-xs tracking-wide p-4 pb-0">

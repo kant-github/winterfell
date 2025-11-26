@@ -9,12 +9,11 @@ import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import getUserPlanController from '../controllers/payment-controller/getUserPlanController';
 import syncFilesController from '../controllers/files/syncFilesController';
 import githubCodePushController from '../controllers/github-deploy-controller/githubCodePushController';
-import githubJobStatusController from '../controllers/github-deploy-controller/githubJobStatusController';
 import continueChatController from '../controllers/chat-controller/continueChatController';
 import getChatController from '../controllers/chat-controller/getChatController';
 import { createContractReview } from '../controllers/review/create_contract_review';
 import generateContractController from '../controllers/gen/generateContractController';
-import contractLimit from '../middlewares/middleware.contractLimit';
+import githubRepoNameValidatorController from '../controllers/github-deploy-controller/githubRepoNameValidatorController';
 
 const router: Router = Router();
 
@@ -29,9 +28,11 @@ router.get('/health', async (_req: Request, res: Response) => {
 router.post('/generate', authMiddleware, generateContractController);
 router.post('/new', authMiddleware, startChatController);
 router.post('/continue', authMiddleware, continueChatController);
-router.post('/contract/export', authMiddleware, githubCodePushController);
-router.get('/contract/push-status', githubJobStatusController);
 router.post('/contract/get-chat', authMiddleware, getChatController);
+
+// github-routes
+router.post('/export-code', authMiddleware, githubCodePushController);
+router.post('/check-repo-name', authMiddleware, githubRepoNameValidatorController);
 
 // file-routes
 router.get('/files/:contractId', authMiddleware, getFilesController);
