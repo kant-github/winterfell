@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { get_github_owner } from '../../services/git_services';
 import { github_worker_queue } from '../../services/init';
 import ResponseWriter from '../../class/response_writer';
-import { prisma } from '@repo/database';
+import { prisma } from '@winterfell/database';
 
 export default async function githubCodePushController(req: Request, res: Response) {
     const user_id = req.user?.id;

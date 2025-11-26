@@ -10,7 +10,7 @@ import ToolTipComponent from '../ui/TooltipComponent';
 import { useTerminalResize } from '@/src/hooks/useTerminalResize';
 import { cn } from '@/src/lib/utils';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
-import { TerminalSocketData } from '@repo/types';
+import { TerminalSocketData } from '@winterfell/types';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { Line } from '@/src/types/terminal_types';
 import { useCommandHistoryStore } from '@/src/store/code/useCommandHistoryStore';

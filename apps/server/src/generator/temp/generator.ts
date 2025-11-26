@@ -13,7 +13,7 @@ import {
 } from './prompts';
 import { AIMessageChunk, MessageStructure } from '@langchain/core/messages';
 import StreamParser from '../../services/stream_parser';
-import { ChatRole, Message, prisma } from '@repo/database';
+import { ChatRole, Message, prisma } from '@winterfell/database';
 import GeneratorShape from '../../metadata/generator';
 import { Response } from 'express';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../../types/stream_event_types';
 import { STAGE } from '../../types/content_types';
 import { objectStore } from '../../services/init';
-import { FileContent } from '@repo/types';
+import { FileContent } from '@winterfell/types';
 import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
 import chalk from 'chalk';
 
@@ -285,7 +285,7 @@ export default class Generator extends GeneratorShape {
 
         console.log('generated idl: ', parser.getGeneratedIdl());
 
-        // make a private var to store idl in stream parser
+        // make a protected var to store idl in stream parser
         // save the idl to db
     }
 
@@ -306,7 +306,7 @@ export default class Generator extends GeneratorShape {
         });
     }
 
-    protected get_chains(chat: 'new' | 'old', model: MODEL) {
+    protected get_chains(chat: 'new' | 'old', model: MODEL): { planner_chain: any, coder_chain: any, finalizer_chain: any } {
         let planner_chain;
         let coder_chain;
         let finalizer_chain;
@@ -344,13 +344,14 @@ export default class Generator extends GeneratorShape {
                 return {
                     planner_chain: planner_chain,
                     coder_chain: coder_chain,
+                    finalizer_chain,
                 };
             }
         }
     }
 
-    private get_parser(contractId: string, res: Response): StreamParser {
-        if (!this.parsers.has(contractId)) {
+    protected get_parser(contract_id: string, res: Response): StreamParser {
+        if (!this.parsers.has(contract_id)) {
             const parser = new StreamParser();
 
             parser.on(PHASE_TYPES.THINKING, ({ data, systemMessage }) =>
@@ -405,25 +406,25 @@ export default class Generator extends GeneratorShape {
                 this.send_sse(res, STAGE.FINALIZING, data, systemMessage),
             );
 
-            this.parsers.set(contractId, parser);
+            this.parsers.set(contract_id, parser);
         }
-        return this.parsers.get(contractId) as StreamParser;
+        return this.parsers.get(contract_id) as StreamParser;
     }
 
-    private delete_parser(contractId: string): void {
-        this.parsers.delete(contractId);
+    protected delete_parser(contract_id: string): void {
+        this.parsers.delete(contract_id);
     }
 
-    private send_sse(
+    protected send_sse(
         res: Response,
         type: PHASE_TYPES | FILE_STRUCTURE_TYPES | STAGE,
         data: StreamEventData,
-        systemMessage?: Message,
+        system_message?: Message,
     ): void {
         const event: StreamEvent = {
             type,
             data,
-            systemMessage: systemMessage as Message,
+            systemMessage: system_message as Message,
             timestamp: Date.now(),
         };
 

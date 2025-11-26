@@ -4,7 +4,7 @@ import { MessagesAnnotation, StateGraph, Annotation } from '@langchain/langgraph
 import Tool from './tool';
 import { AIMessage, BaseMessage } from '@langchain/core/messages';
 import StreamParser from '../../services/stream_parser';
-import { ChatRole, prisma } from '@repo/database';
+import { ChatRole, prisma } from '@winterfell/database';
 import AgentStreamParser from '../../services/agent_stream_parser';
 
 // Create custom state annotation that extends MessagesAnnotation

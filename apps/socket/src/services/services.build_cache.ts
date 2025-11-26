@@ -1,4 +1,4 @@
-import { Contract } from '@repo/database';
+import { Contract } from '@winterfell/database';
 import crypto from 'crypto';
 
 export default class BuildCache {

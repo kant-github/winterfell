@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database';
+import { prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
 
 export default async function syncFilesController(req: Request, res: Response) {

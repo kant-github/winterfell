@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { continueChatSchema } from '../../schemas/continue_chat_schema';
-import { ChatRole, prisma } from '@repo/database';
+import { ChatRole, prisma } from '@winterfell/database';
 import { contentGenerator } from '../../services/init';
 
 export default async function continueChatController(req: Request, res: Response) {

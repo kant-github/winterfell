@@ -1,7 +1,7 @@
 import Razorpay from 'razorpay';
 import { Orders } from 'razorpay/dist/types/orders';
 import env from '../configs/config.env';
-import { PlanType, prisma, SubscriptionStatus } from '@repo/database';
+import { PlanType, prisma, SubscriptionStatus } from '@winterfell/database';
 import PLANS from '../configs/config.plans';
 import crypto from 'crypto';
 

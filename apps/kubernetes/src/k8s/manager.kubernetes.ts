@@ -5,7 +5,7 @@ import { PodServices } from '../services/pod.services';
 import KubernetesClient from './client.kubernetes';
 import { Writable } from 'stream';
 import { PodStatus } from '../types/types.kubernetes';
-import { FileContent } from '@repo/types';
+import { FileContent } from '@winterfell/types';
 
 export default class KubernetesManager {
     private core_api: CoreV1Api;

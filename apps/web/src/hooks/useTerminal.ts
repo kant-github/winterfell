@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { COMMAND_WRITER, CommandResponse } from '../lib/terminal_commands';
 import { useWebSocket } from './useWebSocket';
-import { COMMAND } from '@repo/types';
+import { COMMAND } from '@winterfell/types';
 import { useTerminalLogStore } from '../store/code/useTerminalLogStore';
 import { useCommandHistoryStore } from '../store/code/useCommandHistoryStore';
 

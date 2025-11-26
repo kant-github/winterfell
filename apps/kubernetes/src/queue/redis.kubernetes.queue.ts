@@ -1,4 +1,4 @@
-import { BuildJobPayload, COMMAND } from '@repo/types';
+import { BuildJobPayload, COMMAND } from '@winterfell/types';
 import { Job, Worker } from 'bullmq';
 import { kubernetes_services } from '..';
 import { env } from '../configs/configs.env';

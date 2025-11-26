@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ChatRole, prisma } from '@repo/database';
+import { ChatRole, prisma } from '@winterfell/database';
 import { contentGenerator } from '../../services/init';
 import { startChatSchema } from '../../schemas/start_chat_schema';
 import { Keypair } from '@solana/web3.js';

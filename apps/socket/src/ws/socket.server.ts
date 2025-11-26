@@ -1,6 +1,6 @@
 import WebSocket, { WebSocketServer as WSServer } from 'ws';
 import { CustomWebSocket } from '../types/socket_types';
-import { COMMAND, IncomingPayload, TerminalSocketData, WSServerIncomingPayload } from '@repo/types';
+import { COMMAND, IncomingPayload, TerminalSocketData, WSServerIncomingPayload } from '@winterfell/types';
 import RedisPubSub from '../queue/redis.subscriber';
 import { env } from '../configs/config.env';
 import CommandService from '../services/services.command';

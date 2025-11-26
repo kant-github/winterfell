@@ -13,7 +13,7 @@ import { useChatStore } from '@/src/store/user/useChatStore';
 import React, { useEffect, useState, useCallback, useRef, use } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 import { useRouter } from 'next/navigation';
-import { IncomingPayload, WSServerIncomingPayload } from '@repo/types';
+import { IncomingPayload, WSServerIncomingPayload } from '@winterfell/types';
 
 const REVIEW_STORAGE_KEY = 'contract-reviewed-';
 

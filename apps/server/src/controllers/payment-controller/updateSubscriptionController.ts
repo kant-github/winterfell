@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { razorpay } from '../../services/init';
-import { prisma } from '@repo/database';
+import { prisma } from '@winterfell/database';
 
 export default async function updateSubscriptionController(req: Request, res: Response) {
     try {

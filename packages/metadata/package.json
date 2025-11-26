@@ -1,5 +1,5 @@
 {
-  "name": "@winterfell/types",
+  "name": "@winterfell/metadata",
   "version": "1.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@winterfell/types": "*",
     "@winterfell/database": "*",
     "typescript": "^5.0.0"
   },
@@ -21,3 +22,4 @@
     "zod": "^4.1.12"
   }
 }
+

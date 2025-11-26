@@ -14,7 +14,7 @@ import { cn } from '@/src/lib/utils';
 import OpacityBackground from '../utility/OpacityBackground';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { contractReviewSchema } from '@repo/types';
+import { contractReviewSchema } from '@winterfell/types';
 import { REVIEW_URL } from '@/routes/api_routes';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { prisma } from '@repo/database';
+import { prisma } from '@winterfell/database';
+import ResponseWriter from '../../class/response_writer';
 import { get_github_owner } from '../../services/git_services';
 import axios from 'axios';
 import env from '../../configs/config.env';

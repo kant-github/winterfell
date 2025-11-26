@@ -1,4 +1,4 @@
-import { PlanType, prisma } from '@repo/database';
+import { PlanType, prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
 import { generator } from '../../services/init';
 import { MODEL } from '../../generator/types/model_types';

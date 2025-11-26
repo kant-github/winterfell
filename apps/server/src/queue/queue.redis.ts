@@ -1,6 +1,6 @@
 import { Queue } from 'bullmq';
 import queue_config from '../configs/config.queue';
-import { BuildJobPayload, COMMAND } from '@repo/types';
+import { BuildJobPayload, COMMAND } from '@winterfell/types';
 import crypto from 'crypto';
 
 export default class ServerToOrchestratorQueue {

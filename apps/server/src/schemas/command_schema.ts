@@ -1,4 +1,4 @@
-import { COMMAND } from '@repo/types';
+import { COMMAND } from '@winterfell/types';
 import z from 'zod';
 
 export const command_schema = z.enum([

@@ -1,5 +1,6 @@
 import { Message } from '@winterfell/database';
-import { FileContent, STAGE } from './content_types';
+import { STAGE } from './content_types';
+import { FileContent } from '../file_types/file_types';
 
 export type StreamEventType =
     | 'START'
