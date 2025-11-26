@@ -1,5 +1,5 @@
-import { BuildStatus, prisma } from '@repo/database';
-import { BuildCacheCheck, BuildJobPayload, COMMAND } from '@repo/types';
+import { BuildStatus, prisma } from '@winterfell/database';
+import { BuildCacheCheck, BuildJobPayload, COMMAND } from '@winterfell/types';
 import crypto from 'crypto';
 import { server_orchestrator_queue } from '../services/init';
 

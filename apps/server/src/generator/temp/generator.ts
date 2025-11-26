@@ -13,7 +13,7 @@ import {
 } from './prompts';
 import { AIMessageChunk, MessageStructure } from '@langchain/core/messages';
 import StreamParser from '../../services/stream_parser';
-import { ChatRole, Message, prisma } from '@repo/database';
+import { ChatRole, Message, prisma } from '@winterfell/database';
 import GeneratorShape from '../../metadata/generator';
 import { Response } from 'express';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../../types/stream_event_types';
 import { STAGE } from '../../types/content_types';
 import { objectStore } from '../../services/init';
-import { FileContent } from '@repo/types';
+import { FileContent } from '@winterfell/types';
 import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
 import chalk from 'chalk';
 

@@ -1,4 +1,4 @@
-import { BuildStatus } from "@repo/database";
+import { BuildStatus } from "@winterfell/database";
 import { TerminalSocketData } from "../socket/const";
 
 export interface BuildCacheCheck {

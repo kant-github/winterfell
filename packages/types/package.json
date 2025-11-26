@@ -1,5 +1,5 @@
 {
-  "name": "@repo/types",
+  "name": "@winterfell/types",
   "version": "1.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@repo/database": "*",
+    "@winterfell/database": "*",
     "typescript": "^5.0.0"
   },
   "dependencies": {

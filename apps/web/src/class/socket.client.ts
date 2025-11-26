@@ -1,4 +1,4 @@
-import { COMMAND, IncomingPayload, WSServerIncomingPayload } from '@repo/types';
+import { COMMAND, IncomingPayload, WSServerIncomingPayload } from '@winterfell/types';
 
 export type MessageHandler = (message: WSServerIncomingPayload<IncomingPayload>) => void;
 export interface WSServerOutgoingPayload<T> {

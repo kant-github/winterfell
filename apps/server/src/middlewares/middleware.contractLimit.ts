@@ -1,6 +1,6 @@
-import { PlanType, prisma } from '@repo/database';
-import { NextFunction, Request, Response } from 'express';
-import PLANS from '../configs/config.plans';
+import { PlanType, prisma } from "@winterfell/database";
+import { NextFunction, Request, Response } from "express";
+import PLANS from "../configs/config.plans";
 
 export default function contractLimit(isCreating = false) {
     return async function (req: Request, res: Response, next: NextFunction) {

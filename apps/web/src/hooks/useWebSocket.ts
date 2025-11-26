@@ -3,7 +3,7 @@ import WebSocketClient, { MessageHandler } from '../class/socket.client';
 import { cleanWebSocketClient, getWebSocketClient } from '../lib/singletonWebSocket';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
-import { COMMAND } from '@repo/types';
+import { COMMAND } from '@winterfell/types';
 import { COMMAND_WRITER } from '../lib/terminal_commands';
 
 export const useWebSocket = () => {

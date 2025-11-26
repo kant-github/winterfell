@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import { BuildJobPayload, COMMAND } from '@repo/types';
+import { BuildJobPayload, COMMAND } from '@winterfell/types';
 import crypto from 'crypto';
 import queue_config from '../configs/config.queue';
 

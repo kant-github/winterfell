@@ -1,4 +1,4 @@
-import { TerminalSocketData } from '@repo/types';
+import { TerminalSocketData } from '@winterfell/types';
 
 export interface Line {
     type: 'command' | TerminalSocketData | 'client' | 'error';

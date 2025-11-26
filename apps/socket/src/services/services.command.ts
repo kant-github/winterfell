@@ -1,8 +1,8 @@
-import { prisma } from '@repo/database';
+import { prisma } from '@winterfell/database';
 import { CustomWebSocket } from '../types/socket_types';
 import { ParsedMessage } from '../ws/socket.server';
 import BuildCache from './services.build_cache';
-import { WSServerIncomingPayload, TerminalSocketData, BuildJobPayload } from '@repo/types';
+import { WSServerIncomingPayload, TerminalSocketData, BuildJobPayload } from '@winterfell/types';
 import { socket_orchestrator_queue } from './services.init';
 
 export default class CommandService {

@@ -1,5 +1,5 @@
 {
-  "name": "@repo/database",
+  "name": "@winterfell/database",
   "version": "1.0.0",
   "type": "module",
   "exports": {
@@ -21,8 +21,8 @@
     "@prisma/client": "6.17.1"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
+    "@winterfell/eslint-config": "*",
+    "@winterfell/typescript-config": "*",
     "eslint": "^9.32.0",
     "prisma": "6.17.1",
     "rimraf": "^5.0.5",

@@ -1,5 +1,5 @@
-import { prisma } from '@repo/database';
-import { contractReviewSchema } from '@repo/types';
+import { prisma } from '@winterfell/database';
+import { contractReviewSchema } from '@winterfell/types';
 import ResponseWriter from '../../class/response_writer';
 import { Request, Response } from 'express';
 

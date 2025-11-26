@@ -1,4 +1,4 @@
-import { IncomingPayload, WSServerIncomingPayload } from '@repo/types';
+import { IncomingPayload, WSServerIncomingPayload } from '@winterfell/types';
 import Redis from 'ioredis';
 
 export default class RedisPubSub {

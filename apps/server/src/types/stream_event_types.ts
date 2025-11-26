@@ -1,4 +1,4 @@
-import { Message } from '@repo/database';
+import { Message } from '@winterfell/database';
 import { FileContent, STAGE } from './content_types';
 
 export type StreamEventType =

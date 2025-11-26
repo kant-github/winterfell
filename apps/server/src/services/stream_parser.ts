@@ -1,4 +1,4 @@
-import { ChatRole, Message, prisma } from '@repo/database';
+import { ChatRole, Message, prisma } from '@winterfell/database';
 import { FileContent, STAGE } from '../types/content_types';
 import {
     BuildingData,

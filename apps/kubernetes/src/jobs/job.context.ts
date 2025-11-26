@@ -1,4 +1,4 @@
-import { IncomingPayload, TerminalSocketData, WSServerIncomingPayload } from '@repo/types';
+import { IncomingPayload, TerminalSocketData, WSServerIncomingPayload } from '@winterfell/types';
 import { kubernetes_services } from '..';
 import RedisPubSub from '../queue/redis.publisher';
 
