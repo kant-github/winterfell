@@ -3,7 +3,7 @@ import { Octokit } from '@octokit/rest';
 import { RequestError } from '@octokit/request-error';
 import queue_config from '../configs/config.queue';
 import { FileContent, GithubPushJobData } from '../types/github_worker_queue_types';
-import { fetch_codebase } from '../services/git_services';
+import { github_services } from '../services/init';
 
 export class GithubWorkerQueue {
     private queue: Queue<GithubPushJobData>;
@@ -38,7 +38,7 @@ export class GithubWorkerQueue {
         try {
             await this.ensure_repo(octokit, owner, repo_name);
 
-            const files = await fetch_codebase(contract_id);
+            const files = await github_services.fetch_codebase(contract_id);
             console.log('files from s3 are -------------> ', files);
             if (!files?.length) throw new Error('No files found in codebase');
 

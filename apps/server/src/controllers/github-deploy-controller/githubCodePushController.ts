@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-import { get_github_owner } from '../../services/git_services';
-import { github_worker_queue } from '../../services/init';
+import { github_services, github_worker_queue } from '../../services/init';
 import ResponseWriter from '../../class/response_writer';
 import { prisma } from '@winterfell/database';
 
@@ -39,7 +38,7 @@ export default async function githubCodePushController(req: Request, res: Respon
     }
 
     try {
-        const owner = await get_github_owner(user?.githubAccessToken);
+        const owner = await github_services.get_github_owner(user?.githubAccessToken);
 
         await github_worker_queue.enqueue({
             github_access_token: user.githubAccessToken,
