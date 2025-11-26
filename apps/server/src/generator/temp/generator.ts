@@ -14,7 +14,7 @@ import {
 import { AIMessageChunk, MessageStructure } from '@langchain/core/messages';
 import StreamParser from '../../services/stream_parser';
 import { ChatRole, Message, prisma } from '@winterfell/database';
-import GeneratorShape from '../../metadata/generator';
+import { GeneratorShape } from "@winterfell/metadata";
 import { Response } from 'express';
 import {
     FILE_STRUCTURE_TYPES,

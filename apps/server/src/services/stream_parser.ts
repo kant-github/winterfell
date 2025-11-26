@@ -21,23 +21,23 @@ interface StreamEventPayload {
 }
 
 export default class StreamParser {
-    private buffer: string;
-    private currentPhase: string | null;
-    private currentStage: string | null;
-    private currentFile: string | null;
-    private currentCodeBlock: string;
-    private insideCodeBlock: boolean;
-    private isJsonBlock: boolean;
-    private eventHandlers: Map<
+    protected buffer: string;
+    protected currentPhase: string | null;
+    protected currentStage: string | null;
+    protected currentFile: string | null;
+    protected currentCodeBlock: string;
+    protected insideCodeBlock: boolean;
+    protected isJsonBlock: boolean;
+    protected eventHandlers: Map<
         PHASE_TYPES | FILE_STRUCTURE_TYPES | STAGE,
         ((payload: StreamEventPayload) => void)[]
     >;
-    private generatedFiles: FileContent[];
-    private pendingContext: string | null = null;
-    private contractName: string;
+    protected generatedFiles: FileContent[];
+    protected pendingContext: string | null = null;
+    protected contractName: string;
 
-    private pendingIdl: string | null;
-    private generatedIdl: Object[] | null;
+    protected pendingIdl: string | null;
+    protected generatedIdl: Object[] | null;
 
     constructor() {
         this.buffer = '';
@@ -68,7 +68,7 @@ export default class StreamParser {
         }
     }
 
-    private emit(
+    protected emit(
         type: PHASE_TYPES | FILE_STRUCTURE_TYPES | STAGE,
         data: StreamEventData,
         systemMessage: Message,
@@ -84,7 +84,7 @@ export default class StreamParser {
         this.processBuffer(systemMessage);
     }
 
-    private async processBuffer(systemMessage: Message): Promise<void> {
+    protected async processBuffer(systemMessage: Message): Promise<void> {
         if (this.pendingContext !== null || this.buffer.includes('<')) {
             await this.handleContext(systemMessage);
         }
@@ -177,7 +177,7 @@ export default class StreamParser {
         }
     }
 
-    private async handleContext(systemMessage: Message): Promise<boolean> {
+    protected async handleContext(systemMessage: Message): Promise<boolean> {
         let llm_message;
         if (this.pendingContext !== null) {
             this.pendingContext += '\n' + this.buffer;
@@ -244,7 +244,7 @@ export default class StreamParser {
         return false;
     }
 
-    private async stageMatch(stage: string, systemMessage: Message) {
+    protected async stageMatch(stage: string, systemMessage: Message) {
         switch (stage) {
             case 'Planning':
                 systemMessage = await prisma.message.update({
@@ -332,7 +332,7 @@ export default class StreamParser {
         }
     }
 
-    private async phaseMatch(phase: string, systemMessage: Message) {
+    protected async phaseMatch(phase: string, systemMessage: Message) {
         if (this.currentStage !== STAGE.GENERATING_CODE && !systemMessage.generatingCode) {
             await prisma.message.update({
                 where: {
@@ -391,7 +391,7 @@ export default class StreamParser {
         }
     }
 
-    private async handleIdl(systemMessage: Message): Promise<boolean> {
+    protected async handleIdl(systemMessage: Message): Promise<boolean> {
         // Case 1: already buffering IDL
         if (this.pendingIdl !== null) {
             this.pendingIdl += '\n' + this.buffer;
