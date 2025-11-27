@@ -8,11 +8,15 @@ export default class GithubServer {
 
     public static async checkRepoName(
         repoName: string,
+        contractId: string,
         token: string,
     ): Promise<{ success: boolean; message?: string }> {
         const response = await axios.post(
             CHECK_REPO_NAME,
-            { repo_name: repoName },
+            {
+                repo_name: repoName,
+                contract_id: contractId,
+            },
             {
                 headers: {
                     'Content-Type': 'application/json',

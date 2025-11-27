@@ -6,39 +6,79 @@ import { github_services } from '../../services/init';
 export default async function githubRepoNameValidatorController(req: Request, res: Response) {
     try {
         const user_id = req.user?.id;
-        if (!user_id) return ResponseWriter.unauthorized(res, 'Unauthorized');
+        if (!user_id) {
+            ResponseWriter.unauthorized(res, 'Unauthorized');
+            return;
+        }
 
-        const { repo_name } = req.body;
+        const { repo_name, contract_id } = req.body;
+        console.log('inside 1');
 
-        const user = await prisma.user.findUnique({
-            where: { id: user_id },
-        });
+        if (!repo_name) {
+            console.log('repo name is: ', repo_name);
+            ResponseWriter.validation_error(res, 'Repo name is required');
+            return;
+        }
+
+        if (!contract_id) {
+            ResponseWriter.validation_error(res, 'Contract ID is required');
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9_.-]+$/.test(repo_name)) {
+            ResponseWriter.validation_error(res, 'Invalid repo name');
+            return;
+        }
+
+        console.log('repo name is correct');
+        const user = await prisma.user.findUnique({ where: { id: user_id } });
 
         if (!user?.githubAccessToken) {
-            return ResponseWriter.custom(res, 200, {
+            ResponseWriter.custom(res, 200, {
                 success: false,
                 message: 'GitHub authentication required',
-                data: null,
-                meta: { timestamp: new Date().toISOString() },
+                meta: { timestamp: Date.now().toString() },
             });
+            return;
         }
 
-        const repo_exists = await github_services.check_repo_exists(
+        const contract = await prisma.contract.findUnique({ where: { id: contract_id } });
+
+        if (!contract) {
+            ResponseWriter.not_found(res, 'Contract not found');
+            return;
+        }
+
+        const prev = contract.githubRepoName;
+
+        if (!prev) {
+            const exists = await github_services.check_repo_exists(
+                repo_name,
+                user.githubAccessToken,
+            );
+            ResponseWriter.success(
+                res,
+                repo_name,
+                exists.exists ? 'Repo exists' : 'Repo will be created',
+            );
+            return;
+        }
+
+        if (prev === repo_name) {
+            ResponseWriter.success(res, repo_name, 'Linked repo');
+            return;
+        }
+
+        const exists = await github_services.check_repo_exists(repo_name, user.githubAccessToken);
+
+        ResponseWriter.success(
+            res,
             repo_name,
-            user.githubAccessToken,
+            exists.exists ? 'Switching to existing repo' : 'Switching to new repo',
         );
-
-        if (repo_exists.exists === true) {
-            return ResponseWriter.custom(res, 200, {
-                success: false,
-                message: 'Repo name is unavailable',
-                data: null,
-                meta: { timestamp: new Date().toISOString() },
-            });
-        }
-
-        return ResponseWriter.success(res, repo_name, 'Repo name is available');
+        return;
     } catch (error) {
-        return ResponseWriter.error(res, 'Internal server error');
+        ResponseWriter.error(res, 'Internal server error');
+        return;
     }
 }
