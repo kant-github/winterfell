@@ -69,11 +69,12 @@ export default class WebSocketClient {
     }
 
     private handle_incoming_message(parsed_data: WSServerIncomingPayload<IncomingPayload>) {
-        console.log('handler are : ', this.handlers.size);
         this.handlers.forEach((handler) => handler(parsed_data));
     }
 
     public subscribe(handler: MessageHandler) {
+        console.log("while connection the is connected was is : ", this.is_connected);
+        console.log("handler count are : ", handler.length);
         this.handlers.add(handler);
     }
 

@@ -61,7 +61,7 @@ export default class WebSocketServer {
 
         ws.on('error', (err) => {
             console.log('error is socket : ', err);
-            this.connection_mapping.delete(topic); // Changed from ws.user.id
+            this.connection_mapping.delete(topic);
             ws.close();
         });
     }
@@ -127,6 +127,6 @@ export default class WebSocketServer {
                 timestamp: Date.now(),
             },
         };
-        // this.send_message(ws, data);
+        this.send_message(ws, data);
     }
 }

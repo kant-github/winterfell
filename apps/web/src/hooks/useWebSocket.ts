@@ -23,7 +23,9 @@ export const useWebSocket = () => {
             socket.current = getWebSocketClient(token, contractId);
 
             interval = setInterval(() => {
-                setIsConnected(socket.current?.is_connected ?? false);
+                if (socket.current) {
+                    setIsConnected(socket.current.is_connected ?? false);
+                }
             }, 200);
         } catch (err) {
             console.error('Failed to initialize WS:', err);
@@ -39,7 +41,11 @@ export const useWebSocket = () => {
     }, [session?.user?.token, contractId]);
 
     function subscribeToHandler(handler: MessageHandler) {
-        if (!socket.current) return;
+        if (!socket.current) {
+            console.log("socket is not ready to subcribe to new hadnlers");
+            return;
+        };
+        console.log("subscribing a handler to the subscription set");
         socket.current?.subscribe(handler);
     }
 
@@ -57,6 +63,7 @@ export const useWebSocket = () => {
 
     return {
         isConnected,
+        socket,
         subscribeToHandler,
         sendSocketMessage,
     };

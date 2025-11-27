@@ -4,15 +4,36 @@ import BuilderChats from './BuilderChats';
 import CodeEditor from '../code/CodeEditor';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import BuilderLoader from './BuilderLoader';
-import { JSX } from 'react';
+import { JSX, useEffect } from 'react';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import SidePanel from '../code/SidePanel';
 import EditorSidePanel from '../code/EditorSidePanel';
 import Terminal from '../code/Terminal';
+import { useWebSocket } from '@/src/hooks/useWebSocket';
+import { useTerminalLogStore } from '@/src/store/code/useTerminalLogStore';
+import { IncomingPayload, TerminalSocketData, WSServerIncomingPayload } from '@winterfell/types';
 
 export default function BuilderDashboard(): JSX.Element {
     const { loading } = useBuilderChatStore();
     const { collapseChat } = useCodeEditor();
+    const { isConnected, subscribeToHandler } = useWebSocket();
+    const { addLog, setIsCommandRunning } = useTerminalLogStore();
+
+    useEffect(() => {
+        function handleIncomingTerminalLogs(message: WSServerIncomingPayload<IncomingPayload>) {
+            setIsCommandRunning(true);
+            if (message.type === TerminalSocketData.COMPLETED) setIsCommandRunning(false);
+            const { line } = message.payload;
+            addLog({
+                type: message.type,
+                text: line,
+            });
+        }
+
+        if (isConnected) {
+            subscribeToHandler(handleIncomingTerminalLogs);
+        }
+    }, [isConnected]);
 
     return (
         <div className="w-full h-full flex flex-row bg-dark-base z-0 overflow-hidden">

@@ -14,44 +14,57 @@ import { TerminalSocketData } from '@winterfell/types';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { Line } from '@/src/types/terminal_types';
 import { useCommandHistoryStore } from '@/src/store/code/useCommandHistoryStore';
-import { useTerminal } from '@/src/hooks/useTerminal';
+import { isValidCommandFunction, useTerminal } from '@/src/hooks/useTerminal';
 
 export default function Terminal() {
     const [showTerminal, setShowTerminal] = useState<boolean>(false);
     const [currentInput, setCurrentInput] = useState<string>('');
+    const [isValidCommand, setIsValidCommand] = useState<boolean>(false);
     const { currentFile } = useCodeEditor();
     const outputRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const { moveUp, moveDown, resetIndex } = useCommandHistoryStore();
-    const { logs, addLog, clearLogs } = useTerminalLogStore();
+    const { logs, addLog, clearLogs, isCommandRunning } = useTerminalLogStore();
     const { isConnected } = useWebSocket();
     const { handleCommand } = useTerminal();
 
     const { height, startResize } = useTerminalResize({
-        onClose: () => setShowTerminal(false),
+        onClose: function () {
+            setShowTerminal(false);
+        },
     });
 
     useShortcuts({
-        'meta+j': () => setShowTerminal((p) => !p),
-        'ctrl+j': () => setShowTerminal((p) => !p),
+        'meta+j': function () {
+            setShowTerminal(function (p) {
+                return !p;
+            });
+        },
+        'ctrl+j': function () {
+            setShowTerminal(function (p) {
+                return !p;
+            });
+        },
     });
 
-    const Prompt = () => (
-        <span className="text-green-500 select-none">
-            ➜ <span className="text-blue-400">~</span>
-        </span>
-    );
+    function Prompt() {
+        return (
+            <span className="text-green-500 select-none">
+                ➜ <span className="text-blue-400">~</span>
+            </span>
+        );
+    }
 
-    useEffect(() => {
+    useEffect(function () {
         if (showTerminal) inputRef.current?.focus();
     }, [showTerminal]);
 
-    useEffect(() => {
+    useEffect(function () {
         const el = outputRef.current;
         if (!el) return;
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
                 el.scrollTo({
                     top: el.scrollHeight,
                     behavior: 'smooth',
@@ -60,7 +73,7 @@ export default function Terminal() {
         });
     }, [logs]);
 
-    const handleCurrentFileExtension = () => {
+    function handleCurrentFileExtension() {
         if (!currentFile) return 'no selected file.';
         const currentFileNameArray = currentFile.name.split('.');
         const extension = currentFileNameArray[currentFileNameArray.length - 1];
@@ -77,7 +90,7 @@ export default function Terminal() {
                 if (extension.endsWith('ignore')) return 'ignore';
                 return 'File';
         }
-    };
+    }
 
     function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
         if (e.ctrlKey && e.key === 'c') {
@@ -106,35 +119,73 @@ export default function Terminal() {
         }
     }
 
-    const renderLines = (lines: Line[]) =>
-        lines.map((line, i) => {
-            const colorClass =
-                line.type === 'command'
-                    ? ''
-                    : line.type === TerminalSocketData.COMPLETED
-                      ? 'text-cyan-500'
-                      : line.type === TerminalSocketData.LOGS
-                        ? 'text-green-500/90'
-                        : line.type === TerminalSocketData.ERROR_MESSAGE
-                          ? 'text-[#E9524A]'
-                          : line.type === TerminalSocketData.EXECUTING_COMMAND
-                            ? 'text-primary-light/90'
-                            : line.type === TerminalSocketData.SERVER_MESSAGE
-                              ? 'text-cyan-500'
-                              : 'text-light/80 font-normal';
+    function renderLines(lines: Line[]) {
+        return lines.map(function (line, i) {
+            let className = '';
+            switch (line.type) {
+                case 'command':
+                    className = 'text-[#1ed65e]';
+                    break;
+
+                case TerminalSocketData.COMPLETED:
+                    className = 'text-cyan-500';
+                    break;
+
+                case TerminalSocketData.LOGS:
+                    className = 'text-[#1ed65e]';
+                    break;
+
+                case TerminalSocketData.ERROR_MESSAGE:
+                    className = 'text-[#E9524A]';
+                    break;
+
+                case TerminalSocketData.EXECUTING_COMMAND:
+                    className = 'text-primary-light/90';
+                    break;
+
+                case TerminalSocketData.SERVER_MESSAGE:
+                    className = 'text-cyan-500';
+                    break;
+
+                case 'client':
+                    className = 'text-yellow-500';
+                    break;
+
+                case 'error':
+                    className = 'text-red-500';
+                    break;
+
+                case 'unknown':
+                    className = 'text-red-500';
+                    break;
+
+                default:
+                    className = 'text-light/80 font-normal';
+            }
 
             return (
                 <div key={i} className="whitespace-pre-wrap text-left">
                     {line.type === 'command' ? (
                         <>
-                            <Prompt /> <span className="ml-2">{line.text}</span>
+                            <Prompt /> <span className={cn('ml-2', className)}>{line.text}</span>
                         </>
+                    ) : line.type === 'error' && line.text.startsWith('winterfell:') ? (
+                        <span className={cn('ml-6', className)}>{line.text}</span>
                     ) : (
-                        <span className={cn('ml-6', colorClass)}>{line.text}</span>
+                        <>
+                            {line.type === 'error' ? (
+                                <>
+                                    <Prompt /> <span className={cn('ml-2', className)}>{line.text}</span>
+                                </>
+                            ) : (
+                                <span className={cn('ml-6', className)}>{line.text}</span>
+                            )}
+                        </>
                     )}
                 </div>
             );
         });
+    }
 
     return (
         <>
@@ -147,7 +198,7 @@ export default function Terminal() {
                     }}
                 >
                     <div
-                        onMouseDown={(e) => {
+                        onMouseDown={function (e) {
                             e.preventDefault();
                             startResize();
                         }}
@@ -178,7 +229,9 @@ export default function Terminal() {
 
                             <ToolTipComponent content="close">
                                 <Button
-                                    onClick={() => setShowTerminal(false)}
+                                    onClick={function () {
+                                        setShowTerminal(false);
+                                    }}
                                     size={'mini'}
                                     className="bg-transparent hover:bg-dark rounded"
                                 >
@@ -191,21 +244,33 @@ export default function Terminal() {
                     <div className="flex flex-1 overflow-hidden">
                         <div
                             ref={outputRef}
-                            onClick={() => inputRef.current?.focus()}
+                            onClick={function () {
+                                inputRef.current?.focus();
+                            }}
                             className="flex-1 cursor-text overflow-y-auto px-3 py-2 text-light/80 flex flex-col"
                         >
                             {renderLines(logs)}
 
                             <div className="flex mt-1">
-                                <Prompt />
+                                {!isCommandRunning && <Prompt />}
                                 <input
                                     aria-label="terminal"
                                     ref={inputRef}
+                                    disabled={isCommandRunning}
                                     type="text"
                                     value={currentInput}
-                                    onChange={(e) => setCurrentInput(e.target.value)}
+                                    onChange={function (e) {
+                                        const value = e.target.value;
+                                        setCurrentInput(value);
+                                        setIsValidCommand(isValidCommandFunction(value.trim()));
+                                    }}
                                     onKeyDown={handleInputKeyDown}
-                                    className="outline-none bg-transparent text-light/80 ml-2 flex-1"
+                                    className={cn(
+                                        "outline-none bg-transparent ml-2 flex-1",
+                                        currentInput.trim() && isValidCommand
+                                            ? "text-[#68db3e]"
+                                            : "text-light/80"
+                                    )}
                                 />
                             </div>
                         </div>
@@ -216,7 +281,11 @@ export default function Terminal() {
             <div className="absolute bottom-0 left-0 right-0 h-6 flex justify-between items-center px-3 text-[11px] text-light/70 bg-dark-base border-t border-neutral-800 z-20">
                 <div
                     className="flex items-center space-x-1.5 hover:bg-neutral-800/50 px-2 py-0.5 rounded-md cursor-pointer transition text-[11px]"
-                    onClick={() => setShowTerminal((prev) => !prev)}
+                    onClick={function () {
+                        setShowTerminal(function (prev) {
+                            return !prev;
+                        });
+                    }}
                 >
                     <span className="font-bold text-light/50 tracking-wider">Ctrl/Cmd + J</span>
                     <span className="text-light/50 flex items-center space-x-1 tracking-widest">
