@@ -1,11 +1,5 @@
 import z from "zod";
 
-/**
- * ✅ Gemini-safe schemas
- * ❌ No z.enum
- * ❌ No z.literal
- */
-
 const instruction_schema = z.object({
     name: z.string(),
     params: z.array(
@@ -42,7 +36,7 @@ const struct_schema = z.object({
 const entrypoint_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.string(), // ✅ changed
+    type: z.string(),
     mod_name: z.string(),
     public_key: z.string(),
     instructions: z.array(
@@ -55,21 +49,21 @@ const entrypoint_file_schema = z.object({
 const instruction_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.string(), // ✅ changed
+    type: z.string(),
     instructions: z.array(instruction_schema),
 });
 
 const struct_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.string(), // ✅ changed
+    type: z.string(),
     structs: z.array(struct_schema),
 });
 
 const instruction_and_struct_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.string(), // ✅ changed
+    type: z.string(),
     instructions: z.array(instruction_schema),
     structs: z.array(struct_schema),
 });
@@ -77,14 +71,14 @@ const instruction_and_struct_schema = z.object({
 const test_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.string(), // ✅ changed
+    type: z.string(),
     description: z.string(),
 });
 
 const mod_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.string(), // ✅ changed
+    type: z.string(),
     mods: z.array(
         z.object({
             name: z.string(),
@@ -95,7 +89,7 @@ const mod_file_schema = z.object({
 const packages_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.string(), // ✅ changed
+    type: z.string(),
     name: z.string(),
     description: z.string(),
 });

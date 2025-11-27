@@ -4,13 +4,6 @@ import { MODEL } from '../types/model_types';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { new_planner_output_schema, old_planner_output_schema } from './schema';
 import Tool from '../tools/tool';
-import {
-    finalizer_prompt,
-    new_chat_coder_prompt,
-    new_chat_planner_prompt,
-    old_chat_coder_prompt,
-    old_chat_planner_prompt,
-} from './prompts';
 import { AIMessageChunk, MessageStructure } from '@langchain/core/messages';
 import StreamParser from '../../services/stream_parser';
 import { ChatRole, Message, prisma } from '@winterfell/database';
@@ -28,6 +21,9 @@ import { FileContent } from '@winterfell/types';
 import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
 import chalk from 'chalk';
 import { finalizer_output_schema } from '../schema/finalizer_output_schema';
+import { new_chat_coder_prompt, new_chat_planner_prompt } from '../prompts/new_chat_prompts';
+import { finalizer_prompt } from '../prompts/finalizer_prompt';
+import { old_chat_coder_prompt, old_chat_planner_prompt } from '../prompts/old_chat_prompts';
 
 type planner = RunnableSequence<
     {
@@ -284,7 +280,15 @@ export default class Generator extends GeneratorShape {
 
             objectStore.uploadContractFiles(contract_id, generated_files, full_response);
 
-            console.log('generated idl: ', parser.getGeneratedIdl());
+            // save the idl to data base
+            await prisma.contract.update({
+                where: {
+                    id: contract_id,
+                },
+                data: {
+                    summarisedObject: finalizer_chain.idl,
+                },
+            });
 
             // make a protected var to store idl in stream parser
             // save the idl to db
@@ -303,14 +307,15 @@ export default class Generator extends GeneratorShape {
         contract_id: string,
         idl: Object[],
     ) {
-        const data = await planner_chain.invoke({
-            user_instruction,
+
+        const planner_data = await planner_chain.invoke({
+            user_instruction: user_instruction,
+            idl: idl,
         });
 
-        const coder = await coder_chain.invoke({
-            plan: data.plan,
-            files_likely_affected: data.files_likely_affected,
-        });
+        console.log(planner_data);
+
+
     }
 
     protected get_chains(
