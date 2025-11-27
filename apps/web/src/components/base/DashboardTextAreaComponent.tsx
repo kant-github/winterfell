@@ -11,6 +11,9 @@ import LoginModal from '../utility/LoginModal';
 import ModelSelect from './ModelSelect';
 import { ChatRole } from '@/src/types/prisma-types';
 import { useModelStore } from '@/src/store/model/useModelStore';
+import ContractTemplates from '../home/ContractTemplates';
+import BaseTemplatePanel from './BaseTemplatePanel';
+import BaseContractTemplatesPanel from './BaseTemplatePanel';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -19,6 +22,7 @@ export default function DashboardTextAreaComponent() {
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const { session } = useUserSessionStore();
     const { setMessage } = useBuilderChatStore();
+    const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
     const router = useRouter();
 
     function handleSubmit() {
@@ -114,6 +118,7 @@ export default function DashboardTextAreaComponent() {
                         <div className="flex items-center gap-1.5 md:gap-3">
                             <ModelSelect value={selectedModel} onChange={setSelectedModel} />
                             <Button
+                                onClick={() => setShowTemplatePanel((prev) => !prev)}
                                 type="button"
                                 className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
                             >
@@ -152,6 +157,11 @@ export default function DashboardTextAreaComponent() {
                         </Button>
                     </div>
                 </div>
+                {showTemplatePanel && (
+                    <div className="absolute h-30 max-w-sm z-20 left-40 bg-dark-base">
+                        <BaseContractTemplatesPanel />
+                    </div>
+                )}
 
                 <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-50" />
             </div>

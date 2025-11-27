@@ -1,4 +1,4 @@
-function generateWinterfellReadme() {
+export default function generateWinterfellReadme() {
     return `
 # Winterfell – AI-Powered Anchor Contract Workspace
 

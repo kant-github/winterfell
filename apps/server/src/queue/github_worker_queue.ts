@@ -4,6 +4,8 @@ import { RequestError } from '@octokit/request-error';
 import queue_config from '../configs/config.queue';
 import { FileContent, GithubPushJobData } from '../types/github_worker_queue_types';
 import { github_services } from '../services/init';
+import { prisma } from '@winterfell/database';
+import generateWinterfellReadme from '../utils/winterfell_commit';
 
 export class GithubWorkerQueue {
     private queue: Queue<GithubPushJobData>;
@@ -13,12 +15,8 @@ export class GithubWorkerQueue {
         new Worker(queue_name, this.process_job.bind(this), queue_config);
     }
 
-    /**
-     * enqueus a github push job for execution.
-     */
     public async enqueue(job_data: GithubPushJobData) {
         const job_id = `${job_data.user_id}-${job_data.repo_name}-${Date.now()}`;
-
         return this.queue.add('github-push', job_data, {
             jobId: job_id,
             attempts: 2,
@@ -28,20 +26,25 @@ export class GithubWorkerQueue {
         });
     }
 
-    /**
-     * worker processor for github push jobs.
-     */
     private async process_job(job: Job<GithubPushJobData>) {
         const { github_access_token, owner, repo_name, contract_id } = job.data;
         const octokit = new Octokit({ auth: github_access_token });
 
         try {
-            await this.ensure_repo(octokit, owner, repo_name);
+            const { created } = await this.ensure_repo_for_contract(
+                octokit,
+                owner,
+                repo_name,
+                contract_id,
+            );
+            let files = await github_services.fetch_codebase(contract_id);
+            if (!files || !files.length) {
+                throw new Error('No files found in codebase');
+            }
 
-            const files = await github_services.fetch_codebase(contract_id);
-            console.log('files from s3 are -------------> ', files);
-            if (!files?.length) throw new Error('No files found in codebase');
-
+            if (created && !files.some((f) => f.path === 'README.md')) {
+                files = [...files, { path: 'README.md', content: generateWinterfellReadme() }];
+            }
             await this.upsert_code(octokit, owner, repo_name, files);
 
             return {
@@ -55,42 +58,48 @@ export class GithubWorkerQueue {
         }
     }
 
-    /**
-     * ensures the github repository exists. Creates if missing.
-     */
-    private async ensure_repo(octokit: Octokit, owner: string, repo: string) {
+    private async ensure_repo_for_contract(
+        octokit: Octokit,
+        owner: string,
+        repo: string,
+        contract_id: string,
+    ) {
+        const contract = await prisma.contract.findUnique({ where: { id: contract_id } });
+        if (!contract) {
+            throw new Error('Contract not found');
+        }
+
+        let repo_exists = false;
         try {
             await octokit.repos.get({ owner, repo });
+            repo_exists = true;
         } catch (err) {
-            if (err instanceof RequestError && err.status === 404) {
-                await octokit.repos.createForAuthenticatedUser({
-                    name: repo,
-                    private: false,
-                    auto_init: true,
-                });
-            } else {
+            if (!(err instanceof RequestError && err.status === 404)) {
                 throw err;
             }
         }
+
+        if (!repo_exists) {
+            await octokit.repos.createForAuthenticatedUser({
+                name: repo,
+                private: false,
+                auto_init: true,
+            });
+            return { created: true };
+        }
+        return { created: false };
     }
 
-    /**
-     * upsert code method to synchronize the repository with the provided codebase.
-     */
     private async upsert_code(octokit: Octokit, owner: string, repo: string, files: FileContent[]) {
-        const ref = await octokit.git.getRef({
-            owner,
-            repo,
-            ref: 'heads/main',
-        });
+        let ref;
+        try {
+            ref = await octokit.git.getRef({ owner, repo, ref: 'heads/main' });
+        } catch {
+            ref = await octokit.git.getRef({ owner, repo, ref: 'heads/master' });
+        }
+
         const base_sha = ref.data.object.sha;
-
-        const base_commit = await octokit.git.getCommit({
-            owner,
-            repo,
-            commit_sha: base_sha,
-        });
-
+        const base_commit = await octokit.git.getCommit({ owner, repo, commit_sha: base_sha });
         const tree_data = await octokit.git.getTree({
             owner,
             repo,
@@ -100,27 +109,13 @@ export class GithubWorkerQueue {
 
         const existing = new Map<string, string>();
         for (const item of tree_data.data.tree) {
-            if (item.type === 'blob' && item.path) {
-                existing.set(item.path, item.sha!);
+            if (item.type === 'blob' && item.path && item.sha) {
+                existing.set(item.path, item.sha);
             }
         }
 
         const tree_entries: any[] = [];
-
         for (const file of files) {
-            const old_sha = existing.get(file.path);
-
-            if (old_sha) {
-                tree_entries.push({
-                    path: file.path,
-                    sha: old_sha,
-                    mode: '100644',
-                    type: 'blob',
-                });
-                existing.delete(file.path);
-                continue;
-            }
-
             const blob = await octokit.git.createBlob({
                 owner,
                 repo,
@@ -157,17 +152,11 @@ export class GithubWorkerQueue {
         const commit = await octokit.git.createCommit({
             owner,
             repo,
-            message: `Winterfell deployment`,
+            message: 'Winterfell deployment',
             tree: new_tree.data.sha,
             parents: [base_sha],
-            author: {
-                name: 'Winterfell',
-                email: 'winterfell.dev.official@gmail.com',
-            },
-            committer: {
-                name: 'Winterfell',
-                email: 'winterfell.dev.official@gmail.com',
-            },
+            author: { name: 'Winterfell', email: 'winterfell.dev.official@gmail.com' },
+            committer: { name: 'Winterfell', email: 'winterfell.dev.official@gmail.com' },
         });
 
         await octokit.git.updateRef({
@@ -179,9 +168,6 @@ export class GithubWorkerQueue {
         });
     }
 
-    /**
-     * fetches a job from the queue.
-     */
     public get_job(job_id: string) {
         return this.queue.getJob(job_id);
     }

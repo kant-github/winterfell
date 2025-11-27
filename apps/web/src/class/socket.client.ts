@@ -69,7 +69,7 @@ export default class WebSocketClient {
     }
 
     private handle_incoming_message(parsed_data: WSServerIncomingPayload<IncomingPayload>) {
-        console.log("handler are : ", this.handlers.size);
+        console.log('handler are : ', this.handlers.size);
         this.handlers.forEach((handler) => handler(parsed_data));
     }
 

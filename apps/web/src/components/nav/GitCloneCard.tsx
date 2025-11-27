@@ -60,7 +60,12 @@ export default function GitCloneCard() {
         setInputError(false);
 
         try {
-            const result = await GithubServer.checkRepoName(trimmed, session?.user.token!);
+            if (!session || !session.user.token) return;
+            const result = await GithubServer.checkRepoName(
+                trimmed,
+                contractId ?? window.location.pathname.split('/playground/')[1],
+                session.user.token,
+            );
             if (result.success) {
                 setIsRepoValid(true);
                 setEditingRepo(false);
