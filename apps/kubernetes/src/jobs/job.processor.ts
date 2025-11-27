@@ -28,7 +28,7 @@ export default class JobProcessors {
                 return;
             }
 
-            context.send_server_message('executing build command...');
+            context.send_server_message('queuing you command');
 
             const files = await PodServices.get_codebase(context.contractId);
             if (!files || files.length === 0) {
@@ -60,7 +60,7 @@ export default class JobProcessors {
                 files,
             );
 
-            context.send_command_exectuion('Building...');
+            context.send_command_exectuion('executing command......');
 
             await kubernetes_services.kubernetes_manager.run_command_on_pod({
                 namespace: env.KUBERNETES_NAMESPACE,

@@ -3,6 +3,8 @@ import { create } from 'zustand';
 
 interface TerminalLogStore {
     logs: Line[];
+    isCommandRunning: boolean;
+    setIsCommandRunning: (value: boolean) => void
     addLog: (log: Line) => void;
     setLogs: (logs: Line[]) => void;
     clearLogs: () => void;
@@ -10,7 +12,8 @@ interface TerminalLogStore {
 
 export const useTerminalLogStore = create<TerminalLogStore>((set, get) => ({
     logs: [],
-
+    isCommandRunning: false,
+    setIsCommandRunning: (value: boolean) => set({ isCommandRunning: value }),
     addLog: (log: Line) => set({ logs: [...get().logs, log] }),
 
     setLogs: (logs: Line[]) => set({ logs }),
