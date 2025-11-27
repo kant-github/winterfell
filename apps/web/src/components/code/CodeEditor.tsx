@@ -1,5 +1,5 @@
 'use client';
-import { JSX, useCallback, useEffect } from 'react';
+import { JSX, useCallback } from 'react';
 import { Editor, Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';

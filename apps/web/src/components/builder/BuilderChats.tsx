@@ -4,7 +4,7 @@ import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import Image from 'next/image';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GENERATE_CONTRACT } from '@/routes/api_routes';
 import {
     FILE_STRUCTURE_TYPES,
@@ -35,6 +35,7 @@ export default function BuilderChats() {
     const { messages, loading, setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
         useBuilderChatStore();
     const router = useRouter();
+    const [hasContext, setHasContext] = useState<boolean>(false);
 
     useEffect(() => {
         if (messageEndRef.current) {
@@ -98,7 +99,7 @@ export default function BuilderChats() {
 
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n');
-                buffer = lines.pop() ?? ''; // keep the last incomplete chunk
+                buffer = lines.pop() ?? '';
 
                 for (const line of lines) {
                     const trimmed = line.trim();
@@ -119,6 +120,7 @@ export default function BuilderChats() {
 
                             case STAGE.CONTEXT:
                                 if ('llmMessage' in event.data) {
+                                    setHasContext(true);
                                     upsertMessage(event.data.llmMessage as Message);
                                 }
                                 break;
@@ -170,21 +172,9 @@ export default function BuilderChats() {
                             default:
                                 break;
                         }
-                    } catch (error) {
-                        console.warn('Skipping incomplete stream event chunk', error);
+                    } catch {
+                        console.warn('Skipping incomplete stream event chunk');
                     }
-                }
-            }
-
-            if (buffer.trim()) {
-                try {
-                    const jsonString = buffer.startsWith('data: ') ? buffer.slice(6) : buffer;
-                    const event: StreamEvent = JSON.parse(jsonString);
-                    if (event.type === STAGE.END && 'data' in event.data && event.data.data) {
-                        parseFileStructure(event.data.data as FileContent[]);
-                    }
-                } catch {
-                    console.warn('Failed to parse final buffered chunk');
                 }
             }
 
@@ -207,8 +197,9 @@ export default function BuilderChats() {
             style={{ height: 'calc(100vh - 3.5rem)' }}
         >
             <div className="flex-1 flex flex-col gap-y-3 text-light text-sm pl-4 overflow-y-auto min-h-0 custom-scrollbar">
+
                 {messages.map((message) => (
-                    <div key={message.id} className="w-full flex shrink-0">
+                    <div key={message.id} className="w-full shrink-0">
                         {message.role === 'USER' && (
                             <div className="flex justify-end items-start w-full">
                                 <div className="flex items-start gap-x-2 max-w-[70%]">
@@ -232,6 +223,28 @@ export default function BuilderChats() {
                                 </div>
                             </div>
                         )}
+
+                        {/* for rendering ai loader */}
+                        {message.role === 'USER' &&
+                            !hasContext &&
+                            loading &&
+                            !messages.some((m) => m.role === 'AI') && (
+                                <div className="flex justify-start w-full mt-2 ">
+                                    <div className="flex items-start gap-x-2 max-w-[70%]">
+                                        <AppLogo showLogoText={false} size={22} />
+                                        <div className="px-4 py-2 rounded-[4px] text-sm font-normal bg-dark text-light text-left tracking-wider text-[13px] italic">
+                                            <div className="flex items-center gap-x-1">
+                                                <div className="flex space-x-1">
+                                                    <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                                    <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                                    <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                         {message.role === 'AI' && (
                             <div className="flex justify-start w-full">
                                 <div className="flex items-start gap-x-2 max-w-[70%]">
@@ -242,6 +255,7 @@ export default function BuilderChats() {
                                 </div>
                             </div>
                         )}
+
                         {message.role === 'SYSTEM' && (
                             <div className="flex justify-start items-start w-full my-4 ">
                                 <div className="flex items-start gap-x-2 w-full">
@@ -279,3 +293,4 @@ export default function BuilderChats() {
         </div>
     );
 }
+
