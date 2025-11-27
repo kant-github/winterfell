@@ -115,7 +115,6 @@ export type finalizer =
 | {
     id: string,
     path: string,
-
 }
 | {
     id: string,
