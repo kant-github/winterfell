@@ -342,13 +342,14 @@ export default class StreamParser {
                     generatingCode: true,
                 },
             });
+            console.log('the stage: ', chalk.green('Generating Code'));
+            this.emit(STAGE.GENERATING_CODE, { stage: 'Generating Code' }, systemMessage);
         }
         switch (phase) {
             case 'thinking': {
                 this.currentPhase = phase;
                 const data: ThinkingData = { phase: 'thinking' };
-                (this.emit(STAGE.GENERATING_CODE, { stage: 'Generating Code' }, systemMessage),
-                    this.emit(PHASE_TYPES.THINKING, data, systemMessage));
+                this.emit(PHASE_TYPES.THINKING, data, systemMessage);
                 break;
             }
             case 'generating': {

@@ -1,5 +1,11 @@
 import z from "zod";
 
+/**
+ * ✅ Gemini-safe schemas
+ * ❌ No z.enum
+ * ❌ No z.literal
+ */
+
 const instruction_schema = z.object({
     name: z.string(),
     params: z.array(
@@ -26,8 +32,8 @@ const struct_schema = z.object({
     ),
     struct_vars: z.array(
         z.object({
-            name: z.string,
-            type: z.string,
+            name: z.string(),
+            type: z.string(),
             macro: z.string(),
         }),
     ),
@@ -36,7 +42,7 @@ const struct_schema = z.object({
 const entrypoint_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.literal('entripoint'),
+    type: z.string(), // ✅ changed
     mod_name: z.string(),
     public_key: z.string(),
     instructions: z.array(
@@ -49,21 +55,21 @@ const entrypoint_file_schema = z.object({
 const instruction_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.literal('instruction'),
+    type: z.string(), // ✅ changed
     instructions: z.array(instruction_schema),
 });
 
 const struct_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.literal('struct'),
+    type: z.string(), // ✅ changed
     structs: z.array(struct_schema),
 });
 
 const instruction_and_struct_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.literal('instruction_and_struct'),
+    type: z.string(), // ✅ changed
     instructions: z.array(instruction_schema),
     structs: z.array(struct_schema),
 });
@@ -71,14 +77,14 @@ const instruction_and_struct_schema = z.object({
 const test_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.literal('test'),
-    description: z.string().describe('this should contain the brief description of what test cases and edges this test file contrain'),
+    type: z.string(), // ✅ changed
+    description: z.string(),
 });
 
 const mod_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.literal('mod'),
+    type: z.string(), // ✅ changed
     mods: z.array(
         z.object({
             name: z.string(),
@@ -89,9 +95,9 @@ const mod_file_schema = z.object({
 const packages_file_schema = z.object({
     id: z.string(),
     path: z.string(),
-    type: z.literal('packages'),
-    name: z.string().describe('this should have the name of the file with extension'),
-    description: z.string().describe('this should contain what are the things this file contains'),
+    type: z.string(), // ✅ changed
+    name: z.string(),
+    description: z.string(),
 });
 
 const finalizer_schema = z.union([
@@ -107,4 +113,5 @@ const finalizer_schema = z.union([
 export const finalizer_output_schema = z.object({
     idl: z.array(finalizer_schema),
     context: z.string(),
-})
+});
+

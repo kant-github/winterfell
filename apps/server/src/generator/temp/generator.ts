@@ -27,6 +27,7 @@ import { objectStore } from '../../services/init';
 import { FileContent } from '@winterfell/types';
 import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
 import chalk from 'chalk';
+import { finalizer_output_schema } from '../schema/finalizer_output_schema';
 
 type planner = RunnableSequence<
     {
@@ -118,7 +119,7 @@ export default class Generator extends GeneratorShape {
                 }
             }
         } catch (error) {
-            console.error('Error while generating: ', Error);
+            console.error('Error while generating: ', error);
             parser.reset();
             this.delete_parser(contract_id);
             res.end();
@@ -246,47 +247,53 @@ export default class Generator extends GeneratorShape {
         parser: StreamParser,
         system_message: Message,
     ) {
-        await prisma.message.update({
-            where: {
-                id: system_message.id,
-                contractId: contract_id,
-            },
-            data: {
-                finalzing: true,
-            },
-        });
+        try {
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    finalzing: true,
+                },
+            });
 
-        console.log('the stage: ', chalk.green('Finalizing'));
-        this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
+            console.log('the stage: ', chalk.green('Finalizing'));
+            this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
-        const finalizer_stream = await finalizer_chain.stream({
-            generated_files: generated_files,
-        });
+            const finalizer_data = await finalizer_chain.invoke({
+                generated_files: generated_files,
+            });
 
-        for await (const chunk of finalizer_stream) {
-            if (chunk.text) {
-                // console.log(chunk.text);
-                parser.feed(chunk.text, system_message);
-            }
+            console.log(finalizer_data.idl);
+
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    End: true,
+                },
+            });
+            console.log('the stage: ', chalk.green('END'));
+            this.send_sse(res, STAGE.END, { data: generated_files }, system_message);
+
+            console.log('the context: ', chalk.red(finalizer_data.context));
+            this.send_sse(res, STAGE.CONTEXT, { data: finalizer_data.context }, system_message);
+
+            objectStore.uploadContractFiles(contract_id, generated_files, full_response);
+
+            console.log('generated idl: ', parser.getGeneratedIdl());
+
+            // make a protected var to store idl in stream parser
+            // save the idl to db
+        } catch (error) {
+            console.error('Error while finalizing: ', error);
+            parser.reset();
+            this.delete_parser(contract_id);
+            res.end();
         }
-
-        await prisma.message.update({
-            where: {
-                id: system_message.id,
-                contractId: contract_id,
-            },
-            data: {
-                End: true,
-            },
-        });
-        console.log('the stage: ', chalk.green('END'));
-        this.send_sse(res, STAGE.END, { data: generated_files });
-        objectStore.uploadContractFiles(contract_id, generated_files, full_response);
-
-        console.log('generated idl: ', parser.getGeneratedIdl());
-
-        // make a protected var to store idl in stream parser
-        // save the idl to db
     }
 
     protected async old_contract(
@@ -325,7 +332,10 @@ export default class Generator extends GeneratorShape {
 
                 coder_chain = new_chat_coder_prompt.pipe(coder);
 
-                finalizer_chain = finalizer_prompt.pipe(this.gemini_finalizer);
+                finalizer_chain = RunnableSequence.from([
+                    finalizer_prompt,
+                    this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
+                ]);
 
                 return {
                     planner_chain: planner_chain,
@@ -342,7 +352,10 @@ export default class Generator extends GeneratorShape {
 
                 coder_chain = old_chat_coder_prompt.pipe(coder.bindTools([Tool.get_file]));
 
-                finalizer_chain = finalizer_prompt.pipe(this.gemini_finalizer);
+                finalizer_chain = RunnableSequence.from([
+                    finalizer_prompt,
+                    this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
+                ]);
 
                 return {
                     planner_chain: planner_chain,
