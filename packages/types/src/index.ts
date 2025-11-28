@@ -8,3 +8,6 @@ export * from "./generator/content_types";
 export * from "./generator/stream_event_types";
 
 export * from "./executor/executor.types";
+
+// template-types
+export * from './template_types/template_types';

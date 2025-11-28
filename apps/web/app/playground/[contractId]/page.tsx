@@ -15,13 +15,12 @@ import { useRouter } from 'next/navigation';
 const REVIEW_STORAGE_KEY = 'contract-reviewed-';
 
 export default function Page({ params }: { params: Promise<{ contractId: string }> }) {
-    const { cleanStore, loading } = useBuilderChatStore();
+    const { cleanStore, loading, messages, upsertMessage } = useBuilderChatStore();
     const { reset, collapseFileTree, setCollapseFileTree } = useCodeEditor();
     const unwrappedParams = React.use(params);
     const { contractId } = unwrappedParams;
     const { resetContractId } = useChatStore();
     const { session } = useUserSessionStore();
-    const { upsertMessage, messages } = useBuilderChatStore();
     const { parseFileStructure } = useCodeEditor();
     const router = useRouter();
     const [showReviewCard, setShowReviewCard] = useState(false);

@@ -2,7 +2,7 @@ import { cn } from '@/src/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { Terminal, ArrowRight, FileCode } from 'lucide-react';
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
@@ -10,10 +10,9 @@ import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
 import ModelSelect from './ExecutorSelect';
 import { ChatRole } from '@/src/types/prisma-types';
+import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
+import { useContractTemplateStore } from '@/src/store/user/useContractTemplateStore';
 import { useModelStore } from '@/src/store/model/useExecutorStore';
-import ContractTemplates from '../home/ContractTemplates';
-import BaseTemplatePanel from './BaseTemplatePanel';
-import BaseContractTemplatesPanel from './BaseTemplatePanel';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -24,6 +23,31 @@ export default function DashboardTextAreaComponent() {
     const { setMessage } = useBuilderChatStore();
     const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
     const router = useRouter();
+    const editorRef = useRef<HTMLDivElement>(null);
+    const { template } = useContractTemplateStore();
+
+    useEffect(() => {
+        if (!template || !editorRef.current) return;
+
+        editorRef.current.innerHTML = `
+        <div style="
+            display:flex;
+            gap:8px;
+            background:#141414;
+            border:1px solid #333;
+            padding:8px;
+            border-radius:6px;
+            margin-bottom:8px;
+        ">
+            <img src="${template.image}" style="width:48px;height:48px;border-radius:4px;object-fit:cover" />
+            <div>
+                <div style="font-size:13px;color:#ddd;font-weight:600;">${template.title}</div>
+                <div style="font-size:12px;color:#888;">${template.description}</div>
+            </div>
+        </div>
+        <div>${template.description}</div>
+    `;        
+    }, [template]);
 
     function handleSubmit() {
         if (inputValue.trim() === '') return;
@@ -61,7 +85,7 @@ export default function DashboardTextAreaComponent() {
     return (
         <>
             <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-neutral-600/20 via-neutral-500/20 to-neutral-600/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -inset-1 bg-linear-to-r from-neutral-600/20 via-neutral-500/20 to-neutral-600/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                 <div className="relative bg-neutral-950 rounded-lg border border-neutral-800 overflow-hidden shadow-2xl">
                     <div className="flex items-center justify-between px-2.5 py-1 md:px-4 md:py-3 border-b border-neutral-800/50 bg-neutral-900/50">
@@ -158,12 +182,12 @@ export default function DashboardTextAreaComponent() {
                     </div>
                 </div>
                 {showTemplatePanel && (
-                    <div className="absolute h-30 max-w-sm z-20 left-40 bg-dark-base">
+                    <div className="absolute h-42 max-w-[32rem] z-30 rounded-[4px] left-[9.6rem] -bottom-39 bg-[#111111] border border-neutral-800 rounded-tl-none">
                         <BaseContractTemplatesPanel />
                     </div>
                 )}
 
-                <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-50" />
+                <div className="absolute -bottom-px left-0 right-0 h-px bg-linear-to-r from-transparent via-neutral-600 to-transparent opacity-50" />
             </div>
 
             <LoginModal opensignInModal={openLoginModal} setOpenSignInModal={setOpenLoginModal} />
