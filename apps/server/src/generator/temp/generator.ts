@@ -24,11 +24,12 @@ import { finalizer_output_schema } from '../schema/finalizer_output_schema';
 import { new_chat_coder_prompt, new_chat_planner_prompt } from '../prompts/new_chat_prompts';
 import { finalizer_prompt } from '../prompts/finalizer_prompt';
 import { old_chat_coder_prompt, old_chat_planner_prompt } from '../prompts/old_chat_prompts';
+import { JsonValue } from '../../../../../packages/database/generated/client/runtime/library';
 
 type planner = RunnableSequence<
     {
         user_instruction: string;
-        idl?: Object[];
+        idl?: JsonValue[];
     },
     {
         should_continue: boolean;
@@ -88,7 +89,7 @@ export default class Generator extends GeneratorShape {
         user_instruction: string,
         model: MODEL,
         contract_id: string,
-        idl?: Object[],
+        idl?: JsonValue[],
     ) {
         console.log('generate contract hit');
         const parser = this.get_parser(contract_id, res);
@@ -112,6 +113,20 @@ export default class Generator extends GeneratorShape {
                     return;
                 }
                 case 'old': {
+                    if(idl) {
+                        this.old_contract(
+                            res,
+                            planner_chain,
+                            coder_chain,
+                            finalizer_chain,
+                            user_instruction,
+                            contract_id,
+                            parser,
+                            idl,
+                        );
+                    } else {
+                        throw new Error('idl was not found');
+                    }
                 }
             }
         } catch (error) {
@@ -159,7 +174,7 @@ export default class Generator extends GeneratorShape {
                 return;
             }
 
-            const { system_message, contract } = await prisma.$transaction(async (tx) => {
+            const { system_message } = await prisma.$transaction(async (tx) => {
                 const system_message = await tx.message.create({
                     data: {
                         contractId: contract_id,
@@ -290,8 +305,6 @@ export default class Generator extends GeneratorShape {
                 },
             });
 
-            // make a protected var to store idl in stream parser
-            // save the idl to db
         } catch (error) {
             console.error('Error while finalizing: ', error);
             parser.reset();
@@ -301,12 +314,17 @@ export default class Generator extends GeneratorShape {
     }
 
     protected async old_contract(
+        res: Response,
         planner_chain: planner,
         coder_chain: coder,
+        finalizer_chain: any,
         user_instruction: string,
         contract_id: string,
-        idl: Object[],
+        parser: StreamParser,
+        idl: JsonValue[],
     ) {
+
+        console.log('old contract hit');
 
         const planner_data = await planner_chain.invoke({
             user_instruction: user_instruction,
@@ -314,7 +332,6 @@ export default class Generator extends GeneratorShape {
         });
 
         console.log(planner_data);
-
 
     }
 

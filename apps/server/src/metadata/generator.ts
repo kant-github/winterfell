@@ -12,6 +12,7 @@ import {
     StreamEventData,
 } from '@winterfell/types';
 import { Message } from '@winterfell/database';
+import { JsonValue } from '../../../../packages/database/generated/client/runtime/library';
 
 export default abstract class GeneratorShape {
     protected gemini_planner!: ChatGoogleGenerativeAI;
@@ -26,7 +27,7 @@ export default abstract class GeneratorShape {
      * @param {string} user_instruction
      * @param {MODEL} model
      * @param {string} contract_id
-     * @param {Object[]} idl
+     * @param {JsonValue[]} idl
      */
     abstract generate(
         res: Response,
@@ -34,7 +35,7 @@ export default abstract class GeneratorShape {
         user_instruction: string,
         model: MODEL,
         contract_id: string,
-        idl?: Object[],
+        idl?: JsonValue[],
     ): void;
 
     /**
@@ -78,18 +79,24 @@ export default abstract class GeneratorShape {
 
     /**
      * this method is used to update an old contract
+     * @param {Response} res
      * @param {RunnableSequence} planner_chain
      * @param {Runnable} coder_chain
+     * @param {RunnableSequence} planner_chain
      * @param {string} user_instruction
      * @param {string} contract_id
-     * @param {Object[]} idl
+     * @param {StreamParser} parser
+     * @param {JsonValue[]} idl
      */
     protected abstract old_contract(
+        res: Response,
         planner_chain: RunnableSequence,
         coder_chain: Runnable,
+        finalizer_chain: RunnableSequence,
         user_instruction: string,
         contract_id: string,
-        idl: Object[],
+        parser: StreamParser,
+        idl: JsonValue[],
     ): void;
 
     /**

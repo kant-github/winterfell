@@ -64,6 +64,16 @@ export default async function generateContractController(req: Request, res: Resp
                     contractId: existing_contract.id,
                 },
             });
+
+            generator.generate(
+                res,
+                'old',
+                instruction,
+                model || MODEL.GEMINI,
+                existing_contract.id,
+                existing_contract.summarisedObject
+            );
+
         } else {
             // call for new
             const contract = await prisma.contract.create({

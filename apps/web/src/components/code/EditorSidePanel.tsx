@@ -45,7 +45,7 @@ export default function EditorSidePanel() {
             value: SidePanelValues.CHAT,
             onClick: () => {
                 setCollapsechat(!collapseChat);
-                handleToggleSidebar(SidePanelValues.CHAT);
+                // handleToggleSidebar(SidePanelValues.CHAT);
             },
             tooltip: 'Agent Sessions',
         },
