@@ -8,9 +8,9 @@ import { useParams } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
-import ModelSelect from '../base/ModelSelect';
+import ExecutorSelect from '../base/ExecutorSelect';
 import { ChatRole, Message } from '@/src/types/prisma-types';
-import { useModelStore } from '@/src/store/model/useModelStore';
+import { useModelStore } from '@/src/store/model/useExecutorStore';
 import { GENERATE_CONTRACT } from '@/routes/api_routes';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import {
@@ -121,7 +121,6 @@ export default function BuilderChatInput() {
                                     upsertMessage(event.systemMessage);
                                 }
                                 break;
-
                             case PHASE_TYPES.THINKING:
                             case PHASE_TYPES.GENERATING:
                             case PHASE_TYPES.BUILDING:
@@ -185,7 +184,7 @@ export default function BuilderChatInput() {
         <>
             <div className="relative group w-full">
                 <div className="relative rounded-[8px] border border-neutral-800 overflow-hidden">
-                    <div className="relative bg-[#0c0d0e]">
+                    <div className="relative bg-[#0e0f10]">
                         <div className="absolute left-4 top-5 text-neutral-600 font-mono text-sm select-none">
                             &gt;
                         </div>
@@ -209,7 +208,7 @@ export default function BuilderChatInput() {
 
                     <div className="flex items-center justify-between px-4 py-2.5 border-t border-neutral-800/50 bg-[#101114]">
                         <div className="flex items-center gap-x-1">
-                            <ModelSelect value={selectedModel} onChange={setSelectedModel} />
+                            <ExecutorSelect value={selectedModel} onChange={setSelectedModel} />
                             <Button
                                 type="button"
                                 className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
@@ -242,7 +241,7 @@ export default function BuilderChatInput() {
                                 className={cn(
                                     'w-3 h-3 transition-transform',
                                     inputValue.trim() &&
-                                        'group-hover/submit:translate-x-0.5 duration-200',
+                                    'group-hover/submit:translate-x-0.5 duration-200',
                                 )}
                             />
                         </Button>

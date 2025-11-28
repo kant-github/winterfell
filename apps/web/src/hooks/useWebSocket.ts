@@ -42,10 +42,10 @@ export const useWebSocket = () => {
 
     function subscribeToHandler(handler: MessageHandler) {
         if (!socket.current) {
-            console.log("socket is not ready to subcribe to new hadnlers");
+            console.log('socket is not ready to subcribe to new hadnlers');
             return;
-        };
-        console.log("subscribing a handler to the subscription set");
+        }
+        console.log('subscribing a handler to the subscription set');
         socket.current?.subscribe(handler);
     }
 
