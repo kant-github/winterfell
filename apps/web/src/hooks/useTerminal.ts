@@ -7,7 +7,7 @@ import { useCommandHistoryStore } from '../store/code/useCommandHistoryStore';
 
 export function isValidCommandFunction(command: string): boolean {
     return Object.values(COMMAND_WRITER).includes(command as COMMAND_WRITER);
-};
+}
 
 export function useTerminal() {
     const { addLog, setLogs } = useTerminalLogStore();
@@ -24,7 +24,7 @@ export function useTerminal() {
             const isValid = isValidCommandFunction(trimmed);
             addLog({
                 type: isValid ? 'command' : 'error',
-                text: trimmed
+                text: trimmed,
             });
 
             const cmd = trimmed as COMMAND_WRITER;

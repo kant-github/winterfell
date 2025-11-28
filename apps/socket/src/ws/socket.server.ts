@@ -27,7 +27,6 @@ export default class WebSocketServer {
         this.redis = redis;
         this.wss = new WSServer({ port: env.SOCKET_PORT });
         this.initialize_connection();
-        console.log('wss server is up and running at port : ', env.SOCKET_PORT);
     }
 
     private initialize_connection() {
@@ -54,20 +53,18 @@ export default class WebSocketServer {
         });
 
         ws.on('close', (code, reason) => {
-            console.log('Socket closing - Code:', code, 'Reason:', reason.toString());
+            console.error('Socket closing - Code:', code, 'Reason:', reason.toString());
             this.redis.unsubscribe(topic);
             this.connection_mapping.delete(topic);
         });
 
-        ws.on('error', (err) => {
-            console.log('error is socket : ', err);
+        ws.on('error', () => {
             this.connection_mapping.delete(topic);
             ws.close();
         });
     }
 
     private async handle_incoming_message<T>(ws: CustomWebSocket, message: ParsedMessage<T>) {
-        console.log('message is : ', message);
         switch (message.type as COMMAND) {
             case COMMAND.WINTERFELL_BUILD: {
                 const data = await CommandService.handle_incoming_command(ws, message);

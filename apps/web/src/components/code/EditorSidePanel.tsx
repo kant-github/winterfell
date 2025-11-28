@@ -6,17 +6,20 @@ import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { cn } from '@/src/lib/utils';
 import { RiChat4Fill } from 'react-icons/ri';
+import { FaTelegramPlane } from "react-icons/fa";
+
 
 export enum SidePanelValues {
     FILE = 'FILE',
     GITHUB = 'GITHUB',
     CHAT = 'CHAT',
+    PLAN = 'PLAN',
 }
 
 interface EditorSidePanel {
     setSidePanelRenderer:
-        | Dispatch<SetStateAction<SidePanelValues>>
-        | ((value: SidePanelValues | null) => void);
+    | Dispatch<SetStateAction<SidePanelValues>>
+    | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {
@@ -44,6 +47,14 @@ export default function EditorSidePanel() {
             onClick: () => {
                 setCollapsechat(!collapseChat);
                 handleToggleSidebar(SidePanelValues.CHAT);
+            },
+            tooltip: 'Agent Sessions',
+        },
+        {
+            icon: <FaTelegramPlane size={19} />,
+            value: SidePanelValues.PLAN,
+            onClick: () => {
+                handleToggleSidebar(SidePanelValues.PLAN);
             },
             tooltip: 'Agent Sessions',
         },

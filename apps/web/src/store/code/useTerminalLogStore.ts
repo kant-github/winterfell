@@ -4,7 +4,7 @@ import { create } from 'zustand';
 interface TerminalLogStore {
     logs: Line[];
     isCommandRunning: boolean;
-    setIsCommandRunning: (value: boolean) => void
+    setIsCommandRunning: (value: boolean) => void;
     addLog: (log: Line) => void;
     setLogs: (logs: Line[]) => void;
     clearLogs: () => void;

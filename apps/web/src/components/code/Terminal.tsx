@@ -49,29 +49,35 @@ export default function Terminal() {
 
     function Prompt() {
         return (
-            <span className="text-green-500 select-none">
+            <span className="text-green-500 select-none text-[14px]">
                 ➜ <span className="text-blue-400">~</span>
             </span>
         );
     }
 
-    useEffect(function () {
-        if (showTerminal) inputRef.current?.focus();
-    }, [showTerminal]);
+    useEffect(
+        function () {
+            if (showTerminal) inputRef.current?.focus();
+        },
+        [showTerminal],
+    );
 
-    useEffect(function () {
-        const el = outputRef.current;
-        if (!el) return;
+    useEffect(
+        function () {
+            const el = outputRef.current;
+            if (!el) return;
 
-        requestAnimationFrame(function () {
             requestAnimationFrame(function () {
-                el.scrollTo({
-                    top: el.scrollHeight,
-                    behavior: 'smooth',
+                requestAnimationFrame(function () {
+                    el.scrollTo({
+                        top: el.scrollHeight,
+                        behavior: 'smooth',
+                    });
                 });
             });
-        });
-    }, [logs]);
+        },
+        [logs],
+    );
 
     function handleCurrentFileExtension() {
         if (!currentFile) return 'no selected file.';
@@ -175,7 +181,8 @@ export default function Terminal() {
                         <>
                             {line.type === 'error' ? (
                                 <>
-                                    <Prompt /> <span className={cn('ml-2', className)}>{line.text}</span>
+                                    <Prompt />{' '}
+                                    <span className={cn('ml-2', className)}>{line.text}</span>
                                 </>
                             ) : (
                                 <span className={cn('ml-6', className)}>{line.text}</span>
@@ -266,10 +273,10 @@ export default function Terminal() {
                                     }}
                                     onKeyDown={handleInputKeyDown}
                                     className={cn(
-                                        "outline-none bg-transparent ml-2 flex-1",
+                                        'outline-none bg-transparent ml-2 flex-1',
                                         currentInput.trim() && isValidCommand
-                                            ? "text-[#68db3e]"
-                                            : "text-light/80"
+                                            ? 'text-[#68db3e]'
+                                            : 'text-light/80',
                                     )}
                                 />
                             </div>
