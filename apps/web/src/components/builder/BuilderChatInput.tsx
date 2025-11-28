@@ -21,6 +21,7 @@ import {
     StreamEvent,
 } from '@/src/types/stream_event_types';
 import { toast } from 'sonner';
+import { MODEL } from '@/src/types/extra_types';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -68,6 +69,7 @@ export default function BuilderChatInput() {
                 body: JSON.stringify({
                     contract_id: contractId,
                     instruction: inputValue,
+                    model: MODEL.GEMINI,
                 }),
             });
 

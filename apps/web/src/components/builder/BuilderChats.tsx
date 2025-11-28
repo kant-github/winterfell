@@ -22,6 +22,7 @@ import { LayoutGrid } from '../ui/animated/layout-grid-icon';
 import { TextShimmer } from '../ui/shimmer-text';
 import { formatChatTime } from '@/src/lib/format_chat_time';
 import { toast } from 'sonner';
+import { MODEL } from '@/src/types/extra_types';
 
 export default function BuilderChats() {
     const { session } = useUserSessionStore();
@@ -69,6 +70,7 @@ export default function BuilderChats() {
                 body: JSON.stringify({
                     contract_id: contractId,
                     instruction: message,
+                    model: MODEL.GEMINI,
                 }),
             });
 

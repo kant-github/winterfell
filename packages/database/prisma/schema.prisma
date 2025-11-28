@@ -46,7 +46,7 @@ model Contract {
   idl       Json?
   clientSdk Json?
 
-  summarisedObject Json[]
+  summarisedObject String?
 
   deployed  Boolean  @default(false)
   programId String?

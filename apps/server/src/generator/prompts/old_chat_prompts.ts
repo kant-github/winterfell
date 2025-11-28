@@ -21,6 +21,34 @@ export const old_chat_planner_prompt = new PromptTemplate({
 });
 
 export const old_chat_coder_prompt = new PromptTemplate({
-    template: ``,
+    template: `
+        You're a senior anchor solana contract developer
+
+        follow this plan:
+        {plan}
+        
+        and make tool call with this contract-id {contract_id} to fetch the files which are mentioned in these:
+        {files_likely_affected}
+
+        and strictly follow this architecture of generation with the following order
+        you should not miss any stage or phase
+        for every tag there should be a line gap in both up and down
+
+        <stage>Generating Code</state>
+
+        <phase>thinking</phase>
+        <phase>generating</phase>
+
+        <file>path_to_the_file</file>
+
+        <phase>deleting</phase> (if needed)
+        <file>path_to_the_file</file>
+
+        <phase>updating</phase>
+        <file>path_to_the_file</file>
+
+        <stage>Building</stage>
+
+    `,
     inputVariables: ['plan', 'contract_id', 'files_likely_affected'],
 });

@@ -1,8 +1,9 @@
 import { ChatRole, PlanType, prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
 import { generator } from '../../services/init';
-import { MODEL } from '../../generator/types/model_types';
 import ResponseWriter from '../../class/response_writer';
+import { generate_contract_schema } from '../../schemas/generate_contract_schema';
+import { MODEL } from '@winterfell/types';
 
 export default async function generateContractController(req: Request, res: Response) {
     try {
@@ -12,11 +13,23 @@ export default async function generateContractController(req: Request, res: Resp
             return;
         }
 
-        const body = req.body;
-        // safe parse validation check
-        const { contract_id, instruction, model } = body;
+        console.log(req.body);
 
-        console.log(body);
+        const parsed_data = generate_contract_schema.safeParse(req.body);
+
+        if(!parsed_data.success) {
+            ResponseWriter.error(res, 'Invalid data', 400);
+            return;
+        }
+
+        // safe parse validation check
+        const { contract_id, instruction, model } = parsed_data.data;
+
+        // checking for instruction length
+        if(instruction.length > 200) {
+            ResponseWriter.error(res, 'instruction crossed the length limit!', 413);
+            return;
+        }
 
         if (model === MODEL.CLAUDE) {
             const existing_user = await prisma.user.findUnique({
@@ -65,13 +78,17 @@ export default async function generateContractController(req: Request, res: Resp
                 },
             });
 
+            const parsed_idl = JSON.parse(existing_contract.summarisedObject || '');
+
+            console.log("parsed idl: ", parsed_idl);
+
             generator.generate(
                 res,
                 'old',
                 instruction,
                 model || MODEL.GEMINI,
                 existing_contract.id,
-                existing_contract.summarisedObject
+                parsed_idl,
             );
 
         } else {

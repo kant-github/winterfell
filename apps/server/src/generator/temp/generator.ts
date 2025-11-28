@@ -1,6 +1,5 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { MODEL } from '../types/model_types';
 import { RunnableSequence } from '@langchain/core/runnables';
 import { new_planner_output_schema, old_planner_output_schema } from './schema';
 import Tool from '../tools/tool';
@@ -17,40 +16,15 @@ import {
 } from '../../types/stream_event_types';
 import { STAGE } from '../../types/content_types';
 import { objectStore } from '../../services/init';
-import { FileContent } from '@winterfell/types';
+import { FileContent, MODEL } from '@winterfell/types';
 import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
 import chalk from 'chalk';
 import { finalizer_output_schema } from '../schema/finalizer_output_schema';
 import { new_chat_coder_prompt, new_chat_planner_prompt } from '../prompts/new_chat_prompts';
 import { finalizer_prompt } from '../prompts/finalizer_prompt';
 import { old_chat_coder_prompt, old_chat_planner_prompt } from '../prompts/old_chat_prompts';
-import { JsonValue } from '../../../../../packages/database/generated/client/runtime/library';
+import { new_coder, new_finalizer, new_planner, old_coder, old_finalizer, old_planner } from './generator_types';
 
-type planner = RunnableSequence<
-    {
-        user_instruction: string;
-        idl?: JsonValue[];
-    },
-    {
-        should_continue: boolean;
-        plan: string;
-        contract_name?: string;
-        context: string;
-        files_likely_affected: {
-            do: 'create' | 'update' | 'delete';
-            file_path: string;
-            what_to_do: string;
-        }[];
-    }
->;
-
-type coder = RunnableSequence<
-    {
-        plan: any;
-        files_likely_affected: any;
-    },
-    AIMessageChunk<MessageStructure>
->;
 
 export default class Generator extends GeneratorShape {
     protected gemini_planner: ChatGoogleGenerativeAI;
@@ -89,7 +63,7 @@ export default class Generator extends GeneratorShape {
         user_instruction: string,
         model: MODEL,
         contract_id: string,
-        idl?: JsonValue[],
+        idl?: Object[],
     ) {
         console.log('generate contract hit');
         const parser = this.get_parser(contract_id, res);
@@ -139,9 +113,9 @@ export default class Generator extends GeneratorShape {
 
     protected async new_contract(
         res: Response,
-        planner_chain: planner,
-        coder_chain: any,
-        finalizer_chain: any,
+        planner_chain: new_planner,
+        coder_chain: new_coder,
+        finalizer_chain: new_finalizer,
         user_instruction: string,
         contract_id: string,
         parser: StreamParser,
@@ -251,7 +225,7 @@ export default class Generator extends GeneratorShape {
 
     protected async new_finalizer(
         res: Response,
-        finalizer_chain: any,
+        finalizer_chain: new_finalizer,
         generated_files: FileContent[],
         full_response: string,
         contract_id: string,
@@ -276,8 +250,6 @@ export default class Generator extends GeneratorShape {
                 generated_files: generated_files,
             });
 
-            console.log(finalizer_data.idl);
-
             await prisma.message.update({
                 where: {
                     id: system_message.id,
@@ -288,10 +260,18 @@ export default class Generator extends GeneratorShape {
                 },
             });
             console.log('the stage: ', chalk.green('END'));
-            this.send_sse(res, STAGE.END, { data: generated_files }, system_message);
+            this.send_sse(res, STAGE.END, { stage: 'End', data: generated_files }, system_message);
+
+            const llm_message = await prisma.message.create({
+                data: {
+                    contractId: contract_id,
+                    role: ChatRole.AI,
+                    content: finalizer_data.context,
+                },
+            });
 
             console.log('the context: ', chalk.red(finalizer_data.context));
-            this.send_sse(res, STAGE.CONTEXT, { data: finalizer_data.context }, system_message);
+            this.send_sse(res, STAGE.CONTEXT, { context: finalizer_data.context, llmMessage: llm_message }, system_message);
 
             objectStore.uploadContractFiles(contract_id, generated_files, full_response);
 
@@ -301,7 +281,7 @@ export default class Generator extends GeneratorShape {
                     id: contract_id,
                 },
                 data: {
-                    summarisedObject: finalizer_chain.idl,
+                    summarisedObject: JSON.stringify(finalizer_data.idl),
                 },
             });
 
@@ -315,13 +295,13 @@ export default class Generator extends GeneratorShape {
 
     protected async old_contract(
         res: Response,
-        planner_chain: planner,
-        coder_chain: coder,
-        finalizer_chain: any,
+        planner_chain: old_planner,
+        coder_chain: old_coder,
+        finalizer_chain: old_finalizer,
         user_instruction: string,
         contract_id: string,
         parser: StreamParser,
-        idl: JsonValue[],
+        idl: Object[],
     ) {
 
         console.log('old contract hit');
@@ -331,7 +311,22 @@ export default class Generator extends GeneratorShape {
             idl: idl,
         });
 
-        console.log(planner_data);
+        console.log('planner data; ', planner_data);
+        
+        const code_stream = await coder_chain.stream({
+            plan: planner_data.plan,
+            contract_id: contract_id,
+            files_likely_affected: planner_data.files_likely_affected,
+        });
+
+        console.log('coder stream passed');
+
+        for await (const chunk of code_stream) {
+            console.log("chunk: ", chunk)
+            if(chunk.text) {
+                console.log(chunk.text);
+            }
+        }
 
     }
 

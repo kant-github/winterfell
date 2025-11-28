@@ -1,6 +1,6 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { MODEL } from '../generator/types/model_types';
+import { MODEL } from '@winterfell/types';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import { Response } from 'express';
 import StreamParser from '../services/stream_parser';
@@ -12,7 +12,6 @@ import {
     StreamEventData,
 } from '@winterfell/types';
 import { Message } from '@winterfell/database';
-import { JsonValue } from '../../../../packages/database/generated/client/runtime/library';
 
 export default abstract class GeneratorShape {
     protected gemini_planner!: ChatGoogleGenerativeAI;
@@ -27,7 +26,7 @@ export default abstract class GeneratorShape {
      * @param {string} user_instruction
      * @param {MODEL} model
      * @param {string} contract_id
-     * @param {JsonValue[]} idl
+     * @param {Object[]} idl
      */
     abstract generate(
         res: Response,
@@ -35,7 +34,7 @@ export default abstract class GeneratorShape {
         user_instruction: string,
         model: MODEL,
         contract_id: string,
-        idl?: JsonValue[],
+        idl?: Object[],
     ): void;
 
     /**
@@ -86,7 +85,7 @@ export default abstract class GeneratorShape {
      * @param {string} user_instruction
      * @param {string} contract_id
      * @param {StreamParser} parser
-     * @param {JsonValue[]} idl
+     * @param {Object[]} idl
      */
     protected abstract old_contract(
         res: Response,
@@ -96,7 +95,7 @@ export default abstract class GeneratorShape {
         user_instruction: string,
         contract_id: string,
         parser: StreamParser,
-        idl: JsonValue[],
+        idl: Object[],
     ): void;
 
     /**
