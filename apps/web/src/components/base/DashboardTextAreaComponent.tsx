@@ -10,10 +10,8 @@ import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
 import ModelSelect from './ExecutorSelect';
 import { ChatRole } from '@/src/types/prisma-types';
+import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
 import { useModelStore } from '@/src/store/model/useExecutorStore';
-import ContractTemplates from '../home/ContractTemplates';
-import BaseTemplatePanel from './BaseTemplatePanel';
-import BaseContractTemplatesPanel from './BaseTemplatePanel';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -61,7 +59,7 @@ export default function DashboardTextAreaComponent() {
     return (
         <>
             <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-neutral-600/20 via-neutral-500/20 to-neutral-600/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -inset-1 bg-linear-to-r from-neutral-600/20 via-neutral-500/20 to-neutral-600/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                 <div className="relative bg-neutral-950 rounded-lg border border-neutral-800 overflow-hidden shadow-2xl">
                     <div className="flex items-center justify-between px-2.5 py-1 md:px-4 md:py-3 border-b border-neutral-800/50 bg-neutral-900/50">
@@ -158,12 +156,12 @@ export default function DashboardTextAreaComponent() {
                     </div>
                 </div>
                 {showTemplatePanel && (
-                    <div className="absolute h-30 max-w-sm z-20 left-40 bg-dark-base">
+                    <div className="absolute h-42 max-w-[32rem] z-30 rounded-[4px] left-[9.6rem] -bottom-39 bg-[#111111] border border-neutral-800 rounded-tl-none">
                         <BaseContractTemplatesPanel />
                     </div>
                 )}
 
-                <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-50" />
+                <div className="absolute -bottom-px left-0 right-0 h-px bg-linear-to-r from-transparent via-neutral-600 to-transparent opacity-50" />
             </div>
 
             <LoginModal opensignInModal={openLoginModal} setOpenSignInModal={setOpenLoginModal} />

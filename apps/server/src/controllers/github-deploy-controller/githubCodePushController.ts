@@ -63,7 +63,7 @@ export default async function githubCodePushController(req: Request, res: Respon
     if (repo_exists.exists) {
         ResponseWriter.custom(res, 200, {
             success: false,
-            message: `The repository '${repo_name}' already exists in your GitHub account. Cannot link to an existing repo for a new contract.`,
+            message: `The repository '${repo_name}' already exists in your GitHub account.`,
             meta: { timestamp: new Date().toISOString() },
         });
         return;

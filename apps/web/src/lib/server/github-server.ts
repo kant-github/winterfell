@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CHECK_REPO_NAME, EXPORT_CONTRACT_URL } from '@/routes/api_routes';
+import { CHECK_REPO_NAME, DOWNLOAD_ZIP_FILE, EXPORT_CONTRACT_URL } from '@/routes/api_routes';
 
 export default class GithubServer {
     public static validateRepoNameFormat(name: string): boolean {
@@ -27,16 +27,12 @@ export default class GithubServer {
         return response.data;
     }
 
-    public static async pushCodeToGithub({
-        repoName,
-        contractId,
-        token,
-    }: {
-        repoName: string;
-        contractId: string;
-        token: string;
-    }): Promise<{ success: boolean; message?: string }> {
-        const res = await axios.post(
+    public static async pushCodeToGithub(
+        repoName: string,
+        contractId: string,
+        token: string,
+    ): Promise<{ success: boolean; message?: string }> {
+        const response = await axios.post(
             EXPORT_CONTRACT_URL,
             {
                 repo_name: repoName,
@@ -51,6 +47,23 @@ export default class GithubServer {
             },
         );
 
-        return res.data;
+        return response.data;
+    }
+
+    public static async downloadZipFile(contractId: string, token: string) {
+        const response = await axios.post(
+            DOWNLOAD_ZIP_FILE,
+            {
+                contractId,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+
+        return response.data;
     }
 }

@@ -50,18 +50,19 @@ export default async function githubRepoNameValidatorController(req: Request, re
         }
 
         const prev = contract.githubRepoName;
-
         if (!prev) {
             const exists = await github_services.check_repo_exists(
                 repo_name,
                 user.githubAccessToken,
             );
-            ResponseWriter.success(
-                res,
-                repo_name,
-                exists.exists ? 'Repo exists' : 'Repo will be created',
-            );
-            return;
+            if (exists.exists) {
+                ResponseWriter.custom(res, 200, {
+                    success: false,
+                    meta: { timestamp: Date.now().toString() },
+                    message: 'Repo already exists',
+                });
+                return;
+            }
         }
 
         if (prev === repo_name) {
@@ -78,7 +79,11 @@ export default async function githubRepoNameValidatorController(req: Request, re
         );
         return;
     } catch (error) {
-        ResponseWriter.error(res, 'Internal server error');
+        ResponseWriter.server_error(
+            res,
+            'Internal server error',
+            error instanceof Error ? error.message : undefined,
+        );
         return;
     }
 }

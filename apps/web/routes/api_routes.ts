@@ -18,8 +18,9 @@ export const FILES_URL = API_URL + '/files';
 export const SYNC_FILES_URL = FILES_URL + '/sync';
 export const RUN_COMMAND_URL = API_URL + '/contract/run-command';
 
-export const EXPORT_CONTRACT_URL = API_URL + '/export-code';
-export const CHECK_REPO_NAME = API_URL + '/check-repo-name';
+export const EXPORT_CONTRACT_URL = API_URL + '/github/export-code';
+export const CHECK_REPO_NAME = API_URL + '/github/validate-repo-name';
+export const DOWNLOAD_ZIP_FILE = API_URL + '/github/get-zip-file';
 
 export const LINK_ACCOUNT = API_URL + '/link-account';
 export const REVIEW_URL = API_URL + '/review';
