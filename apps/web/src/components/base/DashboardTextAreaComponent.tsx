@@ -2,7 +2,7 @@ import { cn } from '@/src/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { Terminal, ArrowRight, FileCode } from 'lucide-react';
-import { useState, KeyboardEvent, useRef, useEffect } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
@@ -11,7 +11,6 @@ import LoginModal from '../utility/LoginModal';
 import ModelSelect from './ExecutorSelect';
 import { ChatRole } from '@/src/types/prisma-types';
 import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
-import { useContractTemplateStore } from '@/src/store/user/useContractTemplateStore';
 import { useModelStore } from '@/src/store/model/useExecutorStore';
 
 export default function DashboardTextAreaComponent() {
@@ -23,31 +22,6 @@ export default function DashboardTextAreaComponent() {
     const { setMessage } = useBuilderChatStore();
     const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
     const router = useRouter();
-    const editorRef = useRef<HTMLDivElement>(null);
-    const { template } = useContractTemplateStore();
-
-    useEffect(() => {
-        if (!template || !editorRef.current) return;
-
-        editorRef.current.innerHTML = `
-        <div style="
-            display:flex;
-            gap:8px;
-            background:#141414;
-            border:1px solid #333;
-            padding:8px;
-            border-radius:6px;
-            margin-bottom:8px;
-        ">
-            <img src="${template.image}" style="width:48px;height:48px;border-radius:4px;object-fit:cover" />
-            <div>
-                <div style="font-size:13px;color:#ddd;font-weight:600;">${template.title}</div>
-                <div style="font-size:12px;color:#888;">${template.description}</div>
-            </div>
-        </div>
-        <div>${template.description}</div>
-    `;        
-    }, [template]);
 
     function handleSubmit() {
         if (inputValue.trim() === '') return;

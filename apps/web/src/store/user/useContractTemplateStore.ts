@@ -1,5 +1,5 @@
-import { ContractTemplate } from "@winterfell/types";
-import { create } from "zustand";
+import { ContractTemplate } from '@winterfell/types';
+import { create } from 'zustand';
 
 interface ContractTemplateStore {
     template: ContractTemplate | null;
@@ -11,4 +11,4 @@ export const useContractTemplateStore = create<ContractTemplateStore>((set) => (
     template: null,
     setTemplate: (template: ContractTemplate) => set({ template: template }),
     resetTemplate: () => set({ template: null }),
-}))
+}));

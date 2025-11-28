@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { IoCopyOutline, IoCheckmark } from 'react-icons/io5';
 import { IoIosSend } from 'react-icons/io';
 import { HiPencil } from 'react-icons/hi2';
-import { FiInfo } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/button';
 import ToolTipComponent from '../ui/TooltipComponent';
@@ -13,6 +12,7 @@ import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useChatStore } from '@/src/store/user/useChatStore';
 import { toast } from 'sonner';
 import GithubServer from '@/src/lib/server/github-server';
+import useDebounce from '@/src/hooks/useDebounce';
 
 enum CloneOptions {
     HTTPS = 'HTTPS',
@@ -30,6 +30,7 @@ export default function GitCloneCard() {
     const { session } = useUserSessionStore();
     const { contractId } = useChatStore();
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const debouncedRepoName = useDebounce(repoName, 1000);
 
     const username = session?.user.githubUsername;
     const httpsURL = `https://github.com/${username}/${repoName}.git`;
@@ -42,6 +43,16 @@ export default function GitCloneCard() {
             inputRef.current.select();
         }
     }, [editingRepo]);
+
+    useEffect(() => {
+        if (!editingRepo) return;
+
+        if (!debouncedRepoName.trim()) {
+            setIsRepoValid(null);
+            return;
+        }
+        handleOnClick();
+    }, [debouncedRepoName]);
 
     async function handleOnClick() {
         const trimmed = repoName.trim();
@@ -66,6 +77,7 @@ export default function GitCloneCard() {
                 contractId ?? window.location.pathname.split('/playground/')[1],
                 session.user.token,
             );
+
             if (result.success) {
                 setIsRepoValid(true);
                 setEditingRepo(false);
@@ -101,11 +113,12 @@ export default function GitCloneCard() {
 
         try {
             setIsPushing(true);
-            const result = await GithubServer.pushCodeToGithub({
-                repoName: trimmed,
-                contractId: contractId ?? window.location.pathname.split('/playground/')[1],
-                token: session?.user.token!,
-            });
+            if (!session || !session.user.token) return;
+            const result = await GithubServer.pushCodeToGithub(
+                trimmed,
+                contractId ?? window.location.pathname.split('/playground')[1],
+                session?.user.token,
+            );
             if (result.success) {
                 toast.loading('Pushing...');
                 await new Promise((res) => setTimeout(res, 1000));
@@ -129,14 +142,7 @@ export default function GitCloneCard() {
     const isSendDisabled = isPushing || editingRepo || isRepoValid !== true;
 
     return (
-        <div className="flex flex-col gap-y-3 rounded-[8px] overflow-hidden">
-            <div className="flex justify-between items-center text-sm pb-1">
-                <span>Clone using the web URL</span>
-                <ToolTipComponent content="Which remote URL should I use?">
-                    <FiInfo className="size-4 text-light/60" />
-                </ToolTipComponent>
-            </div>
-
+        <div className="flex flex-col gap-y-3 overflow-hidden">
             <div className="flex gap-x-2">
                 <Button
                     onClick={() => setActiveTab(CloneOptions.HTTPS)}
@@ -168,9 +174,9 @@ export default function GitCloneCard() {
             <div className="flex items-center gap-2 w-full">
                 <div
                     className={cn(
-                        'relative group flex-1 bg-dark/50 border px-3 py-2 rounded-[4px] flex items-center overflow-hidden',
+                        'relative group flex-1 bg-dark/50 border border-neutral-800 px-3 py-2 rounded-[4px] flex items-center',
                         borderColor,
-                        'overflow-hidden ',
+                        'overflow-hidden',
                     )}
                 >
                     {editingRepo ? (
@@ -217,33 +223,19 @@ export default function GitCloneCard() {
                         <AnimatePresence initial={false} mode="wait">
                             {editingRepo ? (
                                 <motion.div
-                                    key="check"
+                                    key="status"
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ duration: 0.15 }}
                                 >
-                                    <ToolTipComponent
-                                        content={isChecking ? 'Checking…' : 'Save repo name'}
-                                    >
-                                        <button
-                                            type="button"
-                                            disabled={isChecking}
-                                            onClick={handleOnClick}
-                                            className={cn(
-                                                'cursor-pointer hover:-translate-y-px transition-transform',
-                                                isChecking
-                                                    ? 'opacity-60 cursor-default'
-                                                    : 'text-green-400',
-                                            )}
-                                        >
-                                            {isChecking ? (
-                                                <div className="size-4 border-[2px] border-light/40 border-t-transparent rounded-full animate-spin" />
-                                            ) : (
-                                                <IoCheckmark className="size-4" />
-                                            )}
-                                        </button>
-                                    </ToolTipComponent>
+                                    {isChecking ? (
+                                        <div className="size-4 border-[2px] border-light/40 border-t-transparent rounded-full animate-spin" />
+                                    ) : isRepoValid === true ? (
+                                        <IoCheckmark className="size-4 text-green-400" />
+                                    ) : isRepoValid === false ? (
+                                        <span className="text-red-500 text-[16px]">✕</span>
+                                    ) : null}
                                 </motion.div>
                             ) : (
                                 <motion.div

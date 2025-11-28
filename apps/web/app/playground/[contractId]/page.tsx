@@ -70,7 +70,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
         };
     }, [messages.length, hasShownReview]);
 
-
     async function get_chat() {
         try {
             if (!session?.user.token) return;
@@ -106,10 +105,10 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
         get_chat();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session]);
-    
+
     useEffect(() => {
         return () => {
-            console.log("Cleanup on unmount");
+            console.log('Cleanup on unmount');
             cleanStore();
             resetContractId();
             reset();

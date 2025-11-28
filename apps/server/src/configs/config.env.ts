@@ -29,6 +29,7 @@ const envScehma = z.object({
     SERVER_STRIPE_SECRET_KEY: z.string(),
     SERVER_STRIPE_WEBHOOK_SECRET: z.string(),
     SERVER_TURNSTILE_SERVER_KEY: z.string().transform((val) => val.trim()),
+    SERVER_ADMIN_SECRET: z.string().transform((val) => val.trim()),
 });
 
 function parseScehma() {

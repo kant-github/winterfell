@@ -14,6 +14,9 @@ import getChatController from '../controllers/chat-controller/getChatController'
 import { createContractReview } from '../controllers/review/create_contract_review';
 import generateContractController from '../controllers/gen/generateContractController';
 import githubRepoNameValidatorController from '../controllers/github-deploy-controller/githubRepoNameValidatorController';
+import syncTemplate from '../controllers/template-controller/syncTemplates';
+import githubMiddleware from '../middlewares/middleware.github';
+import githubProjectZipController from '../controllers/github-deploy-controller/githubProjectZipController';
 
 const router: Router = Router();
 
@@ -31,8 +34,14 @@ router.post('/continue', authMiddleware, continueChatController);
 router.post('/contract/get-chat', authMiddleware, getChatController);
 
 // github-routes
-router.post('/export-code', authMiddleware, githubCodePushController);
-router.post('/check-repo-name', authMiddleware, githubRepoNameValidatorController);
+router.post('/github/export-code', authMiddleware, githubMiddleware, githubCodePushController);
+router.post(
+    '/github/validate-repo-name',
+    authMiddleware,
+    githubMiddleware,
+    githubRepoNameValidatorController,
+);
+router.post('/github/get-zip-file', authMiddleware, githubMiddleware, githubProjectZipController);
 
 // file-routes
 router.get('/files/:contractId', authMiddleware, getFilesController);
@@ -51,6 +60,9 @@ router.get('/subscription/get-plan', authMiddleware, getUserPlanController);
 
 // reviews
 router.post('/review', authMiddleware, createContractReview);
+
+// templates
+router.post('/sync-templates', syncTemplate);
 
 // sign-in
 // health

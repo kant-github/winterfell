@@ -38,7 +38,7 @@ model Contract {
   codeHash     String?
   s3_url       String?
 
-  githubRepoName    String?
+  githubRepoName String?
 
   lastBuildStatus BuildStatus @default(NEVER_BUILT)
   lastBuildId     String?
@@ -60,6 +60,20 @@ model Contract {
   buildJob                  BuildJob[]
   messages                  Message[]
   contractGenerationReviews ContractGenerationReviews[]
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String
+  tags        String[]
+  s3_prefix   String
+  solanaVersion String
+  anchorVersion String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model BuildJob {
