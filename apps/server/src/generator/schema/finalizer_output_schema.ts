@@ -37,61 +37,75 @@ const entrypoint_file_schema = z.object({
     id: z.string(),
     path: z.string(),
     type: z.string(),
-    mod_name: z.string(),
-    public_key: z.string(),
-    instructions: z.array(
-        z.object({
-            name: z.string(),
-        }),
-    ),
+    content: z.object({
+        mod_name: z.string(),
+        public_key: z.string(),
+        instructions: z.array(
+            z.object({
+                name: z.string(),
+            }),
+        ),
+    }),
 });
 
 const instruction_file_schema = z.object({
     id: z.string(),
     path: z.string(),
     type: z.string(),
-    instructions: z.array(instruction_schema),
+    content: z.object({
+        instructions: z.array(instruction_schema),
+    }),
 });
 
 const struct_file_schema = z.object({
     id: z.string(),
     path: z.string(),
     type: z.string(),
-    structs: z.array(struct_schema),
+    content: z.object({
+        structs: z.array(struct_schema),
+    }),
 });
 
 const instruction_and_struct_schema = z.object({
     id: z.string(),
     path: z.string(),
     type: z.string(),
-    instructions: z.array(instruction_schema),
-    structs: z.array(struct_schema),
+    content: z.object({
+        instructions: z.array(instruction_schema),
+        structs: z.array(struct_schema),
+    }),
 });
 
 const test_file_schema = z.object({
     id: z.string(),
     path: z.string(),
     type: z.string(),
-    description: z.string(),
+    content: z.object({
+        description: z.string(),
+    }),
 });
 
 const mod_file_schema = z.object({
     id: z.string(),
     path: z.string(),
     type: z.string(),
-    mods: z.array(
-        z.object({
-            name: z.string(),
-        }),
-    ),
+    content: z.object({
+        mods: z.array(
+            z.object({
+                name: z.string(),
+            }),
+        ),
+    }),
 });
 
 const packages_file_schema = z.object({
     id: z.string(),
     path: z.string(),
     type: z.string(),
-    name: z.string(),
-    description: z.string(),
+    content: z.object({
+        name: z.string(),
+        description: z.string(),
+    }),
 });
 
 const finalizer_schema = z.union([

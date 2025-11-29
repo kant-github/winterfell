@@ -295,87 +295,207 @@ export default class Generator extends GeneratorShape {
         }
     }
 
-protected async old_contract(
-    res: Response,
-    planner_chain: old_planner,
-    coder_chain: old_coder,
-    finalizer_chain: old_finalizer,
-    user_instruction: string,
-    contract_id: string,
-    parser: StreamParser,
-    idl: Object[],
-) {
-    console.log('old contract hit');
+    protected async old_contract(
+        res: Response,
+        planner_chain: old_planner,
+        coder_chain: old_coder,
+        finalizer_chain: old_finalizer,
+        user_instruction: string,
+        contract_id: string,
+        parser: StreamParser,
+        idl: Object[],
+    ) {
 
-    const planner_data = await planner_chain.invoke({
-        user_instruction: user_instruction,
-        idl: idl,
-    });
+        const planner_data = await planner_chain.invoke({
+            user_instruction: user_instruction,
+            idl: idl,
+        });
 
-    const llm_message = await prisma.message.create({
-        data: {
-            content: planner_data.context,
-            contractId: contract_id,
-            role: ChatRole.AI,
-        },
-    });
+        const llm_message = await prisma.message.create({
+            data: {
+                content: planner_data.context,
+                contractId: contract_id,
+                role: ChatRole.AI,
+            },
+        });
 
-    console.log('the context: ', chalk.red(planner_data.context));
-    this.send_sse(res, STAGE.CONTEXT, {
-        context: planner_data.context,
-        llmMessage: llm_message,
-    });
+        console.log('the context: ', chalk.red(planner_data.context));
+        this.send_sse(res, STAGE.CONTEXT, {
+            context: planner_data.context,
+            llmMessage: llm_message,
+        });
 
-    if (!planner_data.should_continue) {
-        console.log('planner said to not continue.');
-        parser.reset();
-        this.delete_parser(contract_id);
-        res.end();
-        return;
+        if (!planner_data.should_continue) {
+            console.log('planner said to not continue.');
+            parser.reset();
+            this.delete_parser(contract_id);
+            res.end();
+            return;
+        }
+
+        const system_message = await prisma.message.create({
+            data: {
+                contractId: contract_id,
+                role: ChatRole.SYSTEM,
+                content: 'starting to generate in a few seconds',
+                planning: true,
+            },
+        });
+
+        const promptValue = await old_chat_coder_prompt.invoke({
+            plan: planner_data.plan,
+            contract_id,
+            files_likely_affected: planner_data.files_likely_affected,
+        });
+        
+        const initialMessages = promptValue.toChatMessages();
+
+        const toolStepResult = await this.gemini_coder
+            .bindTools([Tool.get_file])
+            .invoke(initialMessages);
+
+        const { toolResults } = await Tool.runner.invoke(toolStepResult);
+        const { messages: toolMessages } = await Tool.convert.invoke({ toolResults });
+
+        const code_stream = await this.gemini_coder.stream([
+            ...initialMessages,
+            toolStepResult,
+            ...toolMessages,
+            {
+                role: "user",
+                content: "Use the fetched file contents to implement the planned changes.",
+            }
+        ]);
+
+        for await (const chunk of code_stream) {
+            if (chunk.text) {
+                parser.feed(chunk.text, system_message);
+            }
+        }
+
+        await prisma.message.update({
+            where: {
+                id: system_message.id,
+                contractId: contract_id,
+            },
+            data: {
+                building: true,
+            },
+        });
+
+        console.log('the stage: ', chalk.green('Building'));
+        this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Building' }, system_message);
+
+        const gen_files = parser.getGeneratedFiles();
+        await this.update_contract(contract_id, gen_files);
+
+        await prisma.message.update({
+            where: {
+                id: system_message.id,
+                contractId: contract_id,
+            },
+            data: {
+                creatingFiles: true,
+            },
+        });
+
+        console.log('the stage: ', chalk.green('Creating Files'));
+        this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
+
+
+
     }
 
-    const system_message = await prisma.message.create({
-        data: {
-            contractId: contract_id,
-            role: ChatRole.SYSTEM,
-            content: 'starting to generate in a few seconds',
-            planning: true,
-        },
-    });
+    protected async old_finalizer(
+        res: Response,
+        finalizer_chain: old_finalizer,
+        generated_files: FileContent[],
+        contract_id: string,
+        parser: StreamParser,
+        system_message: Message,
+    ) {
 
-    console.log('planner data; ', planner_data);
+        await prisma.message.update({
+            where: {
+                id: system_message.id,
+                contractId: contract_id,
+            },
+            data: {
+                finalzing: true,
+            },
+        });
 
-    // Step 1: Format the prompt and convert to messages
-    const promptValue = await old_chat_coder_prompt.invoke({
-        plan: planner_data.plan,
-        contract_id,
-        files_likely_affected: planner_data.files_likely_affected,
-    });
-    
-    const initialMessages = promptValue.toChatMessages();
+        console.log('the stage: ', chalk.green('Finalizing'));
+        this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
-    const toolStepResult = await this.gemini_coder.bindTools([Tool.get_file]).invoke(initialMessages);
+        const finalizer_data = await finalizer_chain.invoke({
+            updated_files: generated_files,
+        });
 
-    const { toolResults } = await Tool.runner.invoke(toolStepResult);
-    const { messages: toolMessages } = await Tool.convert.invoke({ toolResults });
+        console.log(finalizer_data.idl);
 
-    const code_stream = await this.gemini_coder.stream([
-        ...initialMessages,
-        toolStepResult,
-        ...toolMessages,
-        {
-            role: "user",
-            content: "Use the fetched file contents to implement the planned changes.",
-        }
-    ]);
-
-
-    for await (const chunk of code_stream) {
-        if (chunk.text) {
-            parser.feed(chunk.text, system_message);
-        }
     }
-}
+
+    protected async update_contract(contract_id: string, generated_files: FileContent[]) {
+
+        const contract = await objectStore.get_resource_files(contract_id);
+
+        contract.forEach((file: FileContent) => {
+            for(const gen_file of generated_files) {
+                if(file.path === gen_file.path){
+                    file.content = gen_file.content;
+                }
+            }
+        });
+
+        await objectStore.updateContractFiles(contract_id, contract);
+    }
+
+    protected async update_idl(contract_id: string, generated_idl_parts: any[]) {
+
+        const contract = await prisma.contract.findUnique({
+            where: {
+                id: contract_id,
+            },
+            select: {
+                summarisedObject: true,
+            },
+        });
+
+        if(!contract?.summarisedObject) {
+            await prisma.contract.update({
+                where: {
+                    id: contract_id,
+                },
+                data: {
+                    summarisedObject: JSON.stringify(generated_idl_parts),
+                },
+            });
+            return;
+        }
+
+        const idl = JSON.parse(contract.summarisedObject);
+
+        idl.forEach((i: any) => {
+            for(const gen_i of generated_idl_parts) {
+                if(i.path === gen_i.path) {
+                    i.content = gen_i.content;
+                }
+            }
+        });
+
+        const updated_string_idl = JSON.stringify(idl);
+
+        await prisma.contract.update({
+            where: {
+                id: contract_id,
+            },
+            data: {
+                summarisedObject: updated_string_idl,
+            },
+        });
+        
+    }
 
     protected get_chains(
         chat: 'new' | 'old',
