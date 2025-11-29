@@ -26,3 +26,88 @@ export const old_planner_output_schema = z.object({
         }),
     ),
 });
+
+// gemini doesn't support any types, I've to specify the complete exact type
+// design the typing
+export const finalizer_output_schema = z.object({
+    idl: z.array(z.object()),
+    context: z.string(),
+});
+
+export type finalizer =
+    | {
+          id: string;
+          path: string;
+          type: 'entrypoint';
+          mod_name: string;
+          pubic_key: string;
+          instructions: [{ name: string }];
+      }
+    | {
+          id: string;
+          path: string;
+          type: 'instruction';
+          instructions: [
+              {
+                  name: string;
+                  params: [{ name: string; type: string }];
+                  returns: [{ type: string }];
+              },
+          ];
+      }
+    | {
+          id: string;
+          path: string;
+          type: 'struct';
+          structs: [
+              {
+                  name: string;
+                  type: string;
+                  instructions: [{ name: string; type: string }];
+                  struct_vars: [{ name: string; type: string; macro: string }];
+              },
+          ];
+      }
+    | {
+          id: string;
+          path: string;
+          type: 'instruction_and_struct';
+          instructions: [
+              {
+                  name: string;
+                  params: [{ name: string; type: string }];
+                  returns: [{ type: string }];
+              },
+          ];
+          structs: [
+              {
+                  name: string;
+                  type: string;
+                  instructions: [{ name: string; type: string }];
+                  struct_vars: [{ name: string; type: string; macro: string }];
+              },
+          ];
+      }
+    | {
+          id: string;
+          path: string;
+          type: 'test';
+          description: string;
+      }
+    | {
+          id: string;
+          path: string;
+      }
+    | {
+          id: string;
+          path: string;
+          type: 'mod';
+          mods: [{ name: string }];
+      }
+    | {
+          id: string;
+          path: string;
+          type: 'packages';
+          name: string;
+          description: string;
+      };

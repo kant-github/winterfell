@@ -16,6 +16,7 @@ import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import {
     FILE_STRUCTURE_TYPES,
     FileContent,
+    MODEL,
     PHASE_TYPES,
     STAGE,
     StreamEvent,
@@ -27,7 +28,7 @@ export default function BuilderChatInput() {
     const { executor, setExecutor } = useModelStore();
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const { session } = useUserSessionStore();
-    const { setLoading, upsertMessage, setPhase, setMessage, setCurrentFileEditing } =
+    const { messages, setLoading, upsertMessage, setPhase, setMessage, setCurrentFileEditing } =
         useBuilderChatStore();
     const { parseFileStructure, deleteFile } = useCodeEditor();
     const { setCollapseFileTree } = useCodeEditor();
@@ -68,10 +69,13 @@ export default function BuilderChatInput() {
                 body: JSON.stringify({
                     contract_id: contractId,
                     instruction: inputValue,
+                    model: MODEL.GEMINI,
                 }),
             });
 
             if (response.status === 403) {
+                // set back the user input to the input box
+                messages.slice(0, messages.length - 2);
                 toast.error('message limit reached');
             }
 
@@ -152,6 +156,7 @@ export default function BuilderChatInput() {
                                 if ('data' in event.data && event.data.data) {
                                     parseFileStructure(event.data.data as FileContent[]);
                                 }
+                                setCollapseFileTree(true);
                                 break;
                             }
 
@@ -173,7 +178,11 @@ export default function BuilderChatInput() {
         // router.push(`/playground/${newContractId}`);
     }
 
+    const userMessagesLength = messages.filter((m) => m.role === ChatRole.USER).length;
+
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+        // if(userMessagesLength >= 5) return;
+
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSubmit();
@@ -227,11 +236,12 @@ export default function BuilderChatInput() {
 
                         <Button
                             type="button"
-                            disabled={!inputValue.trim()}
+                            disabled={!inputValue.trim() || userMessagesLength >= 5}
                             onClick={handleSubmit}
                             className={cn(
                                 'group/submit flex items-center gap-2 h-8 w-9 px-2 py-1 rounded-[4px] font-mono text-xs duration-200',
                                 'transition-all duration-200',
+                                'disabled:cursor-not-allowed',
                                 inputValue.trim()
                                     ? 'bg-neutral-800 text-neutral-300 hover:text-neutral-200'
                                     : 'bg-neutral-900 text-neutral-700 cursor-not-allowed',

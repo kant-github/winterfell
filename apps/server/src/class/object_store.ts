@@ -19,6 +19,49 @@ export default class ObjectStore {
         this.bucket = env.SERVER_AWS_BUCKET_NAME;
     }
 
+    public async updateContractFiles(
+        contractId: string,
+        updatedFiles: FileContent[],
+    ): Promise<void> {
+        const key = `${contractId}/resource`;
+
+        const upload = new Upload({
+            client: this.s3,
+            params: {
+                Bucket: this.bucket,
+                Key: key, // Same key = overwrites existing file
+                Body: JSON.stringify(updatedFiles),
+                ContentType: 'application/json',
+            },
+        });
+
+        await upload.done();
+    }
+
+    public async updateContractFilesWithRaw(
+        contractId: string,
+        updatedFiles: FileContent[],
+        rawLlmResponse?: string,
+    ): Promise<void> {
+        // Update the resource files
+        await this.updateContractFiles(contractId, updatedFiles);
+
+        // Optionally update the raw LLM response
+        if (rawLlmResponse) {
+            const rawKey = `${contractId}/raw/llm-response.txt`;
+            const rawUpload = new Upload({
+                client: this.s3,
+                params: {
+                    Bucket: this.bucket,
+                    Key: rawKey,
+                    Body: rawLlmResponse,
+                    ContentType: 'text/plain',
+                },
+            });
+            await rawUpload.done();
+        }
+    }
+
     public async uploadContractFiles(
         contractId: string,
         files: FileContent[],

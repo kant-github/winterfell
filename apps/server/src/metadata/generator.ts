@@ -1,6 +1,6 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { MODEL } from '../generator/types/model_types';
+import { MODEL } from '@winterfell/types';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import { Response } from 'express';
 import StreamParser from '../services/stream_parser';
@@ -78,17 +78,23 @@ export default abstract class GeneratorShape {
 
     /**
      * this method is used to update an old contract
+     * @param {Response} res
      * @param {RunnableSequence} planner_chain
      * @param {Runnable} coder_chain
+     * @param {RunnableSequence} planner_chain
      * @param {string} user_instruction
      * @param {string} contract_id
+     * @param {StreamParser} parser
      * @param {Object[]} idl
      */
     protected abstract old_contract(
+        res: Response,
         planner_chain: RunnableSequence,
         coder_chain: Runnable,
+        finalizer_chain: RunnableSequence,
         user_instruction: string,
         contract_id: string,
+        parser: StreamParser,
         idl: Object[],
     ): void;
 

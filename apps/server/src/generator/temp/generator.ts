@@ -1,17 +1,8 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { MODEL } from '../types/model_types';
-import { RunnableSequence } from '@langchain/core/runnables';
+import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { new_planner_output_schema, old_planner_output_schema } from './schema';
 import Tool from '../tools/tool';
-import {
-    finalizer_prompt,
-    new_chat_coder_prompt,
-    new_chat_planner_prompt,
-    old_chat_coder_prompt,
-    old_chat_planner_prompt,
-} from './prompts';
-import { AIMessageChunk, MessageStructure } from '@langchain/core/messages';
 import StreamParser from '../../services/stream_parser';
 import { ChatRole, Message, prisma } from '@winterfell/database';
 import GeneratorShape from '../../metadata/generator';
@@ -24,35 +15,21 @@ import {
 } from '../../types/stream_event_types';
 import { STAGE } from '../../types/content_types';
 import { objectStore } from '../../services/init';
-import { FileContent } from '@winterfell/types';
+import { FileContent, MODEL } from '@winterfell/types';
 import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
 import chalk from 'chalk';
-
-type planner = RunnableSequence<
-    {
-        user_instruction: string;
-        idl?: Object[];
-    },
-    {
-        should_continue: boolean;
-        plan: string;
-        contract_name?: string;
-        context: string;
-        files_likely_affected: {
-            do: 'create' | 'update' | 'delete';
-            file_path: string;
-            what_to_do: string;
-        }[];
-    }
->;
-
-type coder = RunnableSequence<
-    {
-        plan: any;
-        files_likely_affected: any;
-    },
-    AIMessageChunk<MessageStructure>
->;
+import { finalizer_output_schema } from '../schema/finalizer_output_schema';
+import { new_chat_coder_prompt, new_chat_planner_prompt } from '../prompts/new_chat_prompts';
+import { finalizer_prompt } from '../prompts/finalizer_prompt';
+import { old_chat_coder_prompt, old_chat_planner_prompt } from '../prompts/old_chat_prompts';
+import {
+    new_coder,
+    new_finalizer,
+    new_planner,
+    old_coder,
+    old_finalizer,
+    old_planner,
+} from './generator_types';
 
 export default class Generator extends GeneratorShape {
     protected gemini_planner: ChatGoogleGenerativeAI;
@@ -70,12 +47,12 @@ export default class Generator extends GeneratorShape {
         });
         this.gemini_coder = new ChatGoogleGenerativeAI({
             model: 'gemini-2.5-flash',
-            streaming: true,
+            streaming: false,
             temperature: 0.2,
         });
         this.claude_coder = new ChatAnthropic({
             model: 'claude-sonnet-4-5-20250929',
-            streaming: true,
+            streaming: false,
         });
         this.gemini_finalizer = new ChatGoogleGenerativeAI({
             model: 'gemini-2.5-flash',
@@ -115,10 +92,24 @@ export default class Generator extends GeneratorShape {
                     return;
                 }
                 case 'old': {
+                    if (idl) {
+                        this.old_contract(
+                            res,
+                            planner_chain,
+                            coder_chain,
+                            finalizer_chain,
+                            user_instruction,
+                            contract_id,
+                            parser,
+                            idl,
+                        );
+                    } else {
+                        throw new Error('idl was not found');
+                    }
                 }
             }
         } catch (error) {
-            console.error('Error while generating: ', Error);
+            console.error('Error while generating: ', error);
             parser.reset();
             this.delete_parser(contract_id);
             res.end();
@@ -127,9 +118,9 @@ export default class Generator extends GeneratorShape {
 
     protected async new_contract(
         res: Response,
-        planner_chain: planner,
-        coder_chain: any,
-        finalizer_chain: any,
+        planner_chain: new_planner,
+        coder_chain: new_coder,
+        finalizer_chain: new_finalizer,
         user_instruction: string,
         contract_id: string,
         parser: StreamParser,
@@ -159,10 +150,13 @@ export default class Generator extends GeneratorShape {
 
             if (!planner_data.should_continue) {
                 console.log('planner said to not continue.');
+                parser.reset();
+                this.delete_parser(contract_id);
+                res.end();
                 return;
             }
 
-            const { system_message, contract } = await prisma.$transaction(async (tx) => {
+            const { system_message } = await prisma.$transaction(async (tx) => {
                 const system_message = await tx.message.create({
                     data: {
                         contractId: contract_id,
@@ -239,33 +233,159 @@ export default class Generator extends GeneratorShape {
 
     protected async new_finalizer(
         res: Response,
-        finalizer_chain: any,
+        finalizer_chain: new_finalizer,
         generated_files: FileContent[],
         full_response: string,
         contract_id: string,
         parser: StreamParser,
         system_message: Message,
     ) {
-        await prisma.message.update({
-            where: {
-                id: system_message.id,
-                contractId: contract_id,
-            },
+        try {
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    finalzing: true,
+                },
+            });
+
+            console.log('the stage: ', chalk.green('Finalizing'));
+            this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
+
+            const finalizer_data = await finalizer_chain.invoke({
+                generated_files: generated_files,
+            });
+
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    End: true,
+                },
+            });
+            console.log('the stage: ', chalk.green('END'));
+            this.send_sse(res, STAGE.END, { stage: 'End', data: generated_files }, system_message);
+
+            const llm_message = await prisma.message.create({
+                data: {
+                    contractId: contract_id,
+                    role: ChatRole.AI,
+                    content: finalizer_data.context,
+                },
+            });
+
+            console.log('the context: ', chalk.red(finalizer_data.context));
+            this.send_sse(
+                res,
+                STAGE.CONTEXT,
+                { context: finalizer_data.context, llmMessage: llm_message },
+                system_message,
+            );
+
+            objectStore.uploadContractFiles(contract_id, generated_files, full_response);
+
+            // save the idl to data base
+            await prisma.contract.update({
+                where: {
+                    id: contract_id,
+                },
+                data: {
+                    summarisedObject: JSON.stringify(finalizer_data.idl),
+                },
+            });
+        } catch (error) {
+            console.error('Error while finalizing: ', error);
+            parser.reset();
+            this.delete_parser(contract_id);
+            res.end();
+        }
+    }
+
+    protected async old_contract(
+        res: Response,
+        planner_chain: old_planner,
+        coder_chain: old_coder,
+        finalizer_chain: old_finalizer,
+        user_instruction: string,
+        contract_id: string,
+        parser: StreamParser,
+        idl: Object[],
+    ) {
+        const planner_data = await planner_chain.invoke({
+            user_instruction: user_instruction,
+            idl: idl,
+        });
+
+        const llm_message = await prisma.message.create({
             data: {
-                finalzing: true,
+                content: planner_data.context,
+                contractId: contract_id,
+                role: ChatRole.AI,
             },
         });
 
-        console.log('the stage: ', chalk.green('Finalizing'));
-        this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
-
-        const finalizer_stream = await finalizer_chain.stream({
-            generated_files: generated_files,
+        console.log('the context: ', chalk.red(planner_data.context));
+        this.send_sse(res, STAGE.CONTEXT, {
+            context: planner_data.context,
+            llmMessage: llm_message,
         });
 
-        for await (const chunk of finalizer_stream) {
-            if (chunk.text) {
-                // console.log(chunk.text);
+        if (!planner_data.should_continue) {
+            console.log('planner said to not continue.');
+            parser.reset();
+            this.delete_parser(contract_id);
+            res.end();
+            return;
+        }
+
+        const system_message = await prisma.message.create({
+            data: {
+                contractId: contract_id,
+                role: ChatRole.SYSTEM,
+                content: 'starting to generate in a few seconds',
+                planning: true,
+            },
+        });
+
+        // send planning stage from here
+        console.log('the stage: ', chalk.green('Planning'));
+        this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
+
+        const delete_files = planner_data.files_likely_affected
+            .filter((f) => f.do === 'delete')
+            .map((f) => f.file_path);
+
+        const promptValue = await old_chat_coder_prompt.invoke({
+            plan: planner_data.plan,
+            contract_id,
+            files_likely_affected: planner_data.files_likely_affected,
+        });
+
+        const initialMessages = promptValue.toChatMessages();
+
+        const toolStepResult = await this.gemini_coder
+            .bindTools([Tool.get_file])
+            .invoke(initialMessages);
+
+        const { toolResults } = await Tool.runner.invoke(toolStepResult);
+        const { messages: toolMessages } = await Tool.convert.invoke({ toolResults });
+
+        const code_stream = await this.gemini_coder.stream([
+            ...initialMessages,
+            toolStepResult,
+            ...toolMessages,
+            {
+                role: 'user',
+                content: 'Use the fetched file contents to implement the planned changes.',
+            },
+        ]);
+
+        for await (const chunk of code_stream) {
+            if (chunk && chunk.text) {
                 parser.feed(chunk.text, system_message);
             }
         }
@@ -276,33 +396,189 @@ export default class Generator extends GeneratorShape {
                 contractId: contract_id,
             },
             data: {
-                End: true,
+                building: true,
             },
         });
-        console.log('the stage: ', chalk.green('END'));
-        this.send_sse(res, STAGE.END, { data: generated_files });
-        objectStore.uploadContractFiles(contract_id, generated_files, full_response);
 
-        console.log('generated idl: ', parser.getGeneratedIdl());
+        console.log('the stage: ', chalk.green('Building'));
+        this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Building' }, system_message);
 
-        // make a protected var to store idl in stream parser
-        // save the idl to db
-    }
+        const gen_files = parser.getGeneratedFiles();
+        await this.update_contract(contract_id, gen_files, delete_files);
 
-    protected async old_contract(
-        planner_chain: planner,
-        coder_chain: coder,
-        user_instruction: string,
-        contract_id: string,
-        idl: Object[],
-    ) {
-        const data = await planner_chain.invoke({
-            user_instruction,
+        console.log(gen_files);
+
+        await prisma.message.update({
+            where: {
+                id: system_message.id,
+                contractId: contract_id,
+            },
+            data: {
+                creatingFiles: true,
+            },
         });
 
-        const coder = await coder_chain.invoke({
-            plan: data.plan,
-            files_likely_affected: data.files_likely_affected,
+        console.log('the stage: ', chalk.green('Creating Files'));
+        this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
+
+        this.old_finalizer(
+            res,
+            finalizer_chain,
+            gen_files,
+            contract_id,
+            parser,
+            system_message,
+            delete_files,
+        );
+    }
+
+    protected async old_finalizer(
+        res: Response,
+        finalizer_chain: old_finalizer,
+        generated_files: FileContent[],
+        contract_id: string,
+        parser: StreamParser,
+        system_message: Message,
+        delete_files: string[],
+    ) {
+        try {
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    finalzing: true,
+                },
+            });
+
+            console.log('the stage: ', chalk.green('Finalizing'));
+            this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
+
+            const finalizer_data = await finalizer_chain.invoke({
+                generated_files: generated_files,
+            });
+
+            console.log(finalizer_data.idl);
+
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    End: true,
+                },
+            });
+            console.log('the stage: ', chalk.green('END'));
+            this.send_sse(res, STAGE.END, { stage: 'End', data: generated_files }, system_message);
+
+            const llm_message = await prisma.message.create({
+                data: {
+                    contractId: contract_id,
+                    role: ChatRole.AI,
+                    content: finalizer_data.context,
+                },
+            });
+
+            console.log('the context: ', chalk.red(finalizer_data.context));
+            this.send_sse(
+                res,
+                STAGE.CONTEXT,
+                { context: finalizer_data.context, llmMessage: llm_message },
+                system_message,
+            );
+
+            this.update_idl(contract_id, finalizer_data.idl, delete_files);
+        } catch (error) {
+            console.error('Error while finalizing: ', error);
+            parser.reset();
+            this.delete_parser(contract_id);
+            res.end();
+        }
+    }
+
+    protected async update_contract(
+        contract_id: string,
+        generated_files: FileContent[],
+        deleting_files_path: string[],
+    ) {
+        const contract = await objectStore.get_resource_files(contract_id);
+
+        const remainingFiles = contract.filter((file) => !deleting_files_path.includes(file.path));
+
+        const existingFilesMap = new Map(remainingFiles.map((file) => [file.path, file]));
+        const newFiles: FileContent[] = [];
+
+        for (const gen_file of generated_files) {
+            const existingFile = existingFilesMap.get(gen_file.path);
+
+            if (existingFile) {
+                existingFile.content = gen_file.content;
+            } else {
+                newFiles.push(gen_file);
+            }
+        }
+
+        const updatedContract = [...remainingFiles, ...newFiles];
+
+        console.log(updatedContract);
+
+        await objectStore.updateContractFiles(contract_id, updatedContract);
+    }
+
+    protected async update_idl(
+        contract_id: string,
+        generated_idl_parts: any[],
+        deleting_files_path: string[],
+    ) {
+        const contract = await prisma.contract.findUnique({
+            where: {
+                id: contract_id,
+            },
+            select: {
+                summarisedObject: true,
+            },
+        });
+
+        if (!contract?.summarisedObject) {
+            await prisma.contract.update({
+                where: {
+                    id: contract_id,
+                },
+                data: {
+                    summarisedObject: JSON.stringify(generated_idl_parts),
+                },
+            });
+            return;
+        }
+
+        const idl = JSON.parse(contract.summarisedObject);
+
+        const remainingIdl = idl.filter((item: any) => !deleting_files_path.includes(item.path));
+
+        const existingIdlMap = new Map(remainingIdl.map((item: any) => [item.path, item]));
+        const newIdlParts: any[] = [];
+
+        for (const gen_i of generated_idl_parts) {
+            const existingIdl = existingIdlMap.get(gen_i.path);
+
+            if (existingIdl) {
+                Object.assign(existingIdl, gen_i);
+            } else {
+                newIdlParts.push(gen_i);
+            }
+        }
+
+        const updatedIdl = [...remainingIdl, ...newIdlParts];
+
+        await prisma.contract.update({
+            where: {
+                id: contract_id,
+            },
+            data: {
+                summarisedObject: JSON.stringify(updatedIdl),
+            },
         });
     }
 
@@ -325,7 +601,10 @@ export default class Generator extends GeneratorShape {
 
                 coder_chain = new_chat_coder_prompt.pipe(coder);
 
-                finalizer_chain = finalizer_prompt.pipe(this.gemini_finalizer);
+                finalizer_chain = RunnableSequence.from([
+                    finalizer_prompt,
+                    this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
+                ]);
 
                 return {
                     planner_chain: planner_chain,
@@ -340,9 +619,28 @@ export default class Generator extends GeneratorShape {
                     this.gemini_planner.withStructuredOutput(old_planner_output_schema),
                 ]);
 
-                coder_chain = old_chat_coder_prompt.pipe(coder.bindTools([Tool.get_file]));
+                const coder_chain = old_chat_coder_prompt
+                    .pipe(coder.bindTools([Tool.get_file]))
+                    .pipe(Tool.runner)
+                    .pipe(Tool.convert)
+                    .pipe(
+                        new RunnableLambda({
+                            func: ({ messages }: { messages: any }) => [
+                                ...messages,
+                                {
+                                    role: 'user',
+                                    content:
+                                        'Use the fetched file contents to implement the planned changes.',
+                                },
+                            ],
+                        }),
+                    )
+                    .pipe(coder);
 
-                finalizer_chain = finalizer_prompt.pipe(this.gemini_finalizer);
+                finalizer_chain = RunnableSequence.from([
+                    finalizer_prompt,
+                    this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
+                ]);
 
                 return {
                     planner_chain: planner_chain,
@@ -407,6 +705,10 @@ export default class Generator extends GeneratorShape {
 
             parser.on(STAGE.FINALIZING, ({ data, systemMessage }) =>
                 this.send_sse(res, STAGE.FINALIZING, data, systemMessage),
+            );
+
+            parser.on(STAGE.END, ({ data, systemMessage }) =>
+                this.send_sse(res, STAGE.END, data, systemMessage),
             );
 
             this.parsers.set(contract_id, parser);

@@ -1,4 +1,4 @@
 export enum MODEL {
-  GEMINI,
-  CLAUDE,
+  GEMINI = "GEMINI",
+  CLAUDE = "CLAUDE",
 }

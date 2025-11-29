@@ -1,26 +1,33 @@
-import { PlanType, prisma } from '@winterfell/database';
+import { ChatRole, PlanType, prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
 import { generator } from '../../services/init';
-import { MODEL } from '../../generator/types/model_types';
 import ResponseWriter from '../../class/response_writer';
+import { generate_contract_schema } from '../../schemas/generate_contract_schema';
+import { MODEL } from '@winterfell/types';
 
 export default async function generateContractController(req: Request, res: Response) {
     try {
-        console.log('generate contract controller hit');
         const user = req.user;
         if (!user) {
-            res.status(401).json({
-                success: false,
-                message: 'Unauthorized',
-            });
+            ResponseWriter.unauthorized(res, 'Unauthorized');
             return;
         }
 
-        const body = req.body;
-        // safe parse validation check
-        const { contract_id, instruction, model } = body;
+        const parsed_data = generate_contract_schema.safeParse(req.body);
 
-        console.log(body);
+        if (!parsed_data.success) {
+            ResponseWriter.error(res, 'Invalid data', 400);
+            return;
+        }
+
+        // safe parse validation check
+        const { contract_id, instruction, model } = parsed_data.data;
+
+        // checking for instruction length
+        if (instruction.length > 200) {
+            ResponseWriter.error(res, 'instruction crossed the length limit!', 413);
+            return;
+        }
 
         if (model === MODEL.CLAUDE) {
             const existing_user = await prisma.user.findUnique({
@@ -48,23 +55,41 @@ export default async function generateContractController(req: Request, res: Resp
                 id: contract_id,
                 userId: user.id,
             },
-            select: {
+            include: {
                 messages: true,
             },
         });
 
         if (existing_contract) {
             // call for update
-            if (existing_contract.messages.length >= 5) {
-                res.status(403).json({
-                    success: false,
-                    message: 'message limit reached!',
-                });
+
+            // const total_messages = existing_contract.messages.filter(m => m.role === ChatRole.USER);
+            const total_messages = 1;
+
+            if (total_messages > 5) {
+                ResponseWriter.error(res, 'message limit reached!', 403);
                 return;
             }
+
+            // create user message
+            await prisma.message.create({
+                data: {
+                    role: ChatRole.USER,
+                    content: instruction,
+                    contractId: existing_contract.id,
+                },
+            });
+
+            generator.generate(
+                res,
+                'old',
+                instruction,
+                model || MODEL.GEMINI,
+                existing_contract.id,
+                JSON.parse(existing_contract.summarisedObject || ''),
+            );
         } else {
             // call for new
-
             const contract = await prisma.contract.create({
                 data: {
                     id: contract_id,
@@ -74,14 +99,22 @@ export default async function generateContractController(req: Request, res: Resp
                 },
             });
 
+            // create user message
+            await prisma.message.create({
+                data: {
+                    role: ChatRole.USER,
+                    content: instruction,
+                    contractId: contract_id,
+                },
+            });
+
             generator.generate(res, 'new', instruction, model || MODEL.GEMINI, contract.id);
         }
     } catch (error) {
         console.error('Error in generate contract controller: ', error);
         if (!res.headersSent) {
-            res.status(500).json({
-                error: 'Internal server error',
-            });
+            ResponseWriter.server_error(res);
+            return;
         } else {
             res.write(
                 `data: ${JSON.stringify({

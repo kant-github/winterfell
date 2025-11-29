@@ -35,7 +35,7 @@ export default async function (req: Request, res: Response) {
                 title: true,
                 description: true,
                 code: true,
-                summary: true,
+                summarisedObject: true,
                 deployed: true,
                 programId: true,
                 version: true,
