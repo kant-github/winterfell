@@ -1,4 +1,4 @@
 export enum EXECUTOR {
-    AGENTIC = "agentic",
-    PLAN = "plan",
+  AGENTIC = "agentic",
+  PLAN = "plan",
 }

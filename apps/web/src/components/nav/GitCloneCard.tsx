@@ -23,13 +23,15 @@ enum CloneOptions {
 export default function GitCloneCard() {
     const [activeTab, setActiveTab] = useState<CloneOptions>(CloneOptions.HTTPS);
     const [repoName, setRepoName] = useState<string>('winterfell');
-    const [editingRepo, setEditingRepo] = useState<boolean>(false);
+    const [isEditing, setIsEditing] = useState<boolean>(false);
     const [inputError, setInputError] = useState<boolean>(false);
     const [isRepoValid, setIsRepoValid] = useState<boolean | null>(null);
     const [isChecking, setIsChecking] = useState<boolean>(false);
     const [isPushing, setIsPushing] = useState<boolean>(false);
+
     const { session } = useUserSessionStore();
     const { contractId } = useChatStore();
+
     const inputRef = useRef<HTMLInputElement | null>(null);
     const debouncedRepoName = useDebounce(repoName, 1000);
 
@@ -39,24 +41,20 @@ export default function GitCloneCard() {
     const finalURL = activeTab === CloneOptions.HTTPS ? httpsURL : sshURL;
 
     useEffect(() => {
-        if (editingRepo && inputRef.current) {
+        if (isEditing && inputRef.current) {
             inputRef.current.focus();
             inputRef.current.select();
         }
-    }, [editingRepo]);
+    }, [isEditing]);
 
     useEffect(() => {
-        if (!editingRepo) return;
-
-        if (!debouncedRepoName.trim()) {
-            setIsRepoValid(null);
-            return;
+        if (isEditing && debouncedRepoName.trim()) {
+            validateRepoName();
         }
-        handleOnClick();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedRepoName]);
 
-    async function handleOnClick() {
+    async function validateRepoName() {
         const trimmed = repoName.trim();
         if (!trimmed) {
             toast.warning('Enter a valid repo name');
@@ -82,19 +80,19 @@ export default function GitCloneCard() {
 
             if (result.success) {
                 setIsRepoValid(true);
-                setEditingRepo(false);
+                setIsEditing(false);
+                setIsChecking(false);
                 toast.success('Repo name is available');
             } else {
                 setIsRepoValid(false);
                 setInputError(true);
+                setIsChecking(false);
                 toast.warning(result.message);
             }
         } catch {
-            toast.error('Failed to validate repo name');
             setInputError(true);
             setIsRepoValid(false);
-        } finally {
-            setIsChecking(false);
+            toast.error('Failed to validate repo name');
         }
     }
 
@@ -108,6 +106,7 @@ export default function GitCloneCard() {
             toast.error('Invalid repo name format');
             return;
         }
+
         if (isRepoValid === false) {
             toast.error('Repo name unavailable');
             return;
@@ -118,20 +117,20 @@ export default function GitCloneCard() {
             if (!session || !session.user.token) return;
             const result = await GithubServer.pushCodeToGithub(
                 trimmed,
-                contractId ?? window.location.pathname.split('/playground')[1],
+                contractId ?? window.location.pathname.split('/playground/')[1],
                 session?.user.token,
             );
+
             if (result.success) {
-                toast.loading('Pushing...');
-                await new Promise((res) => setTimeout(res, 1000));
-                toast.success('Code exported to GitHub');
+                const id = toast.loading('Pushing...');
+                await new Promise((resolve) => setTimeout(resolve, 3000));
+                toast.success('Code exported to GitHub succesfully', { id });
+                setIsPushing(false);
             } else {
                 toast.error(result.message || 'Failed to export');
             }
         } catch {
             toast.error('GitHub export failed');
-        } finally {
-            setIsPushing(false);
         }
     }
 
@@ -141,7 +140,7 @@ export default function GitCloneCard() {
           ? 'border-emerald-500'
           : 'border-neutral-800';
 
-    const isSendDisabled = isPushing || editingRepo || isRepoValid !== true;
+    const isSendDisabled = isPushing || isEditing || isRepoValid !== true;
 
     return (
         <div className="flex flex-col gap-y-3 overflow-hidden">
@@ -149,7 +148,7 @@ export default function GitCloneCard() {
                 <Button
                     onClick={() => {
                         setActiveTab(CloneOptions.HTTPS);
-                        setEditingRepo(false);
+                        setIsEditing(false);
                     }}
                     size="xs"
                     className={cn(
@@ -165,7 +164,7 @@ export default function GitCloneCard() {
                 <Button
                     onClick={() => {
                         setActiveTab(CloneOptions.SSH);
-                        setEditingRepo(false);
+                        setIsEditing(false);
                     }}
                     size="xs"
                     className={cn(
@@ -187,7 +186,7 @@ export default function GitCloneCard() {
                         'overflow-hidden',
                     )}
                 >
-                    {editingRepo ? (
+                    {isEditing ? (
                         <div className="flex items-center w-full whitespace-nowrap overflow-hidden pr-12">
                             <span className="text-light/70 flex-shrink-0">
                                 https://github.com/{username}/
@@ -204,7 +203,7 @@ export default function GitCloneCard() {
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !isChecking) {
                                         e.preventDefault();
-                                        handleOnClick();
+                                        validateRepoName();
                                     }
                                 }}
                                 className="bg-transparent border-none focus-visible:ring-0 h-5 outline-none px-1 pl-0 text-light/90 flex-shrink"
@@ -219,7 +218,7 @@ export default function GitCloneCard() {
                     )}
 
                     <div className="absolute right-3 inset-y-0 flex items-center gap-3">
-                        {!editingRepo && (
+                        {!isEditing && (
                             <ToolTipComponent content="Copy">
                                 <IoCopyOutline
                                     className="size-4 cursor-pointer text-light/80 hover:-translate-y-px transition-transform"
@@ -229,7 +228,7 @@ export default function GitCloneCard() {
                         )}
 
                         <AnimatePresence initial={false} mode="wait">
-                            {editingRepo ? (
+                            {isEditing ? (
                                 <motion.div
                                     key="status"
                                     initial={{ opacity: 0, scale: 0.9 }}
@@ -258,7 +257,7 @@ export default function GitCloneCard() {
                                             type="button"
                                             onClick={() => {
                                                 setInputError(false);
-                                                setEditingRepo(true);
+                                                setIsEditing(true);
                                             }}
                                             className="cursor-pointer hover:-translate-y-px transition-transform"
                                         >
