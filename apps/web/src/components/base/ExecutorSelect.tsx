@@ -14,11 +14,11 @@ export default function ExecutorSelect({ value, onChange }: ModelSelectProps) {
         <Select value={value} onValueChange={(val) => onChange(val as EXECUTOR)}>
             <SelectTrigger
                 className={cn(
-                    'w-12 h-7 text-[10px] flex items-center justify-center gap-1 rounded-lg border-none outline-none focus:outline-none',
-                    'px-1 py-0 min-h-0 h-7 !h-7 !px-1 !py-0',
+                    "w-12.5 h-7 text-[10px] flex items-center justify-center gap-1 rounded-xl border-none outline-none focus:outline-none",
+                    "px-1 py-0 min-h-0 h-7 !h-7 !px-1 !py-0",
                     value === EXECUTOR.AGENTIC
-                        ? 'text-[#6c44fc] hover:bg-[#6c44fc30] bg-[#6c44fc30] border [&>svg]:!text-[#6c44fc] focus:outline-none outline-none selection:outline-none'
-                        : 'bg-[#FFBF0030] hover:bg-[#FFBF0030] text-[#FFBF00] border [&>svg]:!text-[#FFBF00] focus:outline-none outline-none selection:outline-none',
+                        ? "text-[#6c44fc] hover:bg-[#6c44fc30] bg-[#6c44fc30] border [&>svg]:!size-[14px] [&>svg]:!text-[#6c44fc] focus:outline-none outline-none selection:outline-none"
+                        : "bg-[#FFBF0030] hover:bg-[#FFBF0030] text-[#FFBF00] border [&>svg]:!size-[14px] [&>svg]:!text-[#FFBF00] focus:outline-none outline-none selection:outline-none"
                 )}
             >
                 <div className="flex items-center text-[12px]">
@@ -38,7 +38,7 @@ export default function ExecutorSelect({ value, onChange }: ModelSelectProps) {
 
                 <SelectItem value="claude" className="text-xs flex items-center gap-2">
                     <FaTelegramPlane />
-                    Pan
+                    Plan
                 </SelectItem>
             </SelectContent>
         </Select>
