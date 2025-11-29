@@ -2,12 +2,13 @@ import { kubernetes_services } from '..';
 import { env } from '../configs/configs.env';
 import { PodServices } from '../services/pod.services';
 import { JobContext } from './job.context';
+import { randomUUID } from 'crypto';
 
 export default class JobProcessors {
-    public async execute_build_in_pod(context: JobContext, jobId: string, command: string[]) {
+    public async execute_build_in_pod(context: JobContext, command: string[]) {
         try {
             console.log('inside run buuild on pod');
-
+            const job_id = randomUUID();
             const is_acquired = await kubernetes_services.redis_lock_service.is_acquired(
                 context.userId,
                 context.contractId,
@@ -37,7 +38,7 @@ export default class JobProcessors {
             }
 
             const pod_name = await kubernetes_services.kubernetes_manager.create_pod(
-                jobId,
+                job_id,
                 context.userId,
                 context.contractId,
                 command.join(' '),
@@ -74,15 +75,15 @@ export default class JobProcessors {
 
             context.send_server_message('Successfully built your anchor contract');
             return { success: true };
+        } catch (error) {
+            console.error('some error occured while creating the pod : ', error);
         } finally {
-            await kubernetes_services.kubernetes_manager.delete_pod(
-                context.userId,
-                context.contractId,
-            );
-            await kubernetes_services.redis_lock_service.release_lock(
-                context.userId,
-                context.contractId,
-            );
+            await Promise.allSettled([
+                kubernetes_services.redis_lock_service.release_lock(
+                    context.userId,
+                    context.contractId,
+                ),
+            ]);
             context.send_completion('execution complete');
         }
     }

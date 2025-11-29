@@ -25,7 +25,7 @@ export default class RedisQueue {
         try {
             switch (command) {
                 case COMMAND.WINTERFELL_BUILD:
-                    return await this.handleBuild(context, payload);
+                    return await this.handleBuild(context);
                 case COMMAND.WINTERFELL_TEST:
                     return await this.handleTest(payload);
                 case COMMAND.WINTERFELL_DEPLOY_DEVNET:
@@ -43,8 +43,8 @@ export default class RedisQueue {
         }
     }
 
-    private async handleBuild(context: JobContext, payload: BuildJobPayload) {
-        return kubernetes_services.job_processor.execute_build_in_pod(context, payload.jobId, [
+    private async handleBuild(context: JobContext) {
+        return kubernetes_services.job_processor.execute_build_in_pod(context, [
             'sh',
             '-c',
             'anchor build',
