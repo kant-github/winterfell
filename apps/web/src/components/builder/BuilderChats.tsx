@@ -168,6 +168,7 @@ export default function BuilderChats() {
                                     }
                                     parseFileStructure(event.data.data as FileContent[]);
                                     setLoading(false);
+                                    setCollapseFileTree(true);
                                 }
                                 break;
 

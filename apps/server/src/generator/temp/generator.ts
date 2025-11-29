@@ -1,9 +1,8 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { RunnableSequence } from '@langchain/core/runnables';
+import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { new_planner_output_schema, old_planner_output_schema } from './schema';
 import Tool from '../tools/tool';
-import { AIMessageChunk, MessageStructure } from '@langchain/core/messages';
 import StreamParser from '../../services/stream_parser';
 import { ChatRole, Message, prisma } from '@winterfell/database';
 import GeneratorShape from '../../metadata/generator';
@@ -42,12 +41,12 @@ export default class Generator extends GeneratorShape {
         });
         this.gemini_coder = new ChatGoogleGenerativeAI({
             model: 'gemini-2.5-flash',
-            streaming: true,
+            streaming: false,
             temperature: 0.2,
         });
         this.claude_coder = new ChatAnthropic({
             model: 'claude-sonnet-4-5-20250929',
-            streaming: true,
+            streaming: false,
         });
         this.gemini_finalizer = new ChatGoogleGenerativeAI({
             model: 'gemini-2.5-flash',
@@ -87,7 +86,7 @@ export default class Generator extends GeneratorShape {
                     return;
                 }
                 case 'old': {
-                    if(idl) {
+                    if (idl) {
                         this.old_contract(
                             res,
                             planner_chain,
@@ -296,42 +295,87 @@ export default class Generator extends GeneratorShape {
         }
     }
 
-    protected async old_contract(
-        res: Response,
-        planner_chain: old_planner,
-        coder_chain: old_coder,
-        finalizer_chain: old_finalizer,
-        user_instruction: string,
-        contract_id: string,
-        parser: StreamParser,
-        idl: Object[],
-    ) {
+protected async old_contract(
+    res: Response,
+    planner_chain: old_planner,
+    coder_chain: old_coder,
+    finalizer_chain: old_finalizer,
+    user_instruction: string,
+    contract_id: string,
+    parser: StreamParser,
+    idl: Object[],
+) {
+    console.log('old contract hit');
 
-        console.log('old contract hit');
+    const planner_data = await planner_chain.invoke({
+        user_instruction: user_instruction,
+        idl: idl,
+    });
 
-        const planner_data = await planner_chain.invoke({
-            user_instruction: user_instruction,
-            idl: idl,
-        });
+    const llm_message = await prisma.message.create({
+        data: {
+            content: planner_data.context,
+            contractId: contract_id,
+            role: ChatRole.AI,
+        },
+    });
 
-        console.log('planner data; ', planner_data);
-        
-        const code_stream = await coder_chain.stream({
-            plan: planner_data.plan,
-            contract_id: contract_id,
-            files_likely_affected: planner_data.files_likely_affected,
-        });
+    console.log('the context: ', chalk.red(planner_data.context));
+    this.send_sse(res, STAGE.CONTEXT, {
+        context: planner_data.context,
+        llmMessage: llm_message,
+    });
 
-        console.log('coder stream passed');
-
-        for await (const chunk of code_stream) {
-            console.log("chunk: ", chunk)
-            if(chunk.text) {
-                console.log(chunk.text);
-            }
-        }
-
+    if (!planner_data.should_continue) {
+        console.log('planner said to not continue.');
+        parser.reset();
+        this.delete_parser(contract_id);
+        res.end();
+        return;
     }
+
+    const system_message = await prisma.message.create({
+        data: {
+            contractId: contract_id,
+            role: ChatRole.SYSTEM,
+            content: 'starting to generate in a few seconds',
+            planning: true,
+        },
+    });
+
+    console.log('planner data; ', planner_data);
+
+    // Step 1: Format the prompt and convert to messages
+    const promptValue = await old_chat_coder_prompt.invoke({
+        plan: planner_data.plan,
+        contract_id,
+        files_likely_affected: planner_data.files_likely_affected,
+    });
+    
+    const initialMessages = promptValue.toChatMessages();
+
+    const toolStepResult = await this.gemini_coder.bindTools([Tool.get_file]).invoke(initialMessages);
+
+    const { toolResults } = await Tool.runner.invoke(toolStepResult);
+    const { messages: toolMessages } = await Tool.convert.invoke({ toolResults });
+
+    const code_stream = await this.gemini_coder.stream([
+        ...initialMessages,
+        toolStepResult,
+        ...toolMessages,
+        {
+            role: "user",
+            content: "Use the fetched file contents to implement the planned changes.",
+        }
+    ]);
+
+
+    for await (const chunk of code_stream) {
+        if (chunk.text) {
+            parser.feed(chunk.text, system_message);
+        }
+    }
+}
 
     protected get_chains(
         chat: 'new' | 'old',
@@ -370,9 +414,25 @@ export default class Generator extends GeneratorShape {
                     this.gemini_planner.withStructuredOutput(old_planner_output_schema),
                 ]);
 
-                coder_chain = old_chat_coder_prompt
-                    .pipe(coder.bindTools([Tool.get_file]))
-                    .pipe(Tool.runner);
+                const coder_chain =
+                    old_chat_coder_prompt
+                        .pipe(coder.bindTools([Tool.get_file]))
+                        .pipe(Tool.runner)
+                        .pipe(Tool.convert)
+                        .pipe(
+                            new RunnableLambda({
+                                func: ({ messages }: { messages: any }) => [
+                                    ...messages,
+                                    {
+                                        role: "user",
+                                        content:
+                                            "Use the fetched file contents to implement the planned changes.",
+                                    },
+                                ],
+                            })
+                        )
+                        .pipe(coder);
+
 
                 finalizer_chain = RunnableSequence.from([
                     finalizer_prompt,

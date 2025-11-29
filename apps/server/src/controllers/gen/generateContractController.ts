@@ -62,7 +62,11 @@ export default async function generateContractController(req: Request, res: Resp
 
         if (existing_contract) {
             // call for update
-            if (existing_contract.messages.length > 5) {
+
+            // const total_messages = existing_contract.messages.filter(m => m.role === ChatRole.USER);
+            const total_messages = 1;
+
+            if (total_messages > 5) {
                 ResponseWriter.error(res, 'message limit reached!', 403);
                 return;
             }
@@ -76,17 +80,13 @@ export default async function generateContractController(req: Request, res: Resp
                 },
             });
 
-            const parsed_idl = JSON.parse(existing_contract.summarisedObject || '');
-
-            console.log("parsed idl: ", parsed_idl);
-
             generator.generate(
                 res,
                 'old',
                 instruction,
                 model || MODEL.GEMINI,
                 existing_contract.id,
-                parsed_idl,
+                JSON.parse(existing_contract.summarisedObject || ''),
             );
 
         } else {

@@ -7,6 +7,7 @@ import { Runnable, RunnableLambda } from '@langchain/core/runnables';
 import { objectStore } from '../../services/init';
 import { tool_schema } from '../schema/tool_schema';
 import { get_file_schema } from '../schema/get_file_schema';
+import { BaseMessage, ToolMessage } from '@langchain/core/messages';
 
 const RULES_DIR = path.resolve(process.cwd(), 'dist/rules');
 
@@ -44,8 +45,6 @@ export default class Tool {
 
             if (!file) throw new Error('file not found');
 
-            console.log("file found: ", file?.content);
-
             return file.content;
         },
         {
@@ -58,37 +57,57 @@ export default class Tool {
     /**
      * creates a runnable-lambda that executes tool-calling by using specific paths
      */
-public static runner = new RunnableLambda({
-    func: async (aiMessage: any) => {
-        const toolCalls = aiMessage.tool_calls ?? aiMessage.tool_call_chunks ?? [];
-        const results: Record<string, any>[] = [];
+    public static runner = new RunnableLambda({
+        func: async (aiMessage: any) => {
+            const toolCalls = aiMessage.tool_calls ?? aiMessage.tool_call_chunks ?? [];
+            const results: Record<string, any>[] = [];
 
-        for (const tc of toolCalls) {
-            const toolImpl = Tool.TOOL_REGISTRY[tc.name];
+            for (const tc of toolCalls) {
+                const toolImpl = Tool.TOOL_REGISTRY[tc.name];
 
-            if (!toolImpl) {
-                throw new Error(`Unknown tool called: ${tc.name}`);
+                if (!toolImpl) {
+                    throw new Error(`Unknown tool called: ${tc.name}`);
+                }
+
+                const args =
+                    typeof tc.args === 'string'
+                        ? JSON.parse(tc.args)
+                        : tc.args;
+
+                const result = await toolImpl.invoke(args);
+
+                results.push({
+                    id: tc.id,
+                    name: tc.name,
+                    args,
+                    result,
+                });
             }
 
-            const args =
-                typeof tc.args === 'string'
-                    ? JSON.parse(tc.args)
-                    : tc.args;
+            return {
+                aiMessage,
+                toolResults: results,
+            };
+        },
+    });
 
-            const result = await toolImpl.invoke(args);
-
-            results.push({
-                name: tc.name,
-                args,
-                result,
-            });
-        }
-
-        return {
-            aiMessage,
-            toolResults: results,
-        };
-    },
+public static convert = new RunnableLambda<
+  { toolResults: any[] },
+  { messages: BaseMessage[] }
+>({
+  func: ({ toolResults }: { toolResults: any }) => ({
+    messages: toolResults.map(
+      (t: any) =>
+        new ToolMessage({
+          name: t.name,
+          tool_call_id: t.id,
+          content:
+            typeof t.result === "string"
+              ? t.result
+              : JSON.stringify(t.result),
+        }),
+    ),
+  }),
 });
 
 
@@ -116,10 +135,10 @@ public static runner = new RunnableLambda({
 
     public static node = new ToolNode([Tool.get_rule]);
 
-private static TOOL_REGISTRY: Record<string, Runnable> = {
-    get_rule: Tool.get_rule,
-    get_file: Tool.get_file,
-};
+    private static TOOL_REGISTRY: Record<string, Runnable> = {
+        get_rule: Tool.get_rule,
+        get_file: Tool.get_file,
+    };
 
 
 }
