@@ -12,10 +12,8 @@ export default async function githubRepoNameValidatorController(req: Request, re
         }
 
         const { repo_name, contract_id } = req.body;
-        console.log('inside 1');
 
         if (!repo_name) {
-            console.log('repo name is: ', repo_name);
             ResponseWriter.validation_error(res, 'Repo name is required');
             return;
         }
@@ -30,7 +28,6 @@ export default async function githubRepoNameValidatorController(req: Request, re
             return;
         }
 
-        console.log('repo name is correct');
         const user = await prisma.user.findUnique({ where: { id: user_id } });
 
         if (!user?.githubAccessToken) {
@@ -49,13 +46,13 @@ export default async function githubRepoNameValidatorController(req: Request, re
             return;
         }
 
-        const prev = contract.githubRepoName;
-        if (!prev) {
-            const exists = await github_services.check_repo_exists(
-                repo_name,
-                user.githubAccessToken,
-            );
-            if (exists.exists) {
+        const db_repo = contract.githubRepoName;
+        const exists_in_github = await github_services.check_repo_exists(
+            repo_name,
+            user.githubAccessToken,
+        );
+        if (!db_repo) {
+            if (exists_in_github.exists) {
                 ResponseWriter.custom(res, 200, {
                     success: false,
                     meta: { timestamp: Date.now().toString() },
@@ -65,18 +62,21 @@ export default async function githubRepoNameValidatorController(req: Request, re
             }
         }
 
-        if (prev === repo_name) {
+        if (db_repo === repo_name) {
             ResponseWriter.success(res, repo_name, 'Linked repo');
             return;
         }
 
-        const exists = await github_services.check_repo_exists(repo_name, user.githubAccessToken);
+        if (exists_in_github.exists) {
+            ResponseWriter.custom(res, 200, {
+                success: false,
+                meta: { timestamp: Date.now().toString() },
+                message: 'Repo already exists in github',
+            });
+            return;
+        }
 
-        ResponseWriter.success(
-            res,
-            repo_name,
-            exists.exists ? 'Switching to existing repo' : 'Switching to new repo',
-        );
+        ResponseWriter.success(res, repo_name, 'Repo name available');
         return;
     } catch (error) {
         ResponseWriter.server_error(
