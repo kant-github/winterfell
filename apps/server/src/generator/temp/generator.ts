@@ -342,6 +342,15 @@ export default class Generator extends GeneratorShape {
             },
         });
 
+        // send planning stage from here
+        console.log('the stage: ', chalk.green('Planning'));
+        this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
+
+        const delete_files = planner_data
+            .files_likely_affected
+            .filter(f => f.do === 'delete')
+            .map(f => f.file_path);
+
         const promptValue = await old_chat_coder_prompt.invoke({
             plan: planner_data.plan,
             contract_id,
@@ -386,8 +395,13 @@ export default class Generator extends GeneratorShape {
         console.log('the stage: ', chalk.green('Building'));
         this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Building' }, system_message);
 
+
         const gen_files = parser.getGeneratedFiles();
-        await this.update_contract(contract_id, gen_files);
+        await this.update_contract(
+            contract_id,
+            gen_files,
+            delete_files,
+        );
 
         console.log(gen_files);
 
@@ -411,6 +425,7 @@ export default class Generator extends GeneratorShape {
             contract_id,
             parser,
             system_message,
+            delete_files,
         );
     }
 
@@ -421,6 +436,7 @@ export default class Generator extends GeneratorShape {
         contract_id: string,
         parser: StreamParser,
         system_message: Message,
+        delete_files: string[],
     ) {
         try {
             await prisma.message.update({
@@ -465,7 +481,11 @@ export default class Generator extends GeneratorShape {
             console.log('the context: ', chalk.red(finalizer_data.context));
             this.send_sse(res, STAGE.CONTEXT, { context: finalizer_data.context, llmMessage: llm_message }, system_message);
 
-            this.update_idl(contract_id, finalizer_data.idl);
+            this.update_idl(
+                contract_id,
+                finalizer_data.idl,
+                delete_files,
+            );
 
         } catch (error) {
             console.error('Error while finalizing: ', error);
@@ -475,11 +495,18 @@ export default class Generator extends GeneratorShape {
         }
     }
 
-    protected async update_contract(contract_id: string, generated_files: FileContent[]) {
+    protected async update_contract(
+        contract_id: string,
+        generated_files: FileContent[],
+        deleting_files_path: string[],
+    ) {
         const contract = await objectStore.get_resource_files(contract_id);
 
-        const existingFilesMap = new Map(contract.map(file => [file.path, file]));
+        const remainingFiles = contract.filter(
+            file => !deleting_files_path.includes(file.path)
+        );
 
+        const existingFilesMap = new Map(remainingFiles.map(file => [file.path, file]));
         const newFiles: FileContent[] = [];
 
         for (const gen_file of generated_files) {
@@ -492,12 +519,18 @@ export default class Generator extends GeneratorShape {
             }
         }
 
-        const updatedContract = [...contract, ...newFiles];
+        const updatedContract = [...remainingFiles, ...newFiles];
+
+        console.log(updatedContract);
 
         await objectStore.updateContractFiles(contract_id, updatedContract);
     }
 
-    protected async update_idl(contract_id: string, generated_idl_parts: any[]) {
+    protected async update_idl(
+        contract_id: string,
+        generated_idl_parts: any[],
+        deleting_files_path: string[],
+    ) {
         const contract = await prisma.contract.findUnique({
             where: {
                 id: contract_id,
@@ -521,8 +554,11 @@ export default class Generator extends GeneratorShape {
 
         const idl = JSON.parse(contract.summarisedObject);
 
-        const existingIdlMap = new Map(idl.map((item: any) => [item.path, item]));
+        const remainingIdl = idl.filter(
+            (item: any) => !deleting_files_path.includes(item.path)
+        );
 
+        const existingIdlMap = new Map(remainingIdl.map((item: any) => [item.path, item]));
         const newIdlParts: any[] = [];
 
         for (const gen_i of generated_idl_parts) {
@@ -535,7 +571,7 @@ export default class Generator extends GeneratorShape {
             }
         }
 
-        const updatedIdl = [...idl, ...newIdlParts];
+        const updatedIdl = [...remainingIdl, ...newIdlParts];
 
         await prisma.contract.update({
             where: {

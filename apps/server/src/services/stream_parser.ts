@@ -36,6 +36,9 @@ export default class StreamParser {
     protected pendingContext: string | null = null;
     protected contractName: string;
 
+    protected deleting: boolean;
+    protected deleteFiles: string[];
+
     constructor() {
         this.buffer = '';
         this.currentPhase = null;
@@ -47,6 +50,9 @@ export default class StreamParser {
         this.generatedFiles = [];
         this.eventHandlers = new Map();
         this.contractName = '';
+        
+        this.deleting = false;
+        this.deleteFiles = [];
     }
 
     public on(
@@ -112,6 +118,7 @@ export default class StreamParser {
             if (phaseMatch && !this.insideCodeBlock) {
                 const phase = phaseMatch[1].trim();
                 console.log('the phase: ', chalk.yellow(phase));
+                this.deleting = false;
                 await this.phaseMatch(phase, systemMessage);
                 continue;
             }
@@ -122,6 +129,10 @@ export default class StreamParser {
                 const filePath = fileMatch[1].trim();
                 console.log('the file path: ', chalk.magenta(filePath));
                 this.currentFile = filePath;
+
+                // push the file path to the deleting files
+                if(this.deleting) this.deleteFiles.push(filePath);
+
                 const data: EditingFileData = {
                     file: filePath,
                     phase: this.currentPhase || 'unknown',
@@ -354,6 +365,7 @@ export default class StreamParser {
             }
             case 'deleting': {
                 this.currentPhase = phase;
+                this.deleting = true;
                 const data: DeletingData = { phase: 'deleting' };
                 this.emit(PHASE_TYPES.DELETING, data, systemMessage);
                 break;
@@ -386,6 +398,10 @@ export default class StreamParser {
 
     public getContractName(): string {
         return this.contractName;
+    }
+
+    public getDeletingFiles(): string[] {
+        return this.deleteFiles;
     }
 
     public reset(): void {

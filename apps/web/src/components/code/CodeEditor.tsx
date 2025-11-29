@@ -133,7 +133,7 @@ export default function CodeEditor(): JSX.Element {
                             options={{
                                 readOnly: true,
                                 readOnlyMessage: {
-                                    value: 'This feature is available for Premium+ users only.',
+                                    value: 'This feature will be available on the next version.',
                                 },
                                 minimap: {
                                     enabled: true,
