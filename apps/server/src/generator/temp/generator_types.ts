@@ -74,7 +74,7 @@ export type old_coder = Runnable<
 
 export type old_finalizer = RunnableSequence<
     {
-        updated_files: FileContent[],
+        generated_files: FileContent[],
     },
     {
         idl: Object[],

@@ -347,7 +347,7 @@ export default class Generator extends GeneratorShape {
             contract_id,
             files_likely_affected: planner_data.files_likely_affected,
         });
-        
+
         const initialMessages = promptValue.toChatMessages();
 
         const toolStepResult = await this.gemini_coder
@@ -368,7 +368,7 @@ export default class Generator extends GeneratorShape {
         ]);
 
         for await (const chunk of code_stream) {
-            if (chunk.text) {
+            if (chunk && chunk.text) {
                 parser.feed(chunk.text, system_message);
             }
         }
@@ -389,6 +389,8 @@ export default class Generator extends GeneratorShape {
         const gen_files = parser.getGeneratedFiles();
         await this.update_contract(contract_id, gen_files);
 
+        console.log(gen_files);
+
         await prisma.message.update({
             where: {
                 id: system_message.id,
@@ -402,8 +404,14 @@ export default class Generator extends GeneratorShape {
         console.log('the stage: ', chalk.green('Creating Files'));
         this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
 
-
-
+        this.old_finalizer(
+            res,
+            finalizer_chain,
+            gen_files,
+            contract_id,
+            parser,
+            system_message,
+        );
     }
 
     protected async old_finalizer(
@@ -414,45 +422,82 @@ export default class Generator extends GeneratorShape {
         parser: StreamParser,
         system_message: Message,
     ) {
+        try {
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    finalzing: true,
+                },
+            });
 
-        await prisma.message.update({
-            where: {
-                id: system_message.id,
-                contractId: contract_id,
-            },
-            data: {
-                finalzing: true,
-            },
-        });
+            console.log('the stage: ', chalk.green('Finalizing'));
+            this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
-        console.log('the stage: ', chalk.green('Finalizing'));
-        this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
+            const finalizer_data = await finalizer_chain.invoke({
+                generated_files: generated_files,
+            });
 
-        const finalizer_data = await finalizer_chain.invoke({
-            updated_files: generated_files,
-        });
+            console.log(finalizer_data.idl);
 
-        console.log(finalizer_data.idl);
+            await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    End: true,
+                },
+            });
+            console.log('the stage: ', chalk.green('END'));
+            this.send_sse(res, STAGE.END, { stage: 'End', data: generated_files }, system_message);
 
+            const llm_message = await prisma.message.create({
+                data: {
+                    contractId: contract_id,
+                    role: ChatRole.AI,
+                    content: finalizer_data.context,
+                },
+            });
+
+            console.log('the context: ', chalk.red(finalizer_data.context));
+            this.send_sse(res, STAGE.CONTEXT, { context: finalizer_data.context, llmMessage: llm_message }, system_message);
+
+            this.update_idl(contract_id, finalizer_data.idl);
+
+        } catch (error) {
+            console.error('Error while finalizing: ', error);
+            parser.reset();
+            this.delete_parser(contract_id);
+            res.end();
+        }
     }
 
     protected async update_contract(contract_id: string, generated_files: FileContent[]) {
-
         const contract = await objectStore.get_resource_files(contract_id);
 
-        contract.forEach((file: FileContent) => {
-            for(const gen_file of generated_files) {
-                if(file.path === gen_file.path){
-                    file.content = gen_file.content;
-                }
-            }
-        });
+        const existingFilesMap = new Map(contract.map(file => [file.path, file]));
 
-        await objectStore.updateContractFiles(contract_id, contract);
+        const newFiles: FileContent[] = [];
+
+        for (const gen_file of generated_files) {
+            const existingFile = existingFilesMap.get(gen_file.path);
+
+            if (existingFile) {
+                existingFile.content = gen_file.content;
+            } else {
+                newFiles.push(gen_file);
+            }
+        }
+
+        const updatedContract = [...contract, ...newFiles];
+
+        await objectStore.updateContractFiles(contract_id, updatedContract);
     }
 
     protected async update_idl(contract_id: string, generated_idl_parts: any[]) {
-
         const contract = await prisma.contract.findUnique({
             where: {
                 id: contract_id,
@@ -462,7 +507,7 @@ export default class Generator extends GeneratorShape {
             },
         });
 
-        if(!contract?.summarisedObject) {
+        if (!contract?.summarisedObject) {
             await prisma.contract.update({
                 where: {
                     id: contract_id,
@@ -476,25 +521,30 @@ export default class Generator extends GeneratorShape {
 
         const idl = JSON.parse(contract.summarisedObject);
 
-        idl.forEach((i: any) => {
-            for(const gen_i of generated_idl_parts) {
-                if(i.path === gen_i.path) {
-                    i.content = gen_i.content;
-                }
-            }
-        });
+        const existingIdlMap = new Map(idl.map((item: any) => [item.path, item]));
 
-        const updated_string_idl = JSON.stringify(idl);
+        const newIdlParts: any[] = [];
+
+        for (const gen_i of generated_idl_parts) {
+            const existingIdl = existingIdlMap.get(gen_i.path);
+
+            if (existingIdl) {
+                Object.assign(existingIdl, gen_i);
+            } else {
+                newIdlParts.push(gen_i);
+            }
+        }
+
+        const updatedIdl = [...idl, ...newIdlParts];
 
         await prisma.contract.update({
             where: {
                 id: contract_id,
             },
             data: {
-                summarisedObject: updated_string_idl,
+                summarisedObject: JSON.stringify(updatedIdl),
             },
         });
-        
     }
 
     protected get_chains(
