@@ -34,7 +34,7 @@ export default function Hero() {
 
             <main
                 ref={heroRef}
-                className="relative flex flex-col justify-center items-center h-screen w-full overflow-hidden"
+                className="relative flex flex-col justify-center items-center h-screen w-full overflow-visible"
             >
                 <motion.div
                     className="relative z-10 w-full max-w-2xl"

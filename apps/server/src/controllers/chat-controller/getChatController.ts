@@ -1,6 +1,7 @@
 import { prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
 import env from '../../configs/config.env';
+import ResponseWriter from '../../class/response_writer';
 
 export default async function (req: Request, res: Response) {
     try {
@@ -121,10 +122,11 @@ export default async function (req: Request, res: Response) {
         return;
     } catch (error) {
         console.error('Error while fetching chat data: ', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-        });
+        ResponseWriter.server_error(
+            res,
+            'Internal server error',
+            error instanceof Error ? error.message : undefined,
+        );
         return;
     }
 }

@@ -1,38 +1,60 @@
 export const anchorContractTemplates = [
     {
+        id: 'ckv9q1g0x0001ab12cdef3456',
+        title: 'Todo Contract',
+        image: '/templates/contract-3.jpg',
+        description: 'Create, update, and delete todo items.',
+        contractType: 'PROGRAM',
+        tags: ['utility', 'example', 'todo'],
+        clientSdk: {
+            functions: ['addTodo', 'updateTodo', 'deleteTodo', 'getTodos'],
+        },
+    },
+    {
+        id: 'ckv9q1g0x0002ab12cdef3456',
+        title: 'Counter Contract',
+        image: '/templates/contract-4.jpg',
+        description: 'Increment, decrement, and read counter functionalities.',
+        contractType: 'PROGRAM',
+        tags: ['example', 'counter', 'basic'],
+        clientSdk: {
+            functions: ['increment', 'decrement', 'getCount'],
+        },
+    },
+    {
         id: 'ckv9q1g0x0004ab12cdef3456',
         title: 'Staking Rewards Contract',
         image: '/templates/contract-1.jpg',
-        description:
-            'A contract that allows users to stake their tokens and earn periodic rewards based on APY.',
+        description: 'Stake tokens and earn periodic rewards based on APY.',
         contractType: 'PROGRAM',
+        tags: ['staking', 'rewards', 'defi'],
         clientSdk: { functions: ['stake', 'unstake', 'claimRewards', 'getUserInfo'] },
     },
     {
         id: 'ckv9q1g0x0005ab12cdef3456',
         title: 'Liquidity Pool',
         image: '/templates/contract-2.jpg',
-        description:
-            'An AMM-style contract that enables token swaps and provides liquidity incentives for users.',
+        description: 'Provides token swaps and liquidity incentives for users.',
         contractType: 'PROGRAM',
+        tags: ['amm', 'liquidity', 'defi'],
         clientSdk: { functions: ['addLiquidity', 'removeLiquidity', 'swapTokens', 'getPoolInfo'] },
     },
     {
         id: 'ckv9q1g0x0006ab12cdef3456',
         title: 'Token Airdrop Distributor',
         image: '/templates/contract-3.jpg',
-        description:
-            'A utility contract for distributing tokens to multiple users efficiently and securely.',
+        description: 'Contract for distributing tokens to multiple users securely.',
         contractType: 'PROGRAM',
+        tags: ['airdrop', 'distribution', 'utility'],
         clientSdk: { functions: ['createAirdrop', 'claimTokens', 'checkEligibility'] },
     },
     {
         id: 'ckv9q1g0x0007ab12cdef3456',
         title: 'Escrow Payment Contract',
         image: '/templates/contract-4.jpg',
-        description:
-            'A decentralized escrow contract that holds funds until conditions are met between buyer and seller.',
+        description: 'Holds funds until conditions are met between buyer and seller.',
         contractType: 'PROGRAM',
+        tags: ['escrow', 'payments', 'security'],
         clientSdk: {
             functions: ['createEscrow', 'releasePayment', 'cancelEscrow', 'getEscrowStatus'],
         },
@@ -41,18 +63,18 @@ export const anchorContractTemplates = [
         id: 'ckv9q1g0x0008ab12cdef3456',
         title: 'Oracle Price Feed',
         image: '/templates/contract-5.jpg',
-        description:
-            'A contract that fetches and stores off-chain price data from trusted oracle networks.',
+        description: 'Fetches and stores off-chain price data from trusted oracle networks.',
         contractType: 'PROGRAM',
+        tags: ['oracle', 'price-feed', 'data'],
         clientSdk: { functions: ['updatePrice', 'getLatestPrice', 'setOracleAuthority'] },
     },
     {
         id: 'ckv9q1g0x0009ab12cdef3456',
         title: 'Crowdfunding Contract',
         image: '/templates/contract-6.jpg',
-        description:
-            'A decentralized fundraising contract where users can create campaigns and receive contributions.',
+        description: 'Users can create campaigns and receive contributions.',
         contractType: 'PROGRAM',
+        tags: ['crowdfunding', 'fundraising', 'community'],
         clientSdk: {
             functions: ['createCampaign', 'contribute', 'withdrawFunds', 'getCampaignInfo'],
         },

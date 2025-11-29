@@ -17,6 +17,8 @@ import githubRepoNameValidatorController from '../controllers/github-deploy-cont
 import syncTemplate from '../controllers/template-controller/syncTemplates';
 import githubMiddleware from '../middlewares/middleware.github';
 import githubProjectZipController from '../controllers/github-deploy-controller/githubProjectZipController';
+import getUserContracts from '../controllers/contract-controller/getUserContracts';
+import getAllContracts from '../controllers/contract-controller/getAllContracts';
 
 const router: Router = Router();
 
@@ -35,34 +37,37 @@ router.post('/contract/get-chat', authMiddleware, getChatController);
 
 // github-routes
 router.post('/github/export-code', authMiddleware, githubMiddleware, githubCodePushController);
+router.post('/github/get-zip-file', authMiddleware, githubMiddleware, githubProjectZipController);
 router.post(
     '/github/validate-repo-name',
     authMiddleware,
     githubMiddleware,
     githubRepoNameValidatorController,
 );
-router.post('/github/get-zip-file', authMiddleware, githubMiddleware, githubProjectZipController);
 
 // file-routes
 router.get('/files/:contractId', authMiddleware, getFilesController);
-// use this or write a ws layer to share directly to kubernetes
-router.get('/files/sync', authMiddleware, syncFilesController);
+router.get('/files/sync', authMiddleware, syncFilesController); // use this or write a ws layer to share directly to kubernetes
 
 // payment-routes
 router.post('/subscription/create-order', authMiddleware, createOrderController);
+router.get('/subscription/get-plan', authMiddleware, getUserPlanController);
 router.post(
     '/subscription/update',
     authMiddleware,
     subscriptionMiddleware,
     updateSubscriptionController,
 );
-router.get('/subscription/get-plan', authMiddleware, getUserPlanController);
 
 // reviews
 router.post('/review', authMiddleware, createContractReview);
 
 // templates
 router.post('/sync-templates', syncTemplate);
+
+// contracts
+router.get('/contracts/get-user-contracts', authMiddleware, getUserContracts);
+router.get('/contracts/get-all-contracts', authMiddleware, getAllContracts);
 
 // sign-in
 // health
