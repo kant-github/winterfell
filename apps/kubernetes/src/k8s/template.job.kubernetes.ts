@@ -47,9 +47,8 @@ export default function get_job_template(configs: JobConfig) {
                         {
                             name: 'anchor-executor',
                             image: 'winterfellhub/test:latest',
-                            // Keep container alive for exec commands
                             command: ['/bin/sh', '-c'],
-                            args: ['tail -f /dev/null'],
+                            args: ['sleep 3600'],
                             workingDir: '/workspace',
                             volumeMounts: [
                                 {

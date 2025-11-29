@@ -37,7 +37,6 @@ export default class KubernetesManager {
     ): Promise<{ job_name: string; pod_name: string }> {
         try {
             const job_name: string = `build-${job_id}`.toLowerCase().slice(0, 63);
-            console.log('job name is : ', job_name);
             const job_template = get_job_template({
                 user_id,
                 contract_id,
