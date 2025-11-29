@@ -14,7 +14,7 @@ export default function ContractTemplates() {
                 {anchorContractTemplates.map((contract) => (
                     <div
                         key={contract.id}
-                        className="h-full min-w-[calc(30%-12px)] grid grid-rows-[85%_15%] overflow-hidden group relative"
+                        className="h-full min-w-[calc(27%-12px)] grid grid-rows-[85%_15%] overflow-hidden group relative"
                     >
                         <div className="bg-[#0A0C0D70] overflow-hidden shadow-sm border border-neutral-800 rounded-[8px] relative">
                             <Image

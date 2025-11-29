@@ -1,49 +1,86 @@
 import { anchorContractTemplates } from '@/src/templates/contract_templates.const';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { HiPlus } from 'react-icons/hi';
 import { useContractTemplateStore } from '@/src/store/user/useContractTemplateStore';
+import { cn } from '@/src/lib/utils';
 
 export default function BaseContractTemplatesPanel() {
-    const router = useRouter();
     const { setTemplate } = useContractTemplateStore();
 
     return (
-        <div className="w-full h-full flex flex-col gap-y-3 p-3 tracking-wider">
-            <div className="w-full flex justify-between items-center">
-                <div className="text-sm text-light/50">Featured Templates</div>
-                <span
-                    onClick={() => router.push('/home')}
-                    className="text-light/50 text-[13px] flex items-center gap-x-1 cursor-pointer hover:text-light/70 transition-colors duration-200 "
-                >
-                    view all
-                    <ChevronRight className="size-3" />
-                </span>
+        <div
+            data-lenis-prevent
+            className={cn(
+                'w-full max-w-md max-h-54 flex flex-col',
+                'absolute left-23 z-50 -top-12',
+                'bg-dark-base border border-neutral-800 shadow-md',
+                'rounded-[4px] rounded-bl-none overflow-visible overflow-y-auto',
+            )}
+        >
+            {anchorContractTemplates.map((contract) => (
+                <TemplateListItem
+                    key={contract.id}
+                    title={contract.title}
+                    description={contract.description}
+                    image={contract.image}
+                    onClick={() => setTemplate(contract)}
+                />
+            ))}
+        </div>
+    );
+}
+
+interface TemplateListItemProps {
+    title: string;
+    description: string;
+    image: string;
+    onClick?: () => void;
+}
+
+function TemplateListItem({ title, description, image, onClick }: TemplateListItemProps) {
+    return (
+        <div
+            onClick={onClick}
+            className={cn(
+                'w-full flex items-center justify-between',
+                'mb-1 p-2 px-3 last:mb-0',
+                'rounded-[4px]',
+                'hover:bg-dark',
+                'border border-dark-base/40',
+                'cursor-pointer transition-all z-40',
+                'group/item',
+            )}
+        >
+            <div className="flex items-center gap-3">
+                <div className="relative h-8 min-w-8 bg-neutral-800 overflow-hidden ">
+                    <Image
+                        src={image}
+                        alt={''}
+                        fill
+                        className="object-cover rounded-[4px]"
+                        unoptimized
+                    />
+                </div>
+
+                <div className="flex flex-col items-start text-left">
+                    <div className="text-[12px] font-semibold text-light/80 leading-snug">
+                        {title}
+                    </div>
+                    <div className="text-[11px] text-light/60 leading-snug">{description}</div>
+                </div>
             </div>
 
-            <div className="h-full flex gap-x-5 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {anchorContractTemplates.map((contract) => (
-                    <div
-                        key={contract.id}
-                        className="h-full min-w-[calc(30%-12px)] grid grid-rows-[70%_30%] gap-y-1 overflow-hidden group relative"
-                    >
-                        <div
-                            onClick={() => setTemplate(contract)}
-                            className="bg-[#0A0C0D70] hover:border-primary overflow-hidden shadow-sm border border-neutral-800 rounded-[4px] relative"
-                        >
-                            <Image
-                                src={contract.image}
-                                alt=""
-                                fill
-                                className="object-cover opacity-90"
-                            />
-                        </div>
-
-                        <div className="text-light/60 h-full w-full text-left">
-                            <div className="text-xs">{contract.title}</div>
-                        </div>
-                    </div>
-                ))}
+            <div
+                className={cn(
+                    'opacity-0 group-hover/item:opacity-100',
+                    'transition-opacity ease-in-out',
+                    'text-neutral-500 group-hover/item:text-primary',
+                    'border border-neutral-700 rounded-[4px]',
+                    'min-h-6 min-w-6 flex justify-center items-center bg-dark',
+                    'mx-3',
+                )}
+            >
+                <HiPlus size={14} />
             </div>
         </div>
     );

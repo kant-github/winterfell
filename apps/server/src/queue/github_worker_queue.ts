@@ -1,5 +1,5 @@
 import { Job, Queue, Worker } from 'bullmq';
-import { Octokit } from '@octokit/rest';
+import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 import { RequestError } from '@octokit/request-error';
 import queue_config from '../configs/config.queue';
 import { FileContent, GithubPushJobData } from '../types/github_worker_queue_types';
@@ -114,7 +114,7 @@ export class GithubWorkerQueue {
             }
         }
 
-        const tree_entries: any[] = [];
+        const tree_entries: RestEndpointMethodTypes["git"]["createTree"]["parameters"]["tree"] = [];
         for (const file of files) {
             const blob = await octokit.git.createBlob({
                 owner,
