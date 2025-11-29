@@ -25,8 +25,6 @@ export default function ClientDocsPanelRenderer({ clientPanel }: ClientDocsPanel
                 return <ClientDocsExporting />;
             case ClientDocsPanel.DEPLOYMENT:
                 return <ClientDocsDeployments />;
-            case ClientDocsPanel.GETTING_STARTED:
-                return <ClientGettingStarted />;
         }
     }
 

@@ -108,7 +108,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
 
     useEffect(() => {
         return () => {
-            console.log('Cleanup on unmount');
             cleanStore();
             resetContractId();
             reset();

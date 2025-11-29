@@ -88,7 +88,11 @@ export default async function githubCodePushController(req: Request, res: Respon
         ResponseWriter.success(res, repo_url, 'Export job queued successfully', 200);
         return;
     } catch (error) {
-        ResponseWriter.server_error(res, 'Failed to export to GitHub');
+        ResponseWriter.server_error(
+            res,
+            'Failed to export to GitHub',
+            error instanceof Error ? error.message : undefined,
+        );
         return;
     }
 }

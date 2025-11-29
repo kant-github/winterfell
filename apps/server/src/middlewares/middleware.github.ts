@@ -22,7 +22,11 @@ export default async function githubMiddleware(req: Request, res: Response, next
 
         next();
     } catch (error) {
-        ResponseWriter.error(res, 'Internal server error');
+        ResponseWriter.server_error(
+            res,
+            'Internal server error',
+            error instanceof Error ? error.message : undefined,
+        );
         return;
     }
 }

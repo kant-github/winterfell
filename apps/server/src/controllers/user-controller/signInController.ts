@@ -135,7 +135,7 @@ async function verifyTurnstileToken(token: string, ip?: string): Promise<boolean
             },
         );
         return response.data.success === true;
-    } catch (error) {
+    } catch {
         return false;
     }
 }

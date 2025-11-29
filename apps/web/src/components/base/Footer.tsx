@@ -1,5 +1,5 @@
 import { LiaServicestack } from 'react-icons/lia';
-import { FaTwitter, FaGithub, FaDiscord, FaLinkedin } from 'react-icons/fa';
+import { FaTwitter, FaDiscord, FaLinkedin } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { Bruno_Ace } from 'next/font/google';
 import { cn } from '@/src/lib/utils';
@@ -77,6 +77,7 @@ export default function Footer() {
                                             <a
                                                 href={link.link}
                                                 target="_blank"
+                                                rel="noreferrer"
                                                 key={link.name}
                                                 className="cursor-pointer hover:text-primary transition-colors flex items-center gap-x-2"
                                             >

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import env from '../configs/config.env';
 import jwt from 'jsonwebtoken';
 import { AuthUser } from '../types/express';
+import ResponseWriter from '../class/response_writer';
 
 export default function authMiddleware(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
@@ -46,10 +47,11 @@ export default function authMiddleware(req: Request, res: Response, next: NextFu
         });
     } catch (error) {
         console.error('Error in auth middleware: ', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-        });
+        ResponseWriter.server_error(
+            res,
+            'Internal server error',
+            error instanceof Error ? error.message : undefined,
+        );
         return;
     }
 }

@@ -13,6 +13,7 @@ import { useChatStore } from '@/src/store/user/useChatStore';
 import { toast } from 'sonner';
 import GithubServer from '@/src/lib/server/github-server';
 import useDebounce from '@/src/hooks/useDebounce';
+import { RxCross2 } from 'react-icons/rx';
 
 enum CloneOptions {
     HTTPS = 'HTTPS',
@@ -52,6 +53,7 @@ export default function GitCloneCard() {
             return;
         }
         handleOnClick();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedRepoName]);
 
     async function handleOnClick() {
@@ -145,7 +147,10 @@ export default function GitCloneCard() {
         <div className="flex flex-col gap-y-3 overflow-hidden">
             <div className="flex gap-x-2">
                 <Button
-                    onClick={() => setActiveTab(CloneOptions.HTTPS)}
+                    onClick={() => {
+                        setActiveTab(CloneOptions.HTTPS);
+                        setEditingRepo(false);
+                    }}
                     size="xs"
                     className={cn(
                         'text-[11px] tracking-wider font-semibold !bg-dark text-light border border-transparent',
@@ -158,7 +163,10 @@ export default function GitCloneCard() {
                 </Button>
 
                 <Button
-                    onClick={() => setActiveTab(CloneOptions.SSH)}
+                    onClick={() => {
+                        setActiveTab(CloneOptions.SSH);
+                        setEditingRepo(false);
+                    }}
                     size="xs"
                     className={cn(
                         'text-[11px] tracking-wider font-semibold !bg-dark text-light border border-transparent',
@@ -234,7 +242,7 @@ export default function GitCloneCard() {
                                     ) : isRepoValid === true ? (
                                         <IoCheckmark className="size-4 text-green-400" />
                                     ) : isRepoValid === false ? (
-                                        <span className="text-red-500 text-[16px]">✕</span>
+                                        <RxCross2 className="size-4 text-red-600" />
                                     ) : null}
                                 </motion.div>
                             ) : (
