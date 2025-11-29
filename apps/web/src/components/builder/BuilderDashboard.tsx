@@ -17,10 +17,16 @@ export default function BuilderDashboard(): JSX.Element {
     const { loading } = useBuilderChatStore();
     const { collapseChat } = useCodeEditor();
     const { isConnected, subscribeToHandler } = useWebSocket();
-    const { addLog, setIsCommandRunning } = useTerminalLogStore();
+    const { addLog, setIsCommandRunning, setTerminalLoader } = useTerminalLogStore();
 
     useEffect(() => {
+        let timeout: NodeJS.Timeout | null = null;
         function handleIncomingTerminalLogs(message: WSServerIncomingPayload<IncomingPayload>) {
+            setTerminalLoader(false);
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                setTerminalLoader(true);
+            }, 5000)
             setIsCommandRunning(true);
             if (message.type === TerminalSocketData.COMPLETED) setIsCommandRunning(false);
             const { line } = message.payload;
