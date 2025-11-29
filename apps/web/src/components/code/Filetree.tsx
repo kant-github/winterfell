@@ -33,7 +33,9 @@ export default function FileTree() {
                 data: node.name,
                 isFolder: isFolder,
                 children:
-                    isFolder && sortedChildren ? sortedChildren.map((child) => child.id) : undefined,
+                    isFolder && sortedChildren
+                        ? sortedChildren.map((child) => child.id)
+                        : undefined,
             };
 
             if (isFolder && node.children) {
@@ -48,12 +50,12 @@ export default function FileTree() {
 
     function sortNodes(nodes: FileNode[]) {
         return [...nodes].sort((a, b) => {
-            if(a.type !== b.type) {
+            if (a.type !== b.type) {
                 return a.type === NODE.FOLDER ? -1 : 1;
             }
 
             return a.name.localeCompare(b.name);
-        })
+        });
     }
 
     const dataProvider = new StaticTreeDataProvider(treeData, (item, data) => ({

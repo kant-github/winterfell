@@ -1,5 +1,4 @@
-import { PromptTemplate } from "@langchain/core/prompts";
-
+import { PromptTemplate } from '@langchain/core/prompts';
 
 export const new_chat_planner_prompt = new PromptTemplate({
     template: `

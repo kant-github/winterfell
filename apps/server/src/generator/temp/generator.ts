@@ -22,8 +22,14 @@ import { finalizer_output_schema } from '../schema/finalizer_output_schema';
 import { new_chat_coder_prompt, new_chat_planner_prompt } from '../prompts/new_chat_prompts';
 import { finalizer_prompt } from '../prompts/finalizer_prompt';
 import { old_chat_coder_prompt, old_chat_planner_prompt } from '../prompts/old_chat_prompts';
-import { new_coder, new_finalizer, new_planner, old_coder, old_finalizer, old_planner } from './generator_types';
-
+import {
+    new_coder,
+    new_finalizer,
+    new_planner,
+    old_coder,
+    old_finalizer,
+    old_planner,
+} from './generator_types';
 
 export default class Generator extends GeneratorShape {
     protected gemini_planner: ChatGoogleGenerativeAI;
@@ -273,7 +279,12 @@ export default class Generator extends GeneratorShape {
             });
 
             console.log('the context: ', chalk.red(finalizer_data.context));
-            this.send_sse(res, STAGE.CONTEXT, { context: finalizer_data.context, llmMessage: llm_message }, system_message);
+            this.send_sse(
+                res,
+                STAGE.CONTEXT,
+                { context: finalizer_data.context, llmMessage: llm_message },
+                system_message,
+            );
 
             objectStore.uploadContractFiles(contract_id, generated_files, full_response);
 
@@ -286,7 +297,6 @@ export default class Generator extends GeneratorShape {
                     summarisedObject: JSON.stringify(finalizer_data.idl),
                 },
             });
-
         } catch (error) {
             console.error('Error while finalizing: ', error);
             parser.reset();
@@ -305,7 +315,6 @@ export default class Generator extends GeneratorShape {
         parser: StreamParser,
         idl: Object[],
     ) {
-
         const planner_data = await planner_chain.invoke({
             user_instruction: user_instruction,
             idl: idl,
@@ -346,10 +355,9 @@ export default class Generator extends GeneratorShape {
         console.log('the stage: ', chalk.green('Planning'));
         this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
 
-        const delete_files = planner_data
-            .files_likely_affected
-            .filter(f => f.do === 'delete')
-            .map(f => f.file_path);
+        const delete_files = planner_data.files_likely_affected
+            .filter((f) => f.do === 'delete')
+            .map((f) => f.file_path);
 
         const promptValue = await old_chat_coder_prompt.invoke({
             plan: planner_data.plan,
@@ -371,9 +379,9 @@ export default class Generator extends GeneratorShape {
             toolStepResult,
             ...toolMessages,
             {
-                role: "user",
-                content: "Use the fetched file contents to implement the planned changes.",
-            }
+                role: 'user',
+                content: 'Use the fetched file contents to implement the planned changes.',
+            },
         ]);
 
         for await (const chunk of code_stream) {
@@ -395,13 +403,8 @@ export default class Generator extends GeneratorShape {
         console.log('the stage: ', chalk.green('Building'));
         this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Building' }, system_message);
 
-
         const gen_files = parser.getGeneratedFiles();
-        await this.update_contract(
-            contract_id,
-            gen_files,
-            delete_files,
-        );
+        await this.update_contract(contract_id, gen_files, delete_files);
 
         console.log(gen_files);
 
@@ -479,14 +482,14 @@ export default class Generator extends GeneratorShape {
             });
 
             console.log('the context: ', chalk.red(finalizer_data.context));
-            this.send_sse(res, STAGE.CONTEXT, { context: finalizer_data.context, llmMessage: llm_message }, system_message);
-
-            this.update_idl(
-                contract_id,
-                finalizer_data.idl,
-                delete_files,
+            this.send_sse(
+                res,
+                STAGE.CONTEXT,
+                { context: finalizer_data.context, llmMessage: llm_message },
+                system_message,
             );
 
+            this.update_idl(contract_id, finalizer_data.idl, delete_files);
         } catch (error) {
             console.error('Error while finalizing: ', error);
             parser.reset();
@@ -502,11 +505,9 @@ export default class Generator extends GeneratorShape {
     ) {
         const contract = await objectStore.get_resource_files(contract_id);
 
-        const remainingFiles = contract.filter(
-            file => !deleting_files_path.includes(file.path)
-        );
+        const remainingFiles = contract.filter((file) => !deleting_files_path.includes(file.path));
 
-        const existingFilesMap = new Map(remainingFiles.map(file => [file.path, file]));
+        const existingFilesMap = new Map(remainingFiles.map((file) => [file.path, file]));
         const newFiles: FileContent[] = [];
 
         for (const gen_file of generated_files) {
@@ -554,9 +555,7 @@ export default class Generator extends GeneratorShape {
 
         const idl = JSON.parse(contract.summarisedObject);
 
-        const remainingIdl = idl.filter(
-            (item: any) => !deleting_files_path.includes(item.path)
-        );
+        const remainingIdl = idl.filter((item: any) => !deleting_files_path.includes(item.path));
 
         const existingIdlMap = new Map(remainingIdl.map((item: any) => [item.path, item]));
         const newIdlParts: any[] = [];
@@ -620,25 +619,23 @@ export default class Generator extends GeneratorShape {
                     this.gemini_planner.withStructuredOutput(old_planner_output_schema),
                 ]);
 
-                const coder_chain =
-                    old_chat_coder_prompt
-                        .pipe(coder.bindTools([Tool.get_file]))
-                        .pipe(Tool.runner)
-                        .pipe(Tool.convert)
-                        .pipe(
-                            new RunnableLambda({
-                                func: ({ messages }: { messages: any }) => [
-                                    ...messages,
-                                    {
-                                        role: "user",
-                                        content:
-                                            "Use the fetched file contents to implement the planned changes.",
-                                    },
-                                ],
-                            })
-                        )
-                        .pipe(coder);
-
+                const coder_chain = old_chat_coder_prompt
+                    .pipe(coder.bindTools([Tool.get_file]))
+                    .pipe(Tool.runner)
+                    .pipe(Tool.convert)
+                    .pipe(
+                        new RunnableLambda({
+                            func: ({ messages }: { messages: any }) => [
+                                ...messages,
+                                {
+                                    role: 'user',
+                                    content:
+                                        'Use the fetched file contents to implement the planned changes.',
+                                },
+                            ],
+                        }),
+                    )
+                    .pipe(coder);
 
                 finalizer_chain = RunnableSequence.from([
                     finalizer_prompt,

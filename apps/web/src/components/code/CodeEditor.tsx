@@ -100,13 +100,10 @@ export default function CodeEditor(): JSX.Element {
 
     const handleEditorDidMount = useCallback(
         (editorInstance: editor.IStandaloneCodeEditor, monaco: Monaco) => {
-            editorInstance.addCommand(
-                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyP,
-                () => {
-                    const event = new CustomEvent('open-search-bar');
-                    window.dispatchEvent(event);
-                },
-            );
+            editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyP, () => {
+                const event = new CustomEvent('open-search-bar');
+                window.dispatchEvent(event);
+            });
         },
         [],
     );

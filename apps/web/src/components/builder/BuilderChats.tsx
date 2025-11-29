@@ -200,7 +200,6 @@ export default function BuilderChats() {
             style={{ height: 'calc(100vh - 3.5rem)' }}
         >
             <div className="flex-1 flex flex-col gap-y-3 text-light text-sm pl-4 overflow-y-auto min-h-0 custom-scrollbar">
-
                 {messages.map((message) => (
                     <div key={message.id} className="w-full shrink-0">
                         {message.role === 'USER' && (
@@ -296,4 +295,3 @@ export default function BuilderChats() {
         </div>
     );
 }
-

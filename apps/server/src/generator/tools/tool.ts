@@ -12,7 +12,6 @@ import { BaseMessage, ToolMessage } from '@langchain/core/messages';
 const RULES_DIR = path.resolve(process.cwd(), 'dist/rules');
 
 export default class Tool {
-
     /**
      * for fetching rule file from tool call
      */
@@ -69,10 +68,7 @@ export default class Tool {
                     throw new Error(`Unknown tool called: ${tc.name}`);
                 }
 
-                const args =
-                    typeof tc.args === 'string'
-                        ? JSON.parse(tc.args)
-                        : tc.args;
+                const args = typeof tc.args === 'string' ? JSON.parse(tc.args) : tc.args;
 
                 const result = await toolImpl.invoke(args);
 
@@ -91,25 +87,21 @@ export default class Tool {
         },
     });
 
-public static convert = new RunnableLambda<
-  { toolResults: any[] },
-  { messages: BaseMessage[] }
->({
-  func: ({ toolResults }: { toolResults: any }) => ({
-    messages: toolResults.map(
-      (t: any) =>
-        new ToolMessage({
-          name: t.name,
-          tool_call_id: t.id,
-          content:
-            typeof t.result === "string"
-              ? t.result
-              : JSON.stringify(t.result),
-        }),
-    ),
-  }),
-});
-
+    public static convert = new RunnableLambda<{ toolResults: any[] }, { messages: BaseMessage[] }>(
+        {
+            func: ({ toolResults }: { toolResults: any }) => ({
+                messages: toolResults.map(
+                    (t: any) =>
+                        new ToolMessage({
+                            name: t.name,
+                            tool_call_id: t.id,
+                            content:
+                                typeof t.result === 'string' ? t.result : JSON.stringify(t.result),
+                        }),
+                ),
+            }),
+        },
+    );
 
     /**
      * finds all the rules file and remover their extension and return the name
@@ -139,6 +131,4 @@ public static convert = new RunnableLambda<
         get_rule: Tool.get_rule,
         get_file: Tool.get_file,
     };
-
-
 }

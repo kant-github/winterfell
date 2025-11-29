@@ -178,10 +178,9 @@ export default function BuilderChatInput() {
         // router.push(`/playground/${newContractId}`);
     }
 
-    const userMessagesLength = messages.filter(m => m.role === ChatRole.USER).length;
+    const userMessagesLength = messages.filter((m) => m.role === ChatRole.USER).length;
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-
         // if(userMessagesLength >= 5) return;
 
         if (e.key === 'Enter' && !e.shiftKey) {

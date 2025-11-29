@@ -15,7 +15,7 @@ export default async function generateContractController(req: Request, res: Resp
 
         const parsed_data = generate_contract_schema.safeParse(req.body);
 
-        if(!parsed_data.success) {
+        if (!parsed_data.success) {
             ResponseWriter.error(res, 'Invalid data', 400);
             return;
         }
@@ -24,7 +24,7 @@ export default async function generateContractController(req: Request, res: Resp
         const { contract_id, instruction, model } = parsed_data.data;
 
         // checking for instruction length
-        if(instruction.length > 200) {
+        if (instruction.length > 200) {
             ResponseWriter.error(res, 'instruction crossed the length limit!', 413);
             return;
         }
@@ -88,7 +88,6 @@ export default async function generateContractController(req: Request, res: Resp
                 existing_contract.id,
                 JSON.parse(existing_contract.summarisedObject || ''),
             );
-
         } else {
             // call for new
             const contract = await prisma.contract.create({
@@ -108,7 +107,7 @@ export default async function generateContractController(req: Request, res: Resp
                     contractId: contract_id,
                 },
             });
-            
+
             generator.generate(res, 'new', instruction, model || MODEL.GEMINI, contract.id);
         }
     } catch (error) {

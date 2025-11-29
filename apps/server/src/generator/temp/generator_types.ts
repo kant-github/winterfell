@@ -1,7 +1,6 @@
-import { AIMessageChunk, MessageStructure } from "@langchain/core/messages";
-import { Runnable, RunnableSequence } from "@langchain/core/runnables";
-import { FileContent } from "@winterfell/types";
-
+import { AIMessageChunk, MessageStructure } from '@langchain/core/messages';
+import { Runnable, RunnableSequence } from '@langchain/core/runnables';
+import { FileContent } from '@winterfell/types';
 
 export type new_planner = RunnableSequence<
     {
@@ -22,7 +21,7 @@ export type new_planner = RunnableSequence<
 
 export type new_coder = Runnable<
     {
-        plan: string,
+        plan: string;
         files_likely_affected: {
             do: 'create' | 'update' | 'delete';
             file_path: string;
@@ -34,18 +33,18 @@ export type new_coder = Runnable<
 
 export type new_finalizer = RunnableSequence<
     {
-        generated_files: FileContent[],
+        generated_files: FileContent[];
     },
     {
-        idl: Object[],
-        context: string,
+        idl: Object[];
+        context: string;
     }
 >;
 
 export type old_planner = RunnableSequence<
     {
-        user_instruction: string,
-        idl: Object[],
+        user_instruction: string;
+        idl: Object[];
     },
     {
         should_continue: boolean;
@@ -61,8 +60,8 @@ export type old_planner = RunnableSequence<
 
 export type old_coder = Runnable<
     {
-        plan: string,
-        contract_id: string,
+        plan: string;
+        contract_id: string;
         files_likely_affected: {
             do: 'create' | 'update' | 'delete';
             file_path: string;
@@ -74,10 +73,10 @@ export type old_coder = Runnable<
 
 export type old_finalizer = RunnableSequence<
     {
-        generated_files: FileContent[],
+        generated_files: FileContent[];
     },
     {
-        idl: Object[],
-        context: string,
+        idl: Object[];
+        context: string;
     }
 >;

@@ -1,4 +1,4 @@
-import z from "zod";
+import z from 'zod';
 
 const instruction_schema = z.object({
     name: z.string(),
@@ -122,4 +122,3 @@ export const finalizer_output_schema = z.object({
     idl: z.array(finalizer_schema),
     context: z.string(),
 });
-

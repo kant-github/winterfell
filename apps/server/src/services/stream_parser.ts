@@ -50,7 +50,7 @@ export default class StreamParser {
         this.generatedFiles = [];
         this.eventHandlers = new Map();
         this.contractName = '';
-        
+
         this.deleting = false;
         this.deleteFiles = [];
     }
@@ -131,7 +131,7 @@ export default class StreamParser {
                 this.currentFile = filePath;
 
                 // push the file path to the deleting files
-                if(this.deleting) this.deleteFiles.push(filePath);
+                if (this.deleting) this.deleteFiles.push(filePath);
 
                 const data: EditingFileData = {
                     file: filePath,

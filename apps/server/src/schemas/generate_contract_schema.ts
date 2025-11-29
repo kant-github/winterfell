@@ -1,5 +1,5 @@
-import { MODEL } from "@winterfell/types";
-import z from "zod";
+import { MODEL } from '@winterfell/types';
+import z from 'zod';
 
 export const generate_contract_schema = z.object({
     contract_id: z.string(),

@@ -19,12 +19,12 @@ export default class ObjectStore {
         this.bucket = env.SERVER_AWS_BUCKET_NAME;
     }
 
-   public async updateContractFiles(
+    public async updateContractFiles(
         contractId: string,
         updatedFiles: FileContent[],
     ): Promise<void> {
         const key = `${contractId}/resource`;
-        
+
         const upload = new Upload({
             client: this.s3,
             params: {
