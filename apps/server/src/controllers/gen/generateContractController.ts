@@ -13,8 +13,6 @@ export default async function generateContractController(req: Request, res: Resp
             return;
         }
 
-        console.log(req.body);
-
         const parsed_data = generate_contract_schema.safeParse(req.body);
 
         if(!parsed_data.success) {
@@ -64,7 +62,7 @@ export default async function generateContractController(req: Request, res: Resp
 
         if (existing_contract) {
             // call for update
-            if (existing_contract.messages.length >= 5) {
+            if (existing_contract.messages.length > 5) {
                 ResponseWriter.error(res, 'message limit reached!', 403);
                 return;
             }

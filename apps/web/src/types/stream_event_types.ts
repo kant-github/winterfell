@@ -116,3 +116,8 @@ export enum LOADER_STATES {
     BUFFERING = 'BUFFERING',
     COMPLETED = 'COMPLETED',
 }
+
+export enum MODEL {
+    GEMINI = 'GEMINI',
+    CLAUDE = 'CLAUDE',
+}

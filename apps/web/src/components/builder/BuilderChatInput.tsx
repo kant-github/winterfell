@@ -16,12 +16,12 @@ import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import {
     FILE_STRUCTURE_TYPES,
     FileContent,
+    MODEL,
     PHASE_TYPES,
     STAGE,
     StreamEvent,
 } from '@/src/types/stream_event_types';
 import { toast } from 'sonner';
-import { MODEL } from '@/src/types/extra_types';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');

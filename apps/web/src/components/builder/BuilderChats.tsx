@@ -9,6 +9,7 @@ import { GENERATE_CONTRACT } from '@/routes/api_routes';
 import {
     FILE_STRUCTURE_TYPES,
     FileContent,
+    MODEL,
     PHASE_TYPES,
     STAGE,
     StreamEvent,
@@ -22,7 +23,6 @@ import { LayoutGrid } from '../ui/animated/layout-grid-icon';
 import { TextShimmer } from '../ui/shimmer-text';
 import { formatChatTime } from '@/src/lib/format_chat_time';
 import { toast } from 'sonner';
-import { MODEL } from '@/src/types/extra_types';
 
 export default function BuilderChats() {
     const { session } = useUserSessionStore();

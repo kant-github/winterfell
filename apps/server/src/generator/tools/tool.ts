@@ -3,13 +3,15 @@ import fs, { readFileSync } from 'fs';
 import { tool } from '@langchain/core/tools';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import chalk from 'chalk';
-import { RunnableLambda } from '@langchain/core/runnables';
+import { Runnable, RunnableLambda } from '@langchain/core/runnables';
 import { objectStore } from '../../services/init';
 import { tool_schema } from '../schema/tool_schema';
+import { get_file_schema } from '../schema/get_file_schema';
 
 const RULES_DIR = path.resolve(process.cwd(), 'dist/rules');
 
 export default class Tool {
+
     /**
      * for fetching rule file from tool call
      */
@@ -37,35 +39,58 @@ export default class Tool {
             const contract_files = await objectStore.get_resource_files(contract_id);
             const file = contract_files.find((f) => f.path === file_path);
 
+            console.log('file requested: ', file_path);
+            console.log('contract id sent: ', contract_id);
+
             if (!file) throw new Error('file not found');
+
+            console.log("file found: ", file?.content);
+
             return file.content;
         },
         {
             name: 'get_file',
             description: "fetches a file content by it's path",
+            schema: get_file_schema,
         },
     );
 
     /**
      * creates a runnable-lambda that executes tool-calling by using specific paths
      */
-    public static runner = new RunnableLambda({
-        func: async (aiMessage: any) => {
-            const tool_calls = aiMessage.tool_calls ?? aiMessage.tool_call_chunks ?? [];
-            const tool = Tool.get_rule;
-            const results: Record<string, any>[] = [];
+public static runner = new RunnableLambda({
+    func: async (aiMessage: any) => {
+        const toolCalls = aiMessage.tool_calls ?? aiMessage.tool_call_chunks ?? [];
+        const results: Record<string, any>[] = [];
 
-            for (const tc of tool_calls) {
-                const args = typeof tc.args === 'string' ? JSON.parse(tc.args) : tc.args;
-                const result = await tool.invoke({ rule_name: args.rule_name });
-                results.push({ name: tc.name, args, result });
+        for (const tc of toolCalls) {
+            const toolImpl = Tool.TOOL_REGISTRY[tc.name];
+
+            if (!toolImpl) {
+                throw new Error(`Unknown tool called: ${tc.name}`);
             }
-            return {
-                aiMessage,
-                toolResults: results,
-            };
-        },
-    });
+
+            const args =
+                typeof tc.args === 'string'
+                    ? JSON.parse(tc.args)
+                    : tc.args;
+
+            const result = await toolImpl.invoke(args);
+
+            results.push({
+                name: tc.name,
+                args,
+                result,
+            });
+        }
+
+        return {
+            aiMessage,
+            toolResults: results,
+        };
+    },
+});
+
 
     /**
      * finds all the rules file and remover their extension and return the name
@@ -90,4 +115,11 @@ export default class Tool {
     }
 
     public static node = new ToolNode([Tool.get_rule]);
+
+private static TOOL_REGISTRY: Record<string, Runnable> = {
+    get_rule: Tool.get_rule,
+    get_file: Tool.get_file,
+};
+
+
 }

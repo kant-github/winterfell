@@ -145,6 +145,9 @@ export default class Generator extends GeneratorShape {
 
             if (!planner_data.should_continue) {
                 console.log('planner said to not continue.');
+                parser.reset();
+                this.delete_parser(contract_id);
+                res.end();
                 return;
             }
 
@@ -367,7 +370,9 @@ export default class Generator extends GeneratorShape {
                     this.gemini_planner.withStructuredOutput(old_planner_output_schema),
                 ]);
 
-                coder_chain = old_chat_coder_prompt.pipe(coder.bindTools([Tool.get_file]));
+                coder_chain = old_chat_coder_prompt
+                    .pipe(coder.bindTools([Tool.get_file]))
+                    .pipe(Tool.runner);
 
                 finalizer_chain = RunnableSequence.from([
                     finalizer_prompt,
@@ -437,6 +442,10 @@ export default class Generator extends GeneratorShape {
 
             parser.on(STAGE.FINALIZING, ({ data, systemMessage }) =>
                 this.send_sse(res, STAGE.FINALIZING, data, systemMessage),
+            );
+
+            parser.on(STAGE.END, ({ data, systemMessage }) =>
+                this.send_sse(res, STAGE.END, data, systemMessage),
             );
 
             this.parsers.set(contract_id, parser);
