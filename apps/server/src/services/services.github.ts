@@ -3,7 +3,7 @@ import { FileContent } from '../types/github_worker_queue_types';
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 import env from '../configs/config.env';
 import JSZip from 'jszip';
-import fs from 'fs';
+import { prisma } from '@winterfell/database';
 
 export default class GithubServices {
     public async fetch_codebase(contract_id: string): Promise<FileContent[] | null> {
@@ -13,7 +13,7 @@ export default class GithubServices {
             );
             return data;
         } catch (error) {
-            console.error('Failed to fetch codebase', error);
+            console.error(error);
             throw new Error('Failed to fetch code');
         }
     }
@@ -25,7 +25,8 @@ export default class GithubServices {
                 await octokit.users.getAuthenticated();
             return response.data.login;
         } catch (error) {
-            throw new Error('GitHub owner doesnt exist');
+            console.error(error);
+            throw new Error('GitHub owner not found');
         }
     }
 
@@ -49,7 +50,9 @@ export default class GithubServices {
         }
     }
 
-    public async create_zip_file(contract_id: string): Promise<Buffer | null> {
+    public async create_zip_file(
+        contract_id: string,
+    ): Promise<{ buffer: Buffer; contract_name: string } | null> {
         try {
             const files = await this.fetch_codebase(contract_id);
             if (!files || files.length === 0) {
@@ -58,17 +61,34 @@ export default class GithubServices {
             }
 
             const zip = new JSZip();
-            for (const f of files) {
-                zip.file(f.path, f.content);
+
+            const contract_record = await prisma.contract.findUnique({
+                where: { id: contract_id },
+                select: { title: true },
+            });
+            if (!contract_record || !contract_record.title) {
+                console.error('No contract title found');
+                return null;
             }
 
-            console.log('creating buffer');
+            const contract_name = contract_record?.title;
+            const root_folder = `winterfell-${contract_name}`;
 
-            const buffer = await zip.generateAsync({ type: 'nodebuffer' });
-            fs.writeFileSync('/tmp/test-file', buffer);
-            console.log('buffer received is -------------> ', Buffer.isBuffer(buffer));
+            for (const f of files) {
+                const file_path = `${root_folder}/${f.path}`;
+                zip.file(file_path, f.content);
+            }
 
-            return buffer;
+            const buffer = await zip.generateAsync({
+                type: 'nodebuffer',
+                compression: 'DEFLATE',
+                compressionOptions: { level: 9 },
+            });
+
+            return {
+                buffer,
+                contract_name: contract_name,
+            };
         } catch (error) {
             console.error('Failed to create zip format', error);
             return null;

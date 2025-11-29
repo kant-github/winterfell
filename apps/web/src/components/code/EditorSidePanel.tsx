@@ -6,8 +6,7 @@ import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { cn } from '@/src/lib/utils';
 import { RiChat4Fill } from 'react-icons/ri';
-import { FaTelegramPlane } from "react-icons/fa";
-
+import { FaTelegramPlane } from 'react-icons/fa';
 
 export enum SidePanelValues {
     FILE = 'FILE',
@@ -18,8 +17,8 @@ export enum SidePanelValues {
 
 interface EditorSidePanel {
     setSidePanelRenderer:
-    | Dispatch<SetStateAction<SidePanelValues>>
-    | ((value: SidePanelValues | null) => void);
+        | Dispatch<SetStateAction<SidePanelValues>>
+        | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {

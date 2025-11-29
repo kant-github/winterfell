@@ -73,8 +73,6 @@ export default class WebSocketClient {
     }
 
     public subscribe(handler: MessageHandler) {
-        console.log('while connection the is connected was is : ', this.is_connected);
-        console.log('handler count are : ', handler.length);
         this.handlers.add(handler);
     }
 

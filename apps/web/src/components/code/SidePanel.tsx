@@ -10,7 +10,7 @@ import useResize from '@/src/hooks/useResize';
 export default function SidePanel() {
     const { currentState } = useSidePanelStore();
     const { collapseFileTree, setCollapseFileTree } = useCodeEditor();
-    const { dimension, startResize } = useResize({
+    const { dimension } = useResize({
         side: 'width',
         min: 240,
         max: 288,

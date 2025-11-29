@@ -50,7 +50,10 @@ export default class GithubServer {
         return response.data;
     }
 
-    public static async downloadZipFile(contractId: string, token: string) {
+    public static async downloadZipFile(
+        contractId: string,
+        token: string,
+    ): Promise<{ arrayBuffer: ArrayBuffer; contract_name: string }> {
         const response = await axios.post(
             DOWNLOAD_ZIP_FILE,
             {
@@ -61,9 +64,12 @@ export default class GithubServer {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
+                responseType: 'arraybuffer',
             },
         );
 
-        return response.data;
+        const contract_name = response.headers['contract-name'];
+
+        return { arrayBuffer: response.data, contract_name };
     }
 }
