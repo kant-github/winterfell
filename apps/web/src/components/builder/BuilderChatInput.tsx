@@ -24,7 +24,7 @@ import { toast } from 'sonner';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
-    const { selectedModel, setSelectedModel } = useModelStore();
+    const { executor, setExecutor } = useModelStore();
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const { session } = useUserSessionStore();
     const { setLoading, upsertMessage, setPhase, setMessage, setCurrentFileEditing } =
@@ -208,7 +208,7 @@ export default function BuilderChatInput() {
 
                     <div className="flex items-center justify-between px-4 py-2.5 border-t border-neutral-800/50 bg-[#101114]">
                         <div className="flex items-center gap-x-1">
-                            <ExecutorSelect value={selectedModel} onChange={setSelectedModel} />
+                            <ExecutorSelect value={executor} onChange={setExecutor} />
                             <Button
                                 type="button"
                                 className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"

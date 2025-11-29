@@ -25,6 +25,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     const router = useRouter();
     const [showReviewCard, setShowReviewCard] = useState(false);
     const navigationAttemptedRef = useRef(false);
+
     const hasReviewed = useCallback(() => {
         if (typeof window === 'undefined') return true;
         return localStorage.getItem(`${REVIEW_STORAGE_KEY}${contractId}`) === 'true';

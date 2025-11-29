@@ -3,7 +3,7 @@ import { env } from '../configs/configs.env';
 
 export default class RedisLockService {
     private redis: Redis;
-    private ttlSeconds: number = 1000;
+    private ttlSeconds: number = 600000;
 
     constructor() {
         this.redis = new Redis(env.KUBERNETES_REDIS_URL);

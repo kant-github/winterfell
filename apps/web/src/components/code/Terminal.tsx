@@ -24,7 +24,7 @@ export default function Terminal() {
     const outputRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const { moveUp, moveDown, resetIndex } = useCommandHistoryStore();
-    const { logs, addLog, clearLogs, isCommandRunning } = useTerminalLogStore();
+    const { logs, addLog, clearLogs, isCommandRunning, terminalLoader } = useTerminalLogStore();
     const { isConnected } = useWebSocket();
     const { handleCommand } = useTerminal();
 
@@ -51,14 +51,10 @@ export default function Terminal() {
         return (
             <span className="text-green-500 select-none text-[14px]">
                 ➜ <span className="text-blue-400">~</span>
-            </span>
-        );
-    }
-
-    useEffect(
-        function () {
-            if (showTerminal) inputRef.current?.focus();
-        },
+            </span>);
+    } useEffect(function () {
+        if (showTerminal) inputRef.current?.focus();
+    },
         [showTerminal],
     );
 
@@ -130,7 +126,7 @@ export default function Terminal() {
             let className = '';
             switch (line.type) {
                 case 'command':
-                    className = 'text-[#1ed65e]';
+                    className = 'text-[#25da65]';
                     break;
 
                 case TerminalSocketData.COMPLETED:
@@ -138,7 +134,7 @@ export default function Terminal() {
                     break;
 
                 case TerminalSocketData.LOGS:
-                    className = 'text-[#1ed65e]';
+                    className = 'text-[#25da65]';
                     break;
 
                 case TerminalSocketData.ERROR_MESSAGE:
@@ -260,6 +256,8 @@ export default function Terminal() {
 
                             <div className="flex mt-1">
                                 {!isCommandRunning && <Prompt />}
+                                {terminalLoader}
+                                {isCommandRunning && terminalLoader && <span className='terminal-loader ml-5' />}
                                 <input
                                     aria-label="terminal"
                                     ref={inputRef}

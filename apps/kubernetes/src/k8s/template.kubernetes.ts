@@ -21,9 +21,11 @@ export default function podTemplate(configs: PodConfig) {
             annotations: {
                 'created-at': new Date().toISOString(),
                 'anchor-command': command,
+                'pod.kubernetes.io/ttl': '300',
             },
         },
         spec: {
+            activeDeadlineSeconds: 1800,
             restartPolicy: 'Never',
             containers: [
                 {

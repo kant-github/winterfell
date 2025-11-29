@@ -117,3 +117,64 @@
         }
     }
 }
+
+.terminal-loader {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    color: #6c44fc;
+    position: relative;
+}
+
+.terminal-loader::after {
+    content: '...';
+    display: inline-block;
+    animation: terminal-dots 1.5s steps(4, end) infinite;
+    width: 1em;
+    text-align: left;
+    font-size: 1.6em;
+    letter-spacing: -0.15em;
+    line-height: 1;
+}
+
+@keyframes terminal-dots {
+    0% {
+        content: '';
+    }
+    25% {
+        content: '.';
+    }
+    50% {
+        content: '..';
+    }
+    75% {
+        content: '...';
+    }
+    100% {
+        content: '';
+    }
+}
+
+/* Alternative blinking cursor style - add this class instead if preferred */
+.terminal-loader-cursor {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    color: #6c44fc;
+}
+
+.terminal-loader-cursor::after {
+    content: '▋';
+    animation: terminal-blink 1s step-end infinite;
+}
+
+@keyframes terminal-blink {
+    0%,
+    50% {
+        opacity: 1;
+    }
+    51%,
+    100% {
+        opacity: 0;
+    }
+}

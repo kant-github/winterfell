@@ -1,4 +1,12 @@
-import { CoreV1Api, Exec, Log, LogOptions, V1Status } from '@kubernetes/client-node';
+import {
+    BatchApi,
+    BatchV1Api,
+    CoreV1Api,
+    Exec,
+    Log,
+    LogOptions,
+    V1Status,
+} from '@kubernetes/client-node';
 import podTemplate from './template.kubernetes';
 import { env } from '../configs/configs.env';
 import { PodServices } from '../services/pod.services';
@@ -6,16 +14,151 @@ import KubernetesClient from './client.kubernetes';
 import { Writable } from 'stream';
 import { PodStatus } from '../types/types.kubernetes';
 import { FileContent } from '@winterfell/types';
+import get_job_template from './template.job.kubernetes';
 
 export default class KubernetesManager {
     private core_api: CoreV1Api;
     private exec_command: Exec;
+    private batch_api: BatchV1Api;
     private log: Log;
 
     constructor(kubernetes_client: KubernetesClient) {
         this.core_api = kubernetes_client.core_api;
         this.exec_command = kubernetes_client.exec;
         this.log = kubernetes_client.log;
+        this.batch_api = kubernetes_client.batch_api;
+    }
+
+    public async create_job(
+        job_id: string,
+        user_id: string,
+        contract_id: string,
+        command: string,
+    ): Promise<{ job_name: string; pod_name: string }> {
+        try {
+            const job_name: string = `build-${job_id}`.toLowerCase().slice(0, 63);
+            const job_template = get_job_template({
+                user_id,
+                contract_id,
+                command,
+                job_id,
+                job_name,
+            });
+
+            await this.batch_api.createNamespacedJob({
+                namespace: env.KUBERNETES_NAMESPACE,
+                body: job_template,
+            });
+
+            const pod_name = await this.wait_for_job_pod(job_name);
+            return { job_name, pod_name };
+        } catch (err) {
+            console.error('error while creating the job : ', err);
+            throw err;
+        }
+    }
+
+    private async wait_for_job_pod(job_name: string, timeoutMs = 30000): Promise<string> {
+        const start = Date.now();
+        const namespace = env.KUBERNETES_NAMESPACE;
+
+        while (Date.now() - start < timeoutMs) {
+            try {
+                // List pods with job-name label
+                const pods = await this.core_api.listNamespacedPod({
+                    namespace,
+                    labelSelector: `job-name=${job_name}`,
+                });
+
+                if (pods.items.length > 0) {
+                    const pod_name = pods.items[0].metadata?.name;
+                    if (pod_name) {
+                        console.log(`Job ${job_name} created pod: ${pod_name}`);
+                        return pod_name;
+                    }
+                }
+            } catch (err) {
+                console.error('Error checking for job pod:', err);
+            }
+
+            await new Promise((r) => setTimeout(r, 1000));
+        }
+
+        throw new Error(`Timeout waiting for Job ${job_name} to create pod`);
+    }
+
+    public async get_job_status(job_name: string): Promise<{
+        active: boolean;
+        succeeded: boolean;
+        failed: boolean;
+    }> {
+        try {
+            const job = await this.batch_api.readNamespacedJob({
+                namespace: env.KUBERNETES_NAMESPACE,
+                name: job_name,
+            });
+
+            return {
+                active: (job.status?.active ?? 0) > 0,
+                succeeded: (job.status?.succeeded ?? 0) > 0,
+                failed: (job.status?.failed ?? 0) > 0,
+            };
+        } catch (err) {
+            console.error('Error getting job status:', err);
+            throw err;
+        }
+    }
+
+    /**
+     * Wait for Job to complete
+     */
+    public async wait_for_job_completion(
+        job_name: string,
+        timeoutMs = 15 * 60_000,
+    ): Promise<{ success: boolean; error?: string }> {
+        const start = Date.now();
+
+        while (Date.now() - start < timeoutMs) {
+            const status = await this.get_job_status(job_name);
+
+            if (status.succeeded) {
+                return { success: true };
+            }
+
+            if (status.failed) {
+                return {
+                    success: false,
+                    error: 'Job failed during execution',
+                };
+            }
+
+            await new Promise((r) => setTimeout(r, 2000));
+        }
+
+        return {
+            success: false,
+            error: 'Job execution timed out',
+        };
+    }
+
+    /**
+     * Optional: Force delete Job (not usually needed due to TTL)
+     */
+    public async delete_job(job_name: string): Promise<void> {
+        try {
+            await this.batch_api.deleteNamespacedJob({
+                namespace: env.KUBERNETES_NAMESPACE,
+                name: job_name,
+                propagationPolicy: 'Background', // Also delete pods
+            });
+            console.log(`Deleted Job: ${job_name}`);
+        } catch (err: any) {
+            if (err.statusCode === 404) {
+                console.log(`Job ${job_name} already deleted`);
+                return;
+            }
+            throw err;
+        }
     }
 
     /**
@@ -463,10 +606,6 @@ export default class KubernetesManager {
             });
         }
 
-        console.log(`Copied ${files.length} files into pod ${pod_name}`);
-
-        // Check if package.json exists before installing
-        console.log('Checking for package.json...');
         try {
             const { stdout } = await this.run_command_on_pod({
                 namespace,
@@ -479,13 +618,11 @@ export default class KubernetesManager {
                 ],
                 timeoutMs: 10_000,
             });
-            console.log('Workspace contents:', stdout);
         } catch (err) {
             console.error('Error checking workspace:', err);
         }
 
         // Check if yarn is installed, if not skip dependency installation
-        console.log('Checking for yarn...');
         try {
             await this.run_command_on_pod({
                 namespace,
@@ -494,7 +631,6 @@ export default class KubernetesManager {
                 command: ['which', 'yarn'],
                 timeoutMs: 5_000,
             });
-            console.log('Yarn found, installing dependencies...');
         } catch (err) {
             console.log('Yarn not found in container, skipping dependency installation', err);
             return;
@@ -508,9 +644,8 @@ export default class KubernetesManager {
                 container_name,
                 command: ['sh', '-c', 'cd /workspace && yarn install 2>&1'],
                 timeoutMs: 5 * 60_000,
-                onData: (chunk) => console.log(chunk), // Stream output for debugging
+                // onData: (chunk) => console.log(chunk), // Stream output for debugging
             });
-            console.log('Yarn stdout:', stdout);
             if (stderr) console.log('Yarn stderr:', stderr);
             console.log('Dependencies installed successfully');
         } catch (err) {
