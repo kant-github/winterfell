@@ -46,7 +46,7 @@ export default function DownloadZipFileComponent() {
                 document.body.removeChild(link);
                 window.URL.revokeObjectURL(url);
             }, 100);
-
+            toast.dismiss(toastId);
             toast.success('Download complete');
         } catch (error) {
             console.error('Download error:', error);

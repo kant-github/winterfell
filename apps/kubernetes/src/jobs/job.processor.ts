@@ -30,7 +30,7 @@ export default class JobProcessors {
                 return;
             }
 
-            context.send_server_message('queuing you command');
+            context.send_server_message('queuing your command');
 
             const files = await PodServices.get_codebase(context.contractId);
             if (!files || files.length === 0) {
