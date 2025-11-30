@@ -499,9 +499,8 @@ export default class Generator extends GeneratorShape {
         generated_files: FileContent[],
         deleting_files_path: string[],
     ) {
-
         console.log(chalk.bgRed('---------------------------- generated files'));
-        console.log(generated_files.map(file => console.log(file.path)));
+        console.log(generated_files.map((file) => console.log(file.path)));
 
         console.log(chalk.bgRed('---------------------------- deleting files'));
         console.log(deleting_files_path);
@@ -509,23 +508,23 @@ export default class Generator extends GeneratorShape {
         const contract = await objectStore.get_resource_files(contract_id);
 
         console.log(chalk.bgRed('---------------------------- contract'));
-        console.log(contract.map(file => console.log(file.path)));
+        console.log(contract.map((file) => console.log(file.path)));
 
         let remaining_files: FileContent[] = contract;
         // delete the given files from the contract
-        if(deleting_files_path.length > 0) {
+        if (deleting_files_path.length > 0) {
             console.log('removing the deleting files');
-            remaining_files = contract.filter(file => !deleting_files_path.includes(file.path));
+            remaining_files = contract.filter((file) => !deleting_files_path.includes(file.path));
         }
 
         // const gen_file_map = new Map(generated_files.map(file => [file.path, file.content]));
-        const remaining_files_map = new Map(remaining_files.map(file => [file.path, file]));
+        const remaining_files_map = new Map(remaining_files.map((file) => [file.path, file]));
         let new_files: FileContent[] = [];
 
         // update old
         generated_files.forEach((file: FileContent) => {
             const file_exists = remaining_files_map.get(file.path);
-            if(file_exists) {
+            if (file_exists) {
                 remaining_files_map.set(file.path, file);
             } else {
                 new_files.push(file);
@@ -536,11 +535,10 @@ export default class Generator extends GeneratorShape {
         const updated_contract = [...remaining_files, ...new_files];
 
         console.log(chalk.bgRed('---------------------------- updated contract'));
-        console.log(updated_contract.map(file => console.log(file.path)));
+        console.log(updated_contract.map((file) => console.log(file.path)));
 
         console.log(chalk.yellowBright('updating contract in s3...'));
         await objectStore.updateContractFiles(contract_id, updated_contract);
-
     }
 
     protected async update_contract(

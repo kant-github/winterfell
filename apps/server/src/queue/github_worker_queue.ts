@@ -114,7 +114,7 @@ export class GithubWorkerQueue {
             }
         }
 
-        const tree_entries: RestEndpointMethodTypes["git"]["createTree"]["parameters"]["tree"] = [];
+        const tree_entries: RestEndpointMethodTypes['git']['createTree']['parameters']['tree'] = [];
         for (const file of files) {
             const blob = await octokit.git.createBlob({
                 owner,

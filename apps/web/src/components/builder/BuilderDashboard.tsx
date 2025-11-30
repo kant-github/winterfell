@@ -26,7 +26,7 @@ export default function BuilderDashboard(): JSX.Element {
             if (timeout) clearTimeout(timeout);
             timeout = setTimeout(() => {
                 setTerminalLoader(true);
-            }, 5000)
+            }, 5000);
             setIsCommandRunning(true);
             if (message.type === TerminalSocketData.COMPLETED) setIsCommandRunning(false);
             const { line } = message.payload;

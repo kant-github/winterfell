@@ -102,7 +102,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
 
     useEffect(() => {
         if (loading || !session || !session.user || !session.user.token) return;
-        Playyground.get_chat(session.user.token, contractId)
+        Playyground.get_chat(session.user.token, contractId);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session]);
 

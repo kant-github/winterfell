@@ -12,5 +12,3 @@ export interface ContractData {
 export interface ContractTemplateData extends ContractData {
   image: string;
 }
-
-

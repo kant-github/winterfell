@@ -32,7 +32,7 @@ export default function City3D({ className = '' }: City3DProps) {
             20,
             window.innerWidth / window.innerHeight,
             1,
-            500
+            500,
         );
         camera.position.set(0, 2, 14);
 
@@ -76,11 +76,7 @@ export default function City3D({ className = '' }: City3DProps) {
                 cube.scale.y = 0.1 + Math.abs(mathRandom(8));
                 cube.scale.x = cube.scale.z = 0.9 + mathRandom(0.1);
 
-                cube.position.set(
-                    Math.round(mathRandom()),
-                    0,
-                    Math.round(mathRandom())
-                );
+                cube.position.set(Math.round(mathRandom()), 0, Math.round(mathRandom()));
 
                 floor.scale.y = 0.05;
                 floor.position.set(cube.position.x, 0, cube.position.z);
@@ -106,7 +102,7 @@ export default function City3D({ className = '' }: City3DProps) {
                     color: 0x000000,
                     transparent: true,
                     opacity: 0.9,
-                })
+                }),
             );
             ground.rotation.x = -Math.PI / 2;
             ground.position.y = -0.001;
@@ -136,7 +132,7 @@ export default function City3D({ className = '' }: City3DProps) {
         const createCars = (scale = 0.1, pos = 20) => {
             const car = new THREE.Mesh(
                 new THREE.BoxGeometry(1, scale / 40, scale / 40),
-                new THREE.MeshToonMaterial({ color: 0xffff00 })
+                new THREE.MeshToonMaterial({ color: 0xffff00 }),
             );
 
             if (createCarPos) {
@@ -222,5 +218,3 @@ export default function City3D({ className = '' }: City3DProps) {
 
     return <div ref={containerRef} className={`fixed inset-0 ${className}`} />;
 }
-
-
