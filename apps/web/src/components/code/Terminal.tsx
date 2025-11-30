@@ -51,10 +51,13 @@ export default function Terminal() {
         return (
             <span className="text-green-500 select-none text-[14px]">
                 ➜ <span className="text-blue-400">~</span>
-            </span>);
-    } useEffect(function () {
-        if (showTerminal) inputRef.current?.focus();
-    },
+            </span>
+        );
+    }
+    useEffect(
+        function () {
+            if (showTerminal) inputRef.current?.focus();
+        },
         [showTerminal],
     );
 
@@ -257,7 +260,9 @@ export default function Terminal() {
                             <div className="flex mt-1">
                                 {!isCommandRunning && <Prompt />}
                                 {terminalLoader}
-                                {isCommandRunning && terminalLoader && <span className='terminal-loader ml-5' />}
+                                {isCommandRunning && terminalLoader && (
+                                    <span className="terminal-loader ml-5" />
+                                )}
                                 <input
                                     aria-label="terminal"
                                     ref={inputRef}

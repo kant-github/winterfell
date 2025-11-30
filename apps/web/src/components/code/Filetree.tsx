@@ -118,7 +118,14 @@ export default function FileTree() {
                                 )}
                             </div>
 
-                            <span className={cn("w-full text-sm tracking-wide truncate scale-100", item.isFolder ? "text-[#ebcb8a]" : "text-[#828282] ")}>{item.data}</span>
+                            <span
+                                className={cn(
+                                    'w-full text-sm tracking-wide truncate scale-100',
+                                    item.isFolder ? 'text-[#ebcb8a]' : 'text-[#828282] ',
+                                )}
+                            >
+                                {item.data}
+                            </span>
                         </div>
                     )}
                 >

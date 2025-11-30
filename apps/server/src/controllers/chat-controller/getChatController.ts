@@ -2,6 +2,7 @@ import { prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
 import env from '../../configs/config.env';
 import ResponseWriter from '../../class/response_writer';
+import chalk from 'chalk';
 
 export default async function (req: Request, res: Response) {
     try {
@@ -67,6 +68,9 @@ export default async function (req: Request, res: Response) {
             });
             return;
         }
+
+        console.log(chalk.bgRed('--------------------------------- idl'));
+        console.log(JSON.parse(contract.summarisedObject!).map((f: any) => console.log(f.path)));
 
         const sortedMessages = [...contract.messages].sort(
             (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),

@@ -18,7 +18,7 @@ export const useTerminalLogStore = create<TerminalLogStore>((set, get) => ({
     terminalLoader: false,
     setTerminalLoader(value) {
         return set({
-            terminalLoader: value
+            terminalLoader: value,
         });
     },
     setIsCommandRunning: (value: boolean) => set({ isCommandRunning: value }),

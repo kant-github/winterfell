@@ -11,8 +11,8 @@ export default function PricingHeader() {
                 </div>
                 <div className="text-[20px] text-light/60 flex flex-col">
                     <span>
-                        Pricing as efficient as your smart contracts, whether you&apos;re prototyping or
-                        scaling DeFi programs,
+                        Pricing as efficient as your smart contracts, whether you&apos;re
+                        prototyping or scaling DeFi programs,
                     </span>
                     <span>Winterfell adapts with AI tooling and seamless deployment.</span>
                 </div>
