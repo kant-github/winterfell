@@ -10,3 +10,7 @@ app.use(express.json());
 app.listen(PORT, () => {
     console.log(`server running on port: ${PORT}`);
 });
+
+process.on('SIGTERM', () => {
+    kubernetes_services.stop_pod_cleanup();
+});

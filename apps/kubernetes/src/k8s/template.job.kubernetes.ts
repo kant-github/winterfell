@@ -43,12 +43,58 @@ export default function get_job_template(configs: JobConfig) {
                 },
                 spec: {
                     restartPolicy: 'Never',
+                    volumes: [
+                        {
+                            name: 'workspace',
+                            emptyDir: {},
+                        },
+                    ],
+                    initContainers: [
+                        {
+                            name: 's3-code-checkout',
+                            image: 'amazon/aws-cli:latest',
+                            command: ['/bin/sh', '-c'],
+                            args: [
+                                `
+echo "Init: fetching code..."
+# You will fill your own S3 copy command here, e.g.:
+# aws s3 cp s3://bucket/key /workspace --recursive
+echo "Init: done"
+                                `,
+                            ],
+                            workingDir: '/workspace',
+                            volumeMounts: [
+                                {
+                                    name: 'workspace',
+                                    mountPath: '/workspace',
+                                },
+                            ],
+                            env: [
+                                {
+                                    name: 'AWS_ACCESS_KEY_ID',
+                                    value: env.SERVER_AWS_ACCESS_KEY_ID,
+                                },
+                                {
+                                    name: 'AWS_SECRET_ACCESS_KEY',
+                                    value: env.SERVER_AWS_SECRET_ACCESS_KEY,
+                                },
+                                {
+                                    name: 'AWS_DEFAULT_REGION',
+                                    value: env.SERVER_AWS_REGION,
+                                },
+                                {
+                                    name: 'S3_BUCKET',
+                                    value: env.SERVER_AWS_BUCKET_NAME || '',
+                                },
+                            ],
+                        },
+                    ],
                     containers: [
                         {
                             name: 'anchor-executor',
                             image: 'winterfellhub/test:latest',
                             command: ['/bin/sh', '-c'],
-                            args: ['sleep 3600'],
+                            args: [command],
                             workingDir: '/workspace',
                             volumeMounts: [
                                 {
@@ -76,12 +122,6 @@ export default function get_job_template(configs: JobConfig) {
                                 },
                             ],
                             imagePullPolicy: 'Always',
-                        },
-                    ],
-                    volumes: [
-                        {
-                            name: 'workspace',
-                            emptyDir: {},
                         },
                     ],
                 },
