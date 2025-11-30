@@ -12,6 +12,7 @@ import { FileNode, NODE } from '@/src/types/prisma-types';
 import { AiFillFolder } from 'react-icons/ai';
 import { AiFillFolderOpen } from 'react-icons/ai';
 import FileIcon from '../tickers/FileIcon';
+import { cn } from '@/src/lib/utils';
 
 interface TreeData {
     [key: string]: TreeItem;
@@ -117,7 +118,7 @@ export default function FileTree() {
                                 )}
                             </div>
 
-                            <span className="w-full text-sm truncate scale-100">{item.data}</span>
+                            <span className={cn("w-full text-sm tracking-wide truncate scale-100", item.isFolder ? "text-[#ebcb8a]" : "text-[#828282] ")}>{item.data}</span>
                         </div>
                     )}
                 >
