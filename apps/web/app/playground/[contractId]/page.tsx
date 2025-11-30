@@ -11,21 +11,20 @@ import { useChatStore } from '@/src/store/user/useChatStore';
 import React, { useEffect, useState, useCallback, useRef, use } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 import { useRouter } from 'next/navigation';
+import Playyground from '@/src/lib/server/playground';
 
 const REVIEW_STORAGE_KEY = 'contract-reviewed-';
 
 export default function Page({ params }: { params: Promise<{ contractId: string }> }) {
     const { cleanStore, loading, messages, upsertMessage } = useBuilderChatStore();
-    const { reset, collapseFileTree, setCollapseFileTree } = useCodeEditor();
+    const { reset, collapseFileTree, setCollapseFileTree, parseFileStructure } = useCodeEditor();
     const unwrappedParams = React.use(params);
     const { contractId } = unwrappedParams;
     const { resetContractId } = useChatStore();
     const { session } = useUserSessionStore();
-    const { parseFileStructure } = useCodeEditor();
     const router = useRouter();
     const [showReviewCard, setShowReviewCard] = useState(false);
     const navigationAttemptedRef = useRef(false);
-
     const hasReviewed = useCallback(() => {
         if (typeof window === 'undefined') return true;
         return localStorage.getItem(`${REVIEW_STORAGE_KEY}${contractId}`) === 'true';
@@ -102,8 +101,8 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     }
 
     useEffect(() => {
-        if (loading) return;
-        get_chat();
+        if (loading || !session || !session.user || !session.user.token) return;
+        Playyground.get_chat(session.user.token, contractId)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session]);
 
