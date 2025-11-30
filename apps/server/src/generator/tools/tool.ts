@@ -23,7 +23,10 @@ export default class Tool {
 
             console.log(chalk.yellow('requested rule name path: '), file_path);
 
-            if (!fs.existsSync(file_path)) throw new Error('rule file not found');
+            if (!fs.existsSync(file_path)) {
+                console.log('rule file not found');
+                return;
+            }
 
             return readFileSync(file_path, 'utf-8');
         },
@@ -42,8 +45,10 @@ export default class Tool {
             console.log('file requested: ', file_path);
             console.log('contract id sent: ', contract_id);
 
-            if (!file) throw new Error('file not found');
-
+            if (!file) {
+                console.error('file not found');
+                return;
+            }
             return file.content;
         },
         {

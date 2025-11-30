@@ -404,9 +404,7 @@ export default class Generator extends GeneratorShape {
         this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Building' }, system_message);
 
         const gen_files = parser.getGeneratedFiles();
-        await this.update_contract(contract_id, gen_files, delete_files);
-
-        console.log(gen_files);
+        await this.update_contract_2(contract_id, gen_files, delete_files);
 
         await prisma.message.update({
             where: {
@@ -459,8 +457,6 @@ export default class Generator extends GeneratorShape {
                 generated_files: generated_files,
             });
 
-            console.log(finalizer_data.idl);
-
             await prisma.message.update({
                 where: {
                     id: system_message.id,
@@ -498,11 +494,61 @@ export default class Generator extends GeneratorShape {
         }
     }
 
+    protected async update_contract_2(
+        contract_id: string,
+        generated_files: FileContent[],
+        deleting_files_path: string[],
+    ) {
+
+        console.log(chalk.bgRed('---------------------------- generated files'));
+        console.log(generated_files.map(file => console.log(file.path)));
+
+        console.log(chalk.bgRed('---------------------------- deleting files'));
+        console.log(deleting_files_path);
+
+        const contract = await objectStore.get_resource_files(contract_id);
+
+        console.log(chalk.bgRed('---------------------------- contract'));
+        console.log(contract.map(file => console.log(file.path)));
+
+        let remaining_files: FileContent[] = contract;
+        // delete the given files from the contract
+        if(deleting_files_path.length > 0) {
+            console.log('removing the deleting files');
+            remaining_files = contract.filter(file => !deleting_files_path.includes(file.path));
+        }
+
+        // const gen_file_map = new Map(generated_files.map(file => [file.path, file.content]));
+        const remaining_files_map = new Map(remaining_files.map(file => [file.path, file]));
+        let new_files: FileContent[] = [];
+
+        // update old
+        generated_files.forEach((file: FileContent) => {
+            const file_exists = remaining_files_map.get(file.path);
+            if(file_exists) {
+                remaining_files_map.set(file.path, file);
+            } else {
+                new_files.push(file);
+            }
+        });
+
+        const updated_remaining_files = Array.from(remaining_files_map.values());
+        const updated_contract = [...remaining_files, ...new_files];
+
+        console.log(chalk.bgRed('---------------------------- updated contract'));
+        console.log(updated_contract.map(file => console.log(file.path)));
+
+        console.log(chalk.yellowBright('updating contract in s3...'));
+        await objectStore.updateContractFiles(contract_id, updated_contract);
+
+    }
+
     protected async update_contract(
         contract_id: string,
         generated_files: FileContent[],
         deleting_files_path: string[],
     ) {
+        // fetch the complete contract from s3
         const contract = await objectStore.get_resource_files(contract_id);
 
         const remainingFiles = contract.filter((file) => !deleting_files_path.includes(file.path));
