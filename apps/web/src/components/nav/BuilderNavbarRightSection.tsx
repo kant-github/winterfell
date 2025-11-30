@@ -52,7 +52,7 @@ export default function BuilderNavbarRightSection() {
             }
 
             await signIn('github', {
-                callbackUrl: `${window.location.pathname}?githubLinked=true`,
+                callbackUrl: `${window.location.pathname}`,
                 redirect: true,
             });
         } catch (error) {

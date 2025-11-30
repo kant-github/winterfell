@@ -206,7 +206,7 @@ export default function GitCloneCard() {
                                         validateRepoName();
                                     }
                                 }}
-                                className="bg-transparent border-none focus-visible:ring-0 h-5 outline-none px-1 pl-0 text-light/90 flex-shrink"
+                                className="bg-transparent border-none rounded-none focus-visible:ring-0 h-5 outline-none px-1 pl-0 text-light/90 flex-shrink"
                             />
                         </div>
                     ) : (
