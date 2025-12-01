@@ -24,6 +24,7 @@ import { TextShimmer } from '../ui/shimmer-text';
 import { formatChatTime } from '@/src/lib/format_chat_time';
 import { toast } from 'sonner';
 import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
+import PlanExecutorPanel from '../code/PlanExecutorPanel';
 
 export default function BuilderChats() {
     const { session } = useUserSessionStore();
@@ -298,7 +299,7 @@ export default function BuilderChats() {
                             <div className="flex justify-start w-full">
                                 <div className="flex items-start gap-x-2 max-w-[70%]">
                                     <AppLogo showLogoText={false} size={22} />
-                                    <div className="px-4 py-2 rounded-[4px] text-sm font-normal bg-dark text-light text-left tracking-wider text-[13px] italic">
+                                    <div className="px-4 py-2 rounded-tr-[8px] rounded-b-[8px] text-sm font-normal bg-[#1b1d20] border border-neutral-800 text-light text-left tracking-wider text-[13px] italic">
                                         {returnParsedData(message.content)}
                                     </div>
                                 </div>
@@ -334,6 +335,7 @@ export default function BuilderChats() {
                         )}
                     </div>
                 ))}
+                <PlanExecutorPanel />
                 <div ref={messageEndRef} />
             </div>
             <div className="flex items-center justify-center w-full py-4 px-6 flex-shrink-0">

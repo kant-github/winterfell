@@ -86,7 +86,7 @@ export default async function generateContractController(req: Request, res: Resp
                 instruction,
                 model || MODEL.GEMINI,
                 existing_contract.id,
-                JSON.parse(existing_contract.summarisedObject || ''),
+                JSON.parse(existing_contract.summary || ''),
             );
         } else {
             // call for new

@@ -7,11 +7,15 @@ import BuilderLoader from './BuilderLoader';
 import { JSX, useEffect } from 'react';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import SidePanel from '../code/SidePanel';
-import EditorSidePanel from '../code/EditorSidePanel';
+import EditorSidePanel, { SidePanelValues } from '../code/EditorSidePanel';
 import Terminal from '../code/Terminal';
 import { useWebSocket } from '@/src/hooks/useWebSocket';
 import { useTerminalLogStore } from '@/src/store/code/useTerminalLogStore';
 import { IncomingPayload, TerminalSocketData, WSServerIncomingPayload } from '@winterfell/types';
+import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
+import FileTree from '../code/Filetree';
+import GithubPanel from '../code/GithubPanel';
+import PlanExecutorPanel from '../code/PlanExecutorPanel';
 
 export default function BuilderDashboard(): JSX.Element {
     const { loading } = useBuilderChatStore();
@@ -60,7 +64,6 @@ export default function BuilderDashboard(): JSX.Element {
                     </motion.div>
                 )}
             </AnimatePresence>
-
             <motion.div
                 layout
                 transition={{
@@ -78,11 +81,34 @@ export default function BuilderDashboard(): JSX.Element {
 }
 
 function Editing() {
+    const { currentState } = useSidePanelStore();
+    function renderSidePanels() {
+        switch (currentState) {
+            case SidePanelValues.FILE:
+                return <FileTree />;
+            case SidePanelValues.GITHUB:
+                return <GithubPanel />;
+            default:
+                return <div></div>;
+        }
+    }
+
+    function renderEditorPanels() {
+        switch (currentState) {
+            case SidePanelValues.FILE:
+                return <CodeEditor />;
+            case SidePanelValues.GITHUB:
+                return <CodeEditor />;
+            case SidePanelValues.PLAN:
+                return <PlanExecutorPanel className='bg-[#16171a] ' />;
+        }
+    }
+
     return (
         <div className="flex h-full">
             <EditorSidePanel />
-            <SidePanel />
-            <CodeEditor />
+            <SidePanel>{renderSidePanels()}</SidePanel>
+            {renderEditorPanels()}
             <Terminal />
         </div>
     );

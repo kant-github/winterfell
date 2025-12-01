@@ -17,8 +17,8 @@ export enum SidePanelValues {
 
 interface EditorSidePanel {
     setSidePanelRenderer:
-        | Dispatch<SetStateAction<SidePanelValues>>
-        | ((value: SidePanelValues | null) => void);
+    | Dispatch<SetStateAction<SidePanelValues>>
+    | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {
@@ -43,10 +43,7 @@ export default function EditorSidePanel() {
         {
             icon: <RiChat4Fill size={19} />,
             value: SidePanelValues.CHAT,
-            onClick: () => {
-                setCollapsechat(!collapseChat);
-                // handleToggleSidebar(SidePanelValues.CHAT);
-            },
+            onClick: () => setCollapsechat(!collapseChat),
             tooltip: 'Agent Sessions',
         },
         {
@@ -60,15 +57,21 @@ export default function EditorSidePanel() {
     ];
 
     function handleToggleSidebar(value: SidePanelValues) {
-        if (collapseFileTree) {
-            if (value === currentState) {
+        setCurrentState(value);
+        switch (value) {
+            case SidePanelValues.PLAN: {
+                console.log("insdie first case")
                 setCollapseFileTree(false);
-            } else {
-                setCurrentState(value);
+                break;
+            };
+            case SidePanelValues.FILE: {
+                console.log("insdie second case")
+                setCollapseFileTree(true);
+                break;
+            };
+            default: {
+                setCollapseFileTree(true);
             }
-        } else {
-            setCollapseFileTree(true);
-            setCurrentState(value);
         }
     }
 

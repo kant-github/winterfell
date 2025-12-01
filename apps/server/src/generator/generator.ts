@@ -224,7 +224,7 @@ export default class Generator extends GeneratorShape {
                 system_message,
             );
         } catch (error) {
-            console.error('Error while new contract generation: ', Error);
+            console.error('Error while new contract generation: ', error);
             parser.reset();
             this.delete_parser(contract_id);
             res.end();
@@ -294,7 +294,7 @@ export default class Generator extends GeneratorShape {
                     id: contract_id,
                 },
                 data: {
-                    summarisedObject: JSON.stringify(finalizer_data.idl),
+                    summary: JSON.stringify(finalizer_data.idl),
                 },
             });
         } catch (error) {
@@ -519,7 +519,7 @@ export default class Generator extends GeneratorShape {
 
         // const gen_file_map = new Map(generated_files.map(file => [file.path, file.content]));
         const remaining_files_map = new Map(remaining_files.map((file) => [file.path, file]));
-        let new_files: FileContent[] = [];
+        const new_files: FileContent[] = [];
 
         // update old
         generated_files.forEach((file: FileContent) => {
@@ -531,7 +531,7 @@ export default class Generator extends GeneratorShape {
             }
         });
 
-        const updated_remaining_files = Array.from(remaining_files_map.values());
+        // const updated_remaining_files = Array.from(remaining_files_map.values());
         const updated_contract = [...remaining_files, ...new_files];
 
         console.log(chalk.bgRed('---------------------------- updated contract'));
@@ -581,23 +581,23 @@ export default class Generator extends GeneratorShape {
                 id: contract_id,
             },
             select: {
-                summarisedObject: true,
+                summary: true,
             },
         });
 
-        if (!contract?.summarisedObject) {
+        if (!contract?.summary) {
             await prisma.contract.update({
                 where: {
                     id: contract_id,
                 },
                 data: {
-                    summarisedObject: JSON.stringify(generated_idl_parts),
+                    summary: JSON.stringify(generated_idl_parts),
                 },
             });
             return;
         }
 
-        const idl = JSON.parse(contract.summarisedObject);
+        const idl = JSON.parse(contract.summary);
 
         const remainingIdl = idl.filter((item: any) => !deleting_files_path.includes(item.path));
 
@@ -621,7 +621,7 @@ export default class Generator extends GeneratorShape {
                 id: contract_id,
             },
             data: {
-                summarisedObject: JSON.stringify(updatedIdl),
+                summary: JSON.stringify(updatedIdl),
             },
         });
     }
