@@ -1,9 +1,12 @@
-import { anchorContractTemplates } from '@/src/templates/contract_templates.const';
+'use client';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import Image from 'next/image';
 import { FaChevronRight, FaHeart } from 'react-icons/fa';
 import { FaUser } from 'react-icons/fa6';
 
 export default function ContractTemplates() {
+    const { templates } = useTemplateStore();
+
     return (
         <div className="w-full h-full flex flex-col px-2 tracking-wider">
             <div className="w-full flex justify-between py-1 text-sm px-1">
@@ -11,14 +14,14 @@ export default function ContractTemplates() {
             </div>
 
             <div className="h-full flex gap-x-5 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-2">
-                {anchorContractTemplates.map((contract) => (
+                {templates.map((template) => (
                     <div
-                        key={contract.id}
+                        key={template.id}
                         className="h-full min-w-[calc(27%-12px)] grid grid-rows-[85%_15%] overflow-hidden group relative"
                     >
                         <div className="bg-[#0A0C0D70] overflow-hidden shadow-sm border border-neutral-800 rounded-[8px] relative">
                             <Image
-                                src={contract.image}
+                                src={template.image || '/templates/contract-1.jpg'}
                                 alt=""
                                 fill
                                 className="object-cover opacity-90"
@@ -26,7 +29,7 @@ export default function ContractTemplates() {
                         </div>
 
                         <div className="text-light/40 h-full w-full flex items-center justify-between px-1">
-                            <div className="text-sm">{contract.title}</div>
+                            <div className="text-sm">{template.title}</div>
 
                             <div className="flex gap-x-2.5 justify-center items-center h-full">
                                 <div className="flex space-x-1">

@@ -6,7 +6,7 @@ import PricingPlanToggleNavbar from '@/src/components/pricing/PricingPlanToggleN
 
 export default function PricingPage() {
     return (
-        <div className="min-h-screen flex flex-col bg-dark-base items-center pb-10 relative">
+        <div className="min-h-screen flex flex-col bg-dark-base/70 items-center pb-10 relative">
             <HomeNavbar />
             <div className="w-full h-full flex flex-col items-center z-20">
                 <PricingHeader />

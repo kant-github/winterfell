@@ -25,5 +25,9 @@ export const DOWNLOAD_ZIP_FILE = API_URL + '/github/get-zip-file';
 export const LINK_ACCOUNT = API_URL + '/link-account';
 export const REVIEW_URL = API_URL + '/review';
 
+// contracts
 export const GET_USER_CONTRACTS = API_URL + '/contracts/get-user-contracts';
 export const GET_ALL_CONTRACTS = API_URL + '/contracts/get-all-contracts';
+
+// templates
+export const GET_ALL_TEMPLATES = API_URL + '/templates/get-templates';

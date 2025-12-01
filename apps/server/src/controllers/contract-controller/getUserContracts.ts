@@ -19,7 +19,6 @@ export default async function getUserContracts(req: Request, res: Response) {
                         id: true,
                         title: true,
                         description: true,
-                        summary: true,
                         contractType: true,
                         clientSdk: true,
                         deployed: true,

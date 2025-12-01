@@ -17,14 +17,14 @@ export default async function syncTemplate(req: Request, res: Response) {
         return;
     }
 
-    if (typeof body.name !== 'string') {
+    if (typeof body.title !== 'string') {
         ResponseWriter.validation_error(res, 'invalid name');
         return;
     }
 
     const data = {
         id: body.id,
-        name: body.name,
+        title: body.title,
         description: body.description || '',
         category: body.category,
         tags: Array.isArray(body.tags) ? body.tags : [],

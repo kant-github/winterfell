@@ -5,6 +5,7 @@ import UserContracts from '@/src/components/home/UserContracts';
 import HomeNavbar from '@/src/components/nav/HomeNavbar';
 import ContractServer from '@/src/lib/server/contract-server';
 import { useAllContractStore } from '@/src/store/user/useAllContractStore';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useContractStore } from '@/src/store/user/useUserContractStore';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useEffect } from 'react';
@@ -13,6 +14,7 @@ export default function Home() {
     const { session } = useUserSessionStore();
     const { setUserContracts } = useContractStore();
     const { setAllContracts } = useAllContractStore();
+    const { setTemplates } = useTemplateStore();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -22,6 +24,9 @@ export default function Home() {
 
             const all_contracts = await ContractServer.getAllContracts(session.user.token);
             setAllContracts(all_contracts);
+
+            const all_templates = await ContractServer.getTemplates(session.user.token);
+            setTemplates(all_templates);
         };
 
         fetchData();

@@ -196,8 +196,7 @@ export default function SubscriptionPlans() {
             </div>
 
             <div className="flex gap-1 mb-4 z-20 border border-neutral-800 p-1 rounded-lg">
-                <Button
-                    variant={'ghost'}
+                <button
                     onClick={() => setBilling('MONTHLY')}
                     className={`px-6 py-2 rounded-[5px] font-medium transition-all duration-250 cursor-pointer ${
                         billing === 'MONTHLY'
@@ -206,7 +205,7 @@ export default function SubscriptionPlans() {
                     }`}
                 >
                     Monthly
-                </Button>
+                </button>
                 <button
                     onClick={() => setBilling('YEARLY')}
                     className={`px-6 py-2 rounded-[5px] font-medium transition-all cursor-pointer duration-250 ${

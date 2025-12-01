@@ -63,17 +63,17 @@ model Contract {
 }
 
 model Template {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  category    String
-  tags        String[]
-  s3_prefix   String
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  category      String
+  tags          String[]
+  s3_prefix     String
   solanaVersion String
   anchorVersion String
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model BuildJob {
