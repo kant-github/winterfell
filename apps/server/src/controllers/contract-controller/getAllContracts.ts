@@ -16,7 +16,7 @@ export default async function getAllContracts(req: Request, res: Response) {
                 id: true,
                 title: true,
                 description: true,
-                summary: true,
+                summarisedObject: true,
                 contractType: true,
                 clientSdk: true,
                 deployed: true,
