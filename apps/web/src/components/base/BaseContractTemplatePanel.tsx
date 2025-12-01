@@ -1,29 +1,37 @@
-import { anchorContractTemplates } from '@/src/templates/contract_templates.const';
 import Image from 'next/image';
 import { HiPlus } from 'react-icons/hi';
-import { useContractTemplateStore } from '@/src/store/user/useContractTemplateStore';
 import { cn } from '@/src/lib/utils';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 
-export default function BaseContractTemplatesPanel() {
-    const { setTemplate } = useContractTemplateStore();
+interface BaseContractTemplatePanelProps {
+    closePanel: () => void;
+}
+
+export default function BaseContractTemplatesPanel({ closePanel }: BaseContractTemplatePanelProps) {
+    const { setActiveTemplate } = useActiveTemplateStore();
+    const { templates } = useTemplateStore();
 
     return (
         <div
             data-lenis-prevent
             className={cn(
                 'w-full max-w-md max-h-54 flex flex-col',
-                'absolute left-23 z-50 -top-12',
+                'absolute left-23 z-50 bottom-12',
                 'bg-dark-base border border-neutral-800 shadow-md',
                 'rounded-[4px] rounded-bl-none overflow-visible overflow-y-auto',
             )}
         >
-            {anchorContractTemplates.map((contract) => (
+            {templates.map((template) => (
                 <TemplateListItem
-                    key={contract.id}
-                    title={contract.title}
-                    description={contract.description}
-                    image={contract.image}
-                    onClick={() => setTemplate(contract)}
+                    key={template.id}
+                    title={template.title}
+                    description={template.description}
+                    image={template.image || '/templates/contract-2.jpg'}
+                    onClick={() => {
+                        setActiveTemplate(template);
+                        closePanel();
+                    }}
                 />
             ))}
         </div>
@@ -77,7 +85,7 @@ function TemplateListItem({ title, description, image, onClick }: TemplateListIt
                     'text-neutral-500 group-hover/item:text-primary',
                     'border border-neutral-700 rounded-[4px]',
                     'min-h-6 min-w-6 flex justify-center items-center bg-dark',
-                    'mx-3',
+                    'mx-3 pr-px',
                 )}
             >
                 <HiPlus size={14} />

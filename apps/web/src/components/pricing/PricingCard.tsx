@@ -21,7 +21,7 @@ export default function PricingCard({
     features,
 }: PricingCardProps) {
     return (
-        <div className="w-114 h-full min-h-140 rounded-lg select-none border tracking-wide shadow-sm hover:shadow-md hover:border-primary/40 transition-colors duration-200 border-neutral-800 bg-linear-to-br from-dark via-dark-base to-dark p-8 flex flex-col gap-y-7">
+        <div className="w-110 h-full min-h-140 rounded-lg select-none border tracking-wide shadow-sm hover:shadow-md hover:border-primary/40 transition-colors duration-200 border-neutral-800 bg-linear-to-br from-dark via-dark-base to-dark p-8 flex flex-col gap-y-7">
             <div className="flex justify-between items-center text-light/80">
                 <div className="flex gap-x-2 items-center">
                     {icon}

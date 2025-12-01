@@ -19,6 +19,7 @@ import githubMiddleware from '../middlewares/middleware.github';
 import githubProjectZipController from '../controllers/github-deploy-controller/githubProjectZipController';
 import getUserContracts from '../controllers/contract-controller/getUserContracts';
 import getAllContracts from '../controllers/contract-controller/getAllContracts';
+import getAllTemplates from '../controllers/template-controller/getAllTemplates';
 
 const router: Router = Router();
 
@@ -63,7 +64,8 @@ router.post(
 router.post('/review', authMiddleware, createContractReview);
 
 // templates
-router.post('/sync-templates', syncTemplate);
+router.post('/templates/sync-templates', syncTemplate);
+router.get('/templates/get-templates', authMiddleware, getAllTemplates);
 
 // contracts
 router.get('/contracts/get-user-contracts', authMiddleware, getUserContracts);
