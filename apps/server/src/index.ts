@@ -9,6 +9,7 @@ import init_services from './services/init';
 import { loggingMiddleware } from './middlewares/middleware.logger';
 import { logger } from './utils/logger';
 import cookieParser from 'cookie-parser';
+import { seedTemplates } from './services/seed_templates';
 
 const app = express();
 const server = http.createServer(app);
