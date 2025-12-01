@@ -1,6 +1,6 @@
 import ObjectStore from '../class/object_store';
 import ContentGenerator from '../controllers/gen/content_generator';
-import Generator from '../generator/temp/generator';
+import Generator from '../generator/generator';
 import RazorpayGateway from '../payments/razorpay';
 import { GithubWorkerQueue } from '../queue/github_worker_queue';
 import ServerToOrchestratorQueue from '../queue/queue.redis';

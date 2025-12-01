@@ -1,27 +1,27 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
-import { new_planner_output_schema, old_planner_output_schema } from './schema';
-import Tool from '../tools/tool';
-import StreamParser from '../../services/stream_parser';
+import { new_planner_output_schema, old_planner_output_schema } from './schema/output_schema';
+import Tool from './tools/tool';
+import StreamParser from '../services/stream_parser';
 import { ChatRole, Message, prisma } from '@winterfell/database';
-import GeneratorShape from '../../metadata/generator';
+import GeneratorShape from '../metadata/generator';
 import { Response } from 'express';
 import {
     FILE_STRUCTURE_TYPES,
     PHASE_TYPES,
     StreamEvent,
     StreamEventData,
-} from '../../types/stream_event_types';
-import { STAGE } from '../../types/content_types';
-import { objectStore } from '../../services/init';
+} from '../types/stream_event_types';
+import { STAGE } from '../types/content_types';
+import { objectStore } from '../services/init';
 import { FileContent, MODEL } from '@winterfell/types';
-import { mergeWithLLMFiles, prepareBaseTemplate } from '../../class/test';
+import { mergeWithLLMFiles, prepareBaseTemplate } from '../class/test';
 import chalk from 'chalk';
-import { finalizer_output_schema } from '../schema/finalizer_output_schema';
-import { new_chat_coder_prompt, new_chat_planner_prompt } from '../prompts/new_chat_prompts';
-import { finalizer_prompt } from '../prompts/finalizer_prompt';
-import { old_chat_coder_prompt, old_chat_planner_prompt } from '../prompts/old_chat_prompts';
+import { finalizer_output_schema } from './schema/finalizer_output_schema';
+import { new_chat_coder_prompt, new_chat_planner_prompt } from './prompts/new_chat_prompts';
+import { finalizer_prompt } from './prompts/finalizer_prompt';
+import { old_chat_coder_prompt, old_chat_planner_prompt } from './prompts/old_chat_prompts';
 import {
     new_coder,
     new_finalizer,
@@ -29,7 +29,7 @@ import {
     old_coder,
     old_finalizer,
     old_planner,
-} from './generator_types';
+} from './types/generator_types';
 
 export default class Generator extends GeneratorShape {
     protected gemini_planner: ChatGoogleGenerativeAI;
