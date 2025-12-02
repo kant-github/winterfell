@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { GENERATE_CONTRACT } from '@/routes/api_routes';
+import { GENERATE_CONTRACT, GENERATE_TEMPLATE } from '@/routes/api_routes';
 import {
     FILE_STRUCTURE_TYPES,
     FileContent,
@@ -18,11 +18,12 @@ import SystemMessage from './SystemMessage';
 import AppLogo from '../tickers/AppLogo';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useChatStore } from '@/src/store/user/useChatStore';
-import { Message } from '@/src/types/prisma-types';
+import { ChatRole, Message } from '@/src/types/prisma-types';
 import { LayoutGrid } from '../ui/animated/layout-grid-icon';
 import { TextShimmer } from '../ui/shimmer-text';
 import { formatChatTime } from '@/src/lib/format_chat_time';
 import { toast } from 'sonner';
+import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 
 export default function BuilderChats() {
     const { session } = useUserSessionStore();
@@ -37,6 +38,7 @@ export default function BuilderChats() {
         useBuilderChatStore();
     const router = useRouter();
     const [hasContext, setHasContext] = useState<boolean>(false);
+    const { activeTemplate, resetTemplate } = useActiveTemplateStore();
 
     useEffect(() => {
         if (messageEndRef.current) {
@@ -47,6 +49,14 @@ export default function BuilderChats() {
     useEffect(() => {
         if (hasInitialized.current) return;
         if (
+            activeTemplate &&
+            activeTemplate.id &&
+            messages.length === 1 &&
+            messages[0].role === ChatRole.USER &&
+            messages[0].contractId === contractId
+        ) {
+            getTemplates(messages[0].content);
+        } else if (
             messages.length === 1 &&
             messages[0].role === 'USER' &&
             messages[0].contractId === contractId
@@ -57,6 +67,43 @@ export default function BuilderChats() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, messages.length]);
+
+    async function getTemplates(message: string) {
+        try {
+            setLoading(true);
+            const response = await fetch(GENERATE_TEMPLATE, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session?.user.token}`,
+                },
+                body: JSON.stringify({
+                    contract_id: contractId,
+                    template_id: activeTemplate?.id,
+                    template_title: activeTemplate?.title,
+                    instruction: message,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate template');
+            }
+            const json = await response.json();
+
+            const files = json.data;
+            if (!Array.isArray(files)) {
+                throw new Error('Invalid template data');
+            }
+
+            parseFileStructure(files);
+            setCollapseFileTree(true);
+            resetTemplate();
+        } catch (error) {
+            console.error('Chat stream error:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     async function startChat(message: string) {
         try {

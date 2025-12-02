@@ -1,11 +1,41 @@
 'use client';
+import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
+import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import { ChatRole } from '@/src/types/prisma-types';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { FaChevronRight, FaHeart } from 'react-icons/fa';
 import { FaUser } from 'react-icons/fa6';
+import { v4 as uuid } from 'uuid';
 
 export default function ContractTemplates() {
     const { templates } = useTemplateStore();
+    const { setMessage } = useBuilderChatStore();
+    const { activeTemplate, setActiveTemplate } = useActiveTemplateStore();
+    const router = useRouter();
+
+    function handleStartBuilding() {
+        if (!activeTemplate || !activeTemplate.id) {
+            throw new Error('invalid request');
+        }
+        const contractId = uuid();
+
+        setMessage({
+            id: uuid(),
+            contractId: contractId,
+            role: ChatRole.USER,
+            content: `Generate ${activeTemplate?.id} template for me`,
+            planning: false,
+            generatingCode: false,
+            building: false,
+            creatingFiles: false,
+            finalzing: false,
+            error: false,
+            createdAt: new Date(),
+        });
+        router.push(`/playground/${contractId}`);
+    }
 
     return (
         <div className="w-full h-full flex flex-col px-2 tracking-wider">
@@ -43,7 +73,13 @@ export default function ContractTemplates() {
                                 </div>
                             </div>
                         </div>
-                        <div className="absolute flex items-center justify-center gap-x-1 px-5 py-1 bg-primary text-light font-bold opacity-0 group-hover:opacity-100 rounded-[2px] bottom-12 right-3 translate-x-2 group-hover:translate-x-0">
+                        <div
+                            onClick={() => {
+                                setActiveTemplate(template);
+                                handleStartBuilding();
+                            }}
+                            className="absolute flex items-center justify-center gap-x-1 px-5 py-1 bg-primary text-light font-bold opacity-0 group-hover:opacity-100 transition-all ease-in-out rounded-[2px] bottom-12 right-3 translate-x-2 group-hover:translate-x-0 cursor-pointer"
+                        >
                             <span className="text-sm">start building </span>
                             <FaChevronRight size={12} strokeWidth={0.2} />
                         </div>

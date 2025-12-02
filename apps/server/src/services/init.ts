@@ -29,5 +29,4 @@ export default async function init_services() {
     } catch (error) {
         console.error('templates');
     }
-    
 }

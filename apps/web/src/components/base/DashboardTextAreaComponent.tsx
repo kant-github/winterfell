@@ -12,12 +12,10 @@ import ModelSelect from './ExecutorSelect';
 import { ChatRole } from '@/src/types/prisma-types';
 import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
 import { useModelStore } from '@/src/store/model/useExecutorStore';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import ContractServer from '@/src/lib/server/contract-server';
 import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import Image from 'next/image';
-import { SlPencil } from 'react-icons/sl';
+import { RxCross2 } from 'react-icons/rx';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -28,16 +26,13 @@ export default function DashboardTextAreaComponent() {
     const { setMessage } = useBuilderChatStore();
     const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
     const router = useRouter();
-    const { setTemplates } = useTemplateStore();
     const { activeTemplate, resetTemplate } = useActiveTemplateStore();
-
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
     const templatePanelRef = useRef<HTMLDivElement | null>(null);
-
     useHandleClickOutside([templateButtonRef, templatePanelRef], setShowTemplatePanel);
 
     function handleSubmit() {
-        if (inputValue.trim() === '') return;
+        if (!activeTemplate && inputValue.trim() === '') return;
 
         if (!session?.user.id) {
             setOpenLoginModal(true);
@@ -45,31 +40,38 @@ export default function DashboardTextAreaComponent() {
         }
 
         const contractId = uuid();
-        setMessage({
-            id: uuid(),
-            contractId: contractId,
-            role: ChatRole.USER,
-            content: inputValue,
-            planning: false,
-            generatingCode: false,
-            building: false,
-            creatingFiles: false,
-            finalzing: false,
-            error: false,
-            createdAt: new Date(),
-        });
+
+        if (activeTemplate && activeTemplate.id) {
+            setMessage({
+                id: uuid(),
+                contractId: contractId,
+                role: ChatRole.USER,
+                content: `Generate ${activeTemplate.id} template for me`,
+                planning: false,
+                generatingCode: false,
+                building: false,
+                creatingFiles: false,
+                finalzing: false,
+                error: false,
+                createdAt: new Date(),
+            });
+        } else {
+            setMessage({
+                id: uuid(),
+                contractId: contractId,
+                role: ChatRole.USER,
+                content: inputValue,
+                planning: false,
+                generatingCode: false,
+                building: false,
+                creatingFiles: false,
+                finalzing: false,
+                error: false,
+                createdAt: new Date(),
+            });
+        }
 
         router.push(`/playground/${contractId}`);
-    }
-
-    async function handleTemplatesOnClick() {
-        if (!session || !session.user.token) {
-            setOpenLoginModal(true);
-            return;
-        }
-        const fetched_templates = await ContractServer.getTemplates(session?.user.token);
-        setTemplates(fetched_templates);
-        setShowTemplatePanel((prev) => !prev);
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -125,7 +127,7 @@ export default function DashboardTextAreaComponent() {
                                 setIsTyping(e.target.value.length > 0);
                             }}
                             onKeyDown={handleKeyDown}
-                            placeholder="create a counter program..."
+                            placeholder="create a counter contract..."
                             className={cn(
                                 'w-full h-20 md:h-28 bg-transparent pl-10 pr-4 py-5 text-neutral-200 border-0',
                                 'placeholder:text-neutral-800 placeholder:font-mono placeholder:text-xs md:placeholder:text-sm resize-none',
@@ -151,7 +153,7 @@ export default function DashboardTextAreaComponent() {
                                         onClick={() => resetTemplate()}
                                         className="absolute rounded-full h-4.5 w-4.5 flex justify-center items-center right-1 top-1 text-[13px] z-10 bg-light text-dark-base transition-colors transform duration-100 cursor-pointer shadow-sm"
                                     >
-                                        x
+                                        <RxCross2 />
                                     </div>
 
                                     <Image
@@ -173,7 +175,7 @@ export default function DashboardTextAreaComponent() {
                         <div className="flex items-center gap-1.5 md:gap-3">
                             <ModelSelect value={selectedModel} onChange={setSelectedModel} />
                             <Button
-                                onClick={handleTemplatesOnClick}
+                                onClick={() => setShowTemplatePanel((prev) => !prev)}
                                 ref={templateButtonRef}
                                 type="button"
                                 className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
