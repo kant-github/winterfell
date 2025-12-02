@@ -30,4 +30,5 @@ export const GET_USER_CONTRACTS = API_URL + '/contracts/get-user-contracts';
 export const GET_ALL_CONTRACTS = API_URL + '/contracts/get-all-contracts';
 
 // templates
-export const GET_ALL_TEMPLATES = API_URL + '/templates/get-templates';
+export const GET_ALL_TEMPLATES = API_URL + '/template/get-templates';
+export const GENERATE_TEMPLATE = API_URL + '/template/generate-template';

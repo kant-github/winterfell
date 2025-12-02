@@ -3,9 +3,6 @@ import ResponseWriter from '../../class/response_writer';
 import { prisma } from '@winterfell/database';
 
 export default async function getAllTemplates(req: Request, res: Response) {
-    const user = req.user;
-    if (!user) return ResponseWriter.unauthorized(res, 'Unauthorized');
-
     try {
         const templates = await prisma.template.findMany({
             select: {
@@ -22,10 +19,7 @@ export default async function getAllTemplates(req: Request, res: Response) {
         });
 
         if (!templates || templates.length === 0) {
-            ResponseWriter.custom(res, 200, {
-                message: 'No templates found',
-                meta: { timestamp: Date.now().toString() },
-            });
+            ResponseWriter.server_error(res, 'Failed to fetch templates');
             return;
         }
 

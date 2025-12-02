@@ -33,13 +33,9 @@ export default class ContractServer {
         }
     }
 
-    public static async getTemplates(token: string): Promise<ContractTemplateData[]> {
+    public static async getTemplates(): Promise<ContractTemplateData[]> {
         try {
-            const response = await axios.get(GET_ALL_TEMPLATES, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axios.get(GET_ALL_TEMPLATES);
 
             return response.data.data;
         } catch (error) {

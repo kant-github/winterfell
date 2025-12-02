@@ -8,13 +8,23 @@ import ActionTickers from '../tickers/ActionTickers';
 import DashboardTextAreaComponent from './DashboardTextAreaComponent';
 import HighlighterTicker from '../tickers/HighlighterTicker';
 import { useRouter } from 'next/navigation';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import ContractServer from '@/src/lib/server/contract-server';
 
 export default function Hero() {
     const heroRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(heroRef, { once: true });
     const controls = useAnimation();
     const router = useRouter();
+    const { setTemplates, templates } = useTemplateStore();
 
+    useEffect(() => {
+        const get_templates = async () => {
+            const response = await ContractServer.getTemplates();
+            setTemplates(response);
+        };
+        get_templates();
+    }, []);
     useEffect(() => {
         if (isInView) {
             controls.start('visible');
