@@ -30,6 +30,7 @@ import {
     old_finalizer,
     old_planner,
 } from './types/generator_types';
+import { planning_context_prompt } from './prompts/planning_context_prompt';
 
 export default class Generator extends GeneratorShape {
     protected gemini_planner: ChatGoogleGenerativeAI;
@@ -132,7 +133,7 @@ export default class Generator extends GeneratorShape {
             });
             let full_response: string = '';
 
-            // console.log(planner_data);
+            console.log(planner_data);
 
             const llm_message = await prisma.message.create({
                 data: {
@@ -294,7 +295,7 @@ export default class Generator extends GeneratorShape {
                     id: contract_id,
                 },
                 data: {
-                    summary: JSON.stringify(finalizer_data.idl),
+                    summarisedObject: JSON.stringify(finalizer_data.idl),
                 },
             });
         } catch (error) {
@@ -581,23 +582,23 @@ export default class Generator extends GeneratorShape {
                 id: contract_id,
             },
             select: {
-                summary: true,
+                summarisedObject: true,
             },
         });
 
-        if (!contract?.summary) {
+        if (!contract?.summarisedObject) {
             await prisma.contract.update({
                 where: {
                     id: contract_id,
                 },
                 data: {
-                    summary: JSON.stringify(generated_idl_parts),
+                    summarisedObject: JSON.stringify(generated_idl_parts),
                 },
             });
             return;
         }
 
-        const idl = JSON.parse(contract.summary);
+        const idl = JSON.parse(contract.summarisedObject);
 
         const remainingIdl = idl.filter((item: any) => !deleting_files_path.includes(item.path));
 
@@ -621,7 +622,7 @@ export default class Generator extends GeneratorShape {
                 id: contract_id,
             },
             data: {
-                summary: JSON.stringify(updatedIdl),
+                summarisedObject: JSON.stringify(updatedIdl),
             },
         });
     }
@@ -692,6 +693,26 @@ export default class Generator extends GeneratorShape {
                     finalizer_chain,
                 };
             }
+        }
+    }
+
+    public async plan_context(
+        res: Response,
+        chat: 'new' | 'old',
+        user_instruction: string,
+        model: MODEL,
+        contract_id: string,
+        idl?: Object[],
+    ) {
+        try {
+            const planner_chain = RunnableSequence.from([
+                planning_context_prompt,
+                this.gemini_planner,
+            ]);
+            const planner_data = planner_chain.invoke({});
+            console.log('planner data is : ', planner_data);
+        } catch (err) {
+            console.error('Error while planning context ', err);
         }
     }
 

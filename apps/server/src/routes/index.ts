@@ -1,6 +1,5 @@
 import { Request, Response, Router } from 'express';
 import signInController from '../controllers/user-controller/signInController';
-import startChatController from '../controllers/chat-controller/startChatController';
 import getFilesController from '../controllers/chat-controller/getFilesController';
 import authMiddleware from '../middlewares/middleware.auth';
 import createOrderController from '../controllers/payment-controller/createOrderController';
@@ -9,7 +8,6 @@ import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import getUserPlanController from '../controllers/payment-controller/getUserPlanController';
 import syncFilesController from '../controllers/files/syncFilesController';
 import githubCodePushController from '../controllers/github-deploy-controller/githubCodePushController';
-import continueChatController from '../controllers/chat-controller/continueChatController';
 import getChatController from '../controllers/chat-controller/getChatController';
 import { createContractReview } from '../controllers/review/create_contract_review';
 import generateContractController from '../controllers/gen/generateContractController';
@@ -21,6 +19,7 @@ import getUserContracts from '../controllers/contract-controller/getUserContract
 import getAllContracts from '../controllers/contract-controller/getAllContracts';
 import getAllTemplates from '../controllers/template-controller/getAllTemplates';
 import generate_template_controller from '../controllers/template-controller/generate_template_controller';
+import plan_executor_controller from '../controllers/chat-controller/plan_executor_controller';
 
 const router: Router = Router();
 
@@ -33,9 +32,8 @@ router.get('/health', async (_req: Request, res: Response) => {
 
 // code-routes
 router.post('/generate', authMiddleware, generateContractController);
-router.post('/new', authMiddleware, startChatController);
-router.post('/continue', authMiddleware, continueChatController);
 router.post('/contract/get-chat', authMiddleware, getChatController);
+router.post('/plan', authMiddleware, plan_executor_controller);
 
 // github-routes
 router.post('/github/export-code', authMiddleware, githubMiddleware, githubCodePushController);

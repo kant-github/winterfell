@@ -2,30 +2,33 @@ import { cn } from '@/src/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { Terminal, ArrowRight, FileCode } from 'lucide-react';
-import { useState, KeyboardEvent, useEffect, useRef } from 'react';
+import { useState, KeyboardEvent, useRef } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
-import ModelSelect from './ExecutorSelect';
 import { ChatRole } from '@/src/types/prisma-types';
 import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
-import { useModelStore } from '@/src/store/model/useExecutorStore';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import ContractServer from '@/src/lib/server/contract-server';
 import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import Image from 'next/image';
+import ExecutorSelect from './ExecutorSelect';
+import { useModelStore } from '@/src/store/model/useExecutorStore';
 import { RxCross2 } from 'react-icons/rx';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
     const [isTyping, setIsTyping] = useState<boolean>(false);
-    const { selectedModel, setSelectedModel } = useModelStore();
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
-    const { session } = useUserSessionStore();
-    const { setMessage } = useBuilderChatStore();
     const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
     const router = useRouter();
+    const { session } = useUserSessionStore();
+    const { setMessage } = useBuilderChatStore();
+    const { setTemplates } = useTemplateStore();
+    const { executor, setExecutor } = useModelStore();
     const { activeTemplate, resetTemplate } = useActiveTemplateStore();
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
     const templatePanelRef = useRef<HTMLDivElement | null>(null);
@@ -173,7 +176,7 @@ export default function DashboardTextAreaComponent() {
 
                     <div className="flex items-center justify-between px-3 py-1.5 md:px-4 md:py-2.5 border-t border-neutral-800/50 bg-neutral-900/30">
                         <div className="flex items-center gap-1.5 md:gap-3">
-                            <ModelSelect value={selectedModel} onChange={setSelectedModel} />
+                            <ExecutorSelect value={executor} onChange={setExecutor} />
                             <Button
                                 onClick={() => setShowTemplatePanel((prev) => !prev)}
                                 ref={templateButtonRef}

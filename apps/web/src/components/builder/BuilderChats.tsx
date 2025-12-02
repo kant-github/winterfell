@@ -14,9 +14,9 @@ import {
     STAGE,
     StreamEvent,
 } from '@/src/types/stream_event_types';
+
 import SystemMessage from './SystemMessage';
 import AppLogo from '../tickers/AppLogo';
-import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useChatStore } from '@/src/store/user/useChatStore';
 import { ChatRole, Message } from '@/src/types/prisma-types';
 import { LayoutGrid } from '../ui/animated/layout-grid-icon';
@@ -25,6 +25,7 @@ import { formatChatTime } from '@/src/lib/format_chat_time';
 import { toast } from 'sonner';
 import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 import PlanExecutorPanel from '../code/PlanExecutorPanel';
+import GenerateContract from '@/src/lib/server/generate_contract';
 
 export default function BuilderChats() {
     const { session } = useUserSessionStore();
@@ -32,10 +33,8 @@ export default function BuilderChats() {
     const contractId = params.contractId as string;
     const hasInitialized = useRef<boolean>(false);
     const messageEndRef = useRef<HTMLDivElement>(null);
-    const { setCollapseFileTree } = useCodeEditor();
     const { setContractId } = useChatStore();
-    const { parseFileStructure, deleteFile } = useCodeEditor();
-    const { messages, loading, setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
+    const { messages, loading } =
         useBuilderChatStore();
     const router = useRouter();
     const [hasContext, setHasContext] = useState<boolean>(false);
@@ -107,134 +106,16 @@ export default function BuilderChats() {
     }
 
     async function startChat(message: string) {
-        try {
-            setLoading(true);
-            const response = await fetch(GENERATE_CONTRACT, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session?.user.token}`,
-                },
-                body: JSON.stringify({
-                    contract_id: contractId,
-                    instruction: message,
-                    model: MODEL.GEMINI,
-                }),
-            });
-
-            if (response.status === 423) {
-                const data = await response.json();
-                if (data.goBack) {
-                    toast.error(data.message);
-                    router.push('/');
-                }
+        await GenerateContract.start_new_chat(
+            session?.user.token || '',
+            contractId,
+            message,
+            setHasContext,
+            (error) => {
+                toast.error(error.message);
+                router.push('/');
             }
-
-            if (!response.ok) {
-                throw new Error('Failed to start chat');
-            }
-
-            const reader = response.body?.getReader();
-            const decoder = new TextDecoder();
-
-            if (!reader) {
-                throw new Error('No response body');
-            }
-
-            let buffer = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop() ?? '';
-
-                for (const line of lines) {
-                    const trimmed = line.trim();
-                    if (!trimmed) continue;
-
-                    try {
-                        const jsonString = trimmed.startsWith('data: ')
-                            ? trimmed.slice(6)
-                            : trimmed;
-                        const event: StreamEvent = JSON.parse(jsonString);
-
-                        switch (event.type) {
-                            case PHASE_TYPES.STARTING:
-                                if (event.systemMessage) {
-                                    upsertMessage(event.systemMessage);
-                                }
-                                break;
-
-                            case STAGE.CONTEXT:
-                                if ('llmMessage' in event.data) {
-                                    setHasContext(true);
-                                    upsertMessage(event.data.llmMessage as Message);
-                                }
-                                break;
-
-                            case STAGE.PLANNING:
-                            case STAGE.GENERATING_CODE:
-                            case STAGE.BUILDING:
-                            case STAGE.CREATING_FILES:
-                            case STAGE.FINALIZING:
-                                if (event.systemMessage) {
-                                    upsertMessage(event.systemMessage);
-                                }
-                                break;
-
-                            case PHASE_TYPES.THINKING:
-                            case PHASE_TYPES.GENERATING:
-                            case PHASE_TYPES.BUILDING:
-                            case PHASE_TYPES.CREATING_FILES:
-                            case PHASE_TYPES.COMPLETE:
-                            case PHASE_TYPES.DELETING:
-                                setPhase(event.type);
-                                break;
-
-                            case FILE_STRUCTURE_TYPES.EDITING_FILE:
-                                setPhase(event.type);
-                                if ('file' in event.data) {
-                                    if ('phase' in event.data && event.data.phase === 'deleting') {
-                                        deleteFile(event.data.file as string);
-                                    } else {
-                                        setCurrentFileEditing(event.data.file as string);
-                                    }
-                                }
-                                break;
-
-                            case PHASE_TYPES.ERROR:
-                                console.error('LLM Error:', event.data);
-                                break;
-
-                            case STAGE.END:
-                                if ('data' in event.data && event.data.data) {
-                                    if (event.systemMessage) {
-                                        upsertMessage(event.systemMessage);
-                                    }
-                                    parseFileStructure(event.data.data as FileContent[]);
-                                    setLoading(false);
-                                    setCollapseFileTree(true);
-                                }
-                                break;
-
-                            default:
-                                break;
-                        }
-                    } catch {
-                        console.warn('Skipping incomplete stream event chunk');
-                    }
-                }
-            }
-
-            setCollapseFileTree(true);
-        } catch (error) {
-            console.error('Chat stream error:', error);
-        } finally {
-            setLoading(false);
-        }
+        );
     }
 
     function returnParsedData(message: string) {
@@ -335,7 +216,7 @@ export default function BuilderChats() {
                         )}
                     </div>
                 ))}
-                <PlanExecutorPanel />
+                <PlanExecutorPanel expanded={false} hidePlanSvg={true} className="border border-neutral-800 rounded-[8px] bg-[#1b1d20]" />
                 <div ref={messageEndRef} />
             </div>
             <div className="flex items-center justify-center w-full py-4 px-6 flex-shrink-0">

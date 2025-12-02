@@ -100,7 +100,7 @@ function Editing() {
             case SidePanelValues.GITHUB:
                 return <CodeEditor />;
             case SidePanelValues.PLAN:
-                return <PlanExecutorPanel className='bg-[#16171a] ' />;
+                return <PlanExecutorPanel expanded className="bg-[#16171a] w-full px-2 py-2" />;
         }
     }
 

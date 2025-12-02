@@ -36,7 +36,7 @@ export default async function (req: Request, res: Response) {
                 title: true,
                 description: true,
                 code: true,
-                summary: true,
+                summarisedObject: true,
                 deployed: true,
                 programId: true,
                 version: true,
@@ -70,7 +70,7 @@ export default async function (req: Request, res: Response) {
         }
 
         console.log(chalk.bgRed('--------------------------------- idl'));
-        console.log(JSON.parse(contract.summary!).map((f: any) => console.log(f.path)));
+        console.log(JSON.parse(contract.summarisedObject!).map((f: any) => console.log(f.path)));
 
         const sortedMessages = [...contract.messages].sort(
             (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),

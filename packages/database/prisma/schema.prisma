@@ -148,6 +148,7 @@ model Message {
   finalzing      Boolean @default(false)
   End            Boolean @default(false)
   error          Boolean @default(false)
+  plannerContext String?
 
   // isCodeBuilt Boolean? @default(false)
   // buildStatus

@@ -22,10 +22,9 @@ interface EditorSidePanel {
 }
 
 export default function EditorSidePanel() {
-    const { collapseFileTree, setCollapseFileTree, setCollapsechat, collapseChat } =
+    const { setCollapseFileTree, setCollapsechat, collapseChat } =
         useCodeEditor();
-    const { setCurrentState } = useSidePanelStore();
-    const { currentState } = useSidePanelStore();
+    const { currentState, setCurrentState } = useSidePanelStore();
 
     const sidePanelData = [
         {
@@ -60,15 +59,13 @@ export default function EditorSidePanel() {
         setCurrentState(value);
         switch (value) {
             case SidePanelValues.PLAN: {
-                console.log("insdie first case")
                 setCollapseFileTree(false);
                 break;
-            };
+            }
             case SidePanelValues.FILE: {
-                console.log("insdie second case")
                 setCollapseFileTree(true);
                 break;
-            };
+            }
             default: {
                 setCollapseFileTree(true);
             }

@@ -5,7 +5,7 @@ import useResize from '@/src/hooks/useResize';
 import { ReactNode } from 'react';
 
 interface SidePanelProps {
-    children: ReactNode
+    children: ReactNode;
 }
 
 export default function SidePanel({ children }: SidePanelProps) {

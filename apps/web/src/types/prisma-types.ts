@@ -49,7 +49,7 @@ export interface Contract {
     code: string;
     idl?: JSON;
     clientSdk?: JSON;
-    summary?: string | null;
+    summarisedObject?: string | null;
     deployed: boolean;
     programId?: string | null;
     version: number;
