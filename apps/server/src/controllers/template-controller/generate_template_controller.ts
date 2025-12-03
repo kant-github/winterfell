@@ -28,7 +28,7 @@ export default async function generate_template_controller(req: Request, res: Re
             return;
         }
 
-        const { contract_id, instruction, template_id, template_title } = parsed.data;
+        const { contract_id, instruction, template_id } = parsed.data;
 
         const valid_template = await prisma.template.findUnique({
             where: { id: template_id },
@@ -53,9 +53,10 @@ export default async function generate_template_controller(req: Request, res: Re
         await prisma.contract.create({
             data: {
                 id: contract_id,
-                title: template_title,
+                title: template_id,
                 contractType: 'CUSTOM', // take this from template
                 userId: user.id,
+                isTemplate: true,
             },
         });
 

@@ -87,7 +87,6 @@ export default function BuilderChats() {
                 body: JSON.stringify({
                     contract_id: contractId,
                     template_id: activeTemplate?.id,
-                    template_title: activeTemplate?.title,
                     instruction: message,
                 }),
             });

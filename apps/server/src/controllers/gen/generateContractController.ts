@@ -93,6 +93,7 @@ export default async function generateContractController(req: Request, res: Resp
                     title: 'contractor',
                     contractType: 'CUSTOM',
                     userId: user.id,
+                    isTemplate: false,
                 },
             });
 

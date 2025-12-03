@@ -38,6 +38,8 @@ model Contract {
   codeHash     String?
   s3_url       String?
 
+  isTemplate  Boolean
+
   githubRepoName String?
 
   lastBuildStatus BuildStatus @default(NEVER_BUILT)

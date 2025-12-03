@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import env from '../../configs/config.env';
 import ResponseWriter from '../../class/response_writer';
 import chalk from 'chalk';
+import axios from 'axios';
+import { title } from 'process';
 
 export default async function (req: Request, res: Response) {
     try {
@@ -35,6 +37,7 @@ export default async function (req: Request, res: Response) {
                 id: true,
                 title: true,
                 description: true,
+                isTemplate: true,
                 code: true,
                 summarisedObject: true,
                 deployed: true,
@@ -65,6 +68,30 @@ export default async function (req: Request, res: Response) {
             res.status(404).json({
                 success: false,
                 messsage: `contract with id: ${contractId} was not found!`,
+            });
+            return;
+        }
+
+        if (contract.isTemplate && contract.messages.length === 1) {
+            const template_url = `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${contract.title}/resource`;
+            const response = await fetch(template_url);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch contract: ${response.statusText}`);
+            }
+            const templateFiles = await response.text();
+
+            res.status(200).json({
+                success: true,
+                message: 'template fetched successfully',
+                latestMessage: '',
+                messages: contract.messages,
+                templateFiles: templateFiles,
+            });
+
+            ResponseWriter.custom(res, 200, {
+                success: true,
+                data: { templateFiles },
+                meta: { timestamp: Date.now().toString() },
             });
             return;
         }
