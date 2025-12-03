@@ -68,7 +68,7 @@ export default function BuilderNavbarRightSection() {
                 <Button
                     onClick={() => setOpenWalletPanel(true)}
                     size="xs"
-                    className="bg-light text-dark-base hover:bg-light hover:text-dark-base tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 duration-300 font-semibold rounded-[4px]"
+                    className="bg-light text-dark-base hover:bg-light hover:text-dark-base tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 duration-300 font-semibold rounded-[4px] exec-button-light"
                 >
                     <IoIosPaperPlane className="size-3.5" />
                     <span className="text-[11px]">Deploy</span>
@@ -81,7 +81,7 @@ export default function BuilderNavbarRightSection() {
                         onClick={handleConnectGitHub}
                         disabled={isConnectingGithub}
                         size="xs"
-                        className="bg-[#24292e] text-white hover:bg-[#1a1e22] gap-1.5 tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-[#24292e] text-white hover:bg-[#1a1e22] gap-1.5 tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed exec-button-dark"
                     >
                         <FaGithub className="size-3.5" />
                         <span className="text-[11px]">
@@ -97,7 +97,7 @@ export default function BuilderNavbarRightSection() {
                             size="xs"
                             className={cn(
                                 'bg-dark text-light hover:bg-dark/90 hover:text-light/90',
-                                'tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-[4px] text-xs',
+                                'tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-[4px] text-xs exec-button-dark',
                             )}
                         >
                             <IoLogoGithub className="size-4.5" />

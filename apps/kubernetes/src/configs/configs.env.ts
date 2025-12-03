@@ -12,6 +12,10 @@ const envSchema = z.object({
     KUBERNETES_NAMESPACE: z.string().default('default'),
     KUBERNETES_REDIS_URL: z.url(),
     SERVER_CLOUDFRONT_DOMAIN: z.url(),
+    SERVER_AWS_ACCESS_KEY_ID: z.string().transform((val) => val.trim()),
+    SERVER_AWS_SECRET_ACCESS_KEY: z.string().transform((val) => val.trim()),
+    SERVER_AWS_REGION: z.string().transform((val) => val.trim()),
+    SERVER_AWS_BUCKET_NAME: z.string().transform((val) => val.trim()),
 });
 
 function parseEnv() {

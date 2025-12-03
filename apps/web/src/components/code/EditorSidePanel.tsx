@@ -22,10 +22,8 @@ interface EditorSidePanel {
 }
 
 export default function EditorSidePanel() {
-    const { collapseFileTree, setCollapseFileTree, setCollapsechat, collapseChat } =
-        useCodeEditor();
-    const { setCurrentState } = useSidePanelStore();
-    const { currentState } = useSidePanelStore();
+    const { setCollapseFileTree, setCollapsechat, collapseChat } = useCodeEditor();
+    const { currentState, setCurrentState } = useSidePanelStore();
 
     const sidePanelData = [
         {
@@ -43,10 +41,7 @@ export default function EditorSidePanel() {
         {
             icon: <RiChat4Fill size={19} />,
             value: SidePanelValues.CHAT,
-            onClick: () => {
-                setCollapsechat(!collapseChat);
-                // handleToggleSidebar(SidePanelValues.CHAT);
-            },
+            onClick: () => setCollapsechat(!collapseChat),
             tooltip: 'Agent Sessions',
         },
         {
@@ -60,15 +55,19 @@ export default function EditorSidePanel() {
     ];
 
     function handleToggleSidebar(value: SidePanelValues) {
-        if (collapseFileTree) {
-            if (value === currentState) {
+        setCurrentState(value);
+        switch (value) {
+            case SidePanelValues.PLAN: {
                 setCollapseFileTree(false);
-            } else {
-                setCurrentState(value);
+                break;
             }
-        } else {
-            setCollapseFileTree(true);
-            setCurrentState(value);
+            case SidePanelValues.FILE: {
+                setCollapseFileTree(true);
+                break;
+            }
+            default: {
+                setCollapseFileTree(true);
+            }
         }
     }
 

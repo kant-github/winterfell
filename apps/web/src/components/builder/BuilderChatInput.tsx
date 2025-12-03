@@ -9,48 +9,40 @@ import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
 import ExecutorSelect from '../base/ExecutorSelect';
-import { ChatRole, Message } from '@/src/types/prisma-types';
-import { useModelStore } from '@/src/store/model/useExecutorStore';
-import { GENERATE_CONTRACT } from '@/routes/api_routes';
-import { useCodeEditor } from '@/src/store/code/useCodeEditor';
-import {
-    FILE_STRUCTURE_TYPES,
-    FileContent,
-    MODEL,
-    PHASE_TYPES,
-    STAGE,
-    StreamEvent,
-} from '@/src/types/stream_event_types';
+import { ChatRole } from '@/src/types/prisma-types';
 import { toast } from 'sonner';
+import GenerateContract from '@/src/lib/server/generate_contract';
+import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
-    const { executor, setExecutor } = useModelStore();
+    const { executor, setExecutor } = useExecutorStore();
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const { session } = useUserSessionStore();
-    const { messages, setLoading, upsertMessage, setPhase, setMessage, setCurrentFileEditing } =
-        useBuilderChatStore();
-    const { parseFileStructure, deleteFile } = useCodeEditor();
-    const { setCollapseFileTree } = useCodeEditor();
+    const { messages, setMessage } = useBuilderChatStore();
     const params = useParams();
     const contractId = params.contractId as string;
 
     async function handleSubmit() {
         try {
-            setInputValue('');
-            setLoading(true);
-            if (inputValue.trim() === '') return;
+            const messageContent = inputValue.trim();
+
+            if (messageContent === '') return;
 
             if (!session?.user.id) {
                 setOpenLoginModal(true);
                 return;
             }
 
+            // Clear input immediately
+            setInputValue('');
+
+            // Add user message to the store
             setMessage({
                 id: uuid(),
                 contractId: contractId,
                 role: ChatRole.USER,
-                content: inputValue,
+                content: messageContent,
                 planning: false,
                 generatingCode: false,
                 building: false,
@@ -60,122 +52,24 @@ export default function BuilderChatInput() {
                 createdAt: new Date(),
             });
 
-            const response = await fetch(GENERATE_CONTRACT, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session.user.token}`,
+            // Call the continue_chat method from GenerateContract class
+            await GenerateContract.continue_chat(
+                session.user.token || '',
+                contractId,
+                messageContent,
+                (error) => {
+                    // Handle errors
+                    console.error('Chat error:', error);
+                    toast.error(error.message || 'Failed to send message');
+
+                    // Optionally restore the input value on error
+                    setInputValue(messageContent);
                 },
-                body: JSON.stringify({
-                    contract_id: contractId,
-                    instruction: inputValue,
-                    model: MODEL.GEMINI,
-                }),
-            });
-
-            if (response.status === 403) {
-                // set back the user input to the input box
-                messages.slice(0, messages.length - 2);
-                toast.error('message limit reached');
-            }
-
-            if (!response.ok) {
-                throw new Error('Failed to continue to chat');
-            }
-
-            const reader = response.body?.getReader();
-            const decoder = new TextDecoder();
-
-            if (!reader) {
-                throw new Error('No response body');
-            }
-
-            while (true) {
-                const { done, value } = await reader.read();
-
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n').filter((line) => line.trim());
-
-                for (const line of lines) {
-                    try {
-                        const jsonString = line.startsWith('data: ') ? line.slice(6) : line;
-                        const event: StreamEvent = JSON.parse(jsonString);
-
-                        switch (event.type) {
-                            case PHASE_TYPES.STARTING:
-                                if (event.systemMessage) {
-                                    upsertMessage(event.systemMessage);
-                                }
-                                break;
-
-                            case STAGE.CONTEXT:
-                                if ('llmMessage' in event.data) {
-                                    upsertMessage(event.data.llmMessage as Message);
-                                }
-                                break;
-
-                            case STAGE.PLANNING:
-                            case STAGE.GENERATING_CODE:
-                            case STAGE.BUILDING:
-                            case STAGE.CREATING_FILES:
-                            case STAGE.FINALIZING:
-                                if (event.systemMessage) {
-                                    upsertMessage(event.systemMessage);
-                                }
-                                break;
-                            case PHASE_TYPES.THINKING:
-                            case PHASE_TYPES.GENERATING:
-                            case PHASE_TYPES.BUILDING:
-                            case PHASE_TYPES.CREATING_FILES:
-                            case PHASE_TYPES.COMPLETE:
-                                setPhase(event.type);
-                                break;
-
-                            case PHASE_TYPES.DELETING:
-                                setPhase(event.type);
-                                break;
-
-                            case FILE_STRUCTURE_TYPES.EDITING_FILE:
-                                setPhase(event.type);
-                                if ('file' in event.data) {
-                                    if ('phase' in event.data && event.data.phase === 'deleting') {
-                                        deleteFile(event.data.file as string);
-                                    } else {
-                                        setCurrentFileEditing(event.data.file as string);
-                                    }
-                                }
-                                break;
-
-                            case PHASE_TYPES.ERROR:
-                                console.error('LLM Error:', event.data);
-                                break;
-
-                            case STAGE.END: {
-                                if ('data' in event.data && event.data.data) {
-                                    parseFileStructure(event.data.data as FileContent[]);
-                                }
-                                setCollapseFileTree(true);
-                                break;
-                            }
-
-                            default:
-                                break;
-                        }
-                    } catch {
-                        console.error('Failed to parse stream event');
-                    }
-                }
-            }
-            setCollapseFileTree(true);
+            );
         } catch (error) {
-            console.error('Chat stream error: ', error);
-        } finally {
-            setLoading(false);
+            console.error('Chat stream error:', error);
+            toast.error('An unexpected error occurred');
         }
-
-        // router.push(`/playground/${newContractId}`);
     }
 
     const userMessagesLength = messages.filter((m) => m.role === ChatRole.USER).length;
@@ -241,7 +135,7 @@ export default function BuilderChatInput() {
                             className={cn(
                                 'group/submit flex items-center gap-2 h-8 w-9 px-2 py-1 rounded-[4px] font-mono text-xs duration-200',
                                 'transition-all duration-200',
-                                'disabled:cursor-not-allowed',
+                                'disabled:cursor-not-allowed exec-button-dark',
                                 inputValue.trim()
                                     ? 'bg-neutral-800 text-neutral-300 hover:text-neutral-200'
                                     : 'bg-neutral-900 text-neutral-700 cursor-not-allowed',
@@ -250,8 +144,6 @@ export default function BuilderChatInput() {
                             <ArrowRight
                                 className={cn(
                                     'w-3 h-3 transition-transform',
-                                    inputValue.trim() &&
-                                        'group-hover/submit:translate-x-0.5 duration-200',
                                 )}
                             />
                         </Button>

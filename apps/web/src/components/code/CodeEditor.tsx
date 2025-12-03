@@ -47,7 +47,6 @@ export default function CodeEditor(): JSX.Element {
                 { token: 'string.value.json', foreground: 'C3E88D' },
                 { token: 'string.template', foreground: 'F1FA8C' },
                 { token: 'string.escape', foreground: 'FFD580' },
-
                 { token: 'number', foreground: 'F78C6C' },
                 { token: 'constant.numeric', foreground: 'F78C6C' },
                 { token: 'constant.language.boolean', foreground: 'FF5370' },

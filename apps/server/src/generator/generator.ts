@@ -30,6 +30,9 @@ import {
     old_finalizer,
     old_planner,
 } from './types/generator_types';
+import { planning_context_prompt } from './prompts/planning_context_prompt';
+import { plan_context_schema } from './schema/plan_context_schema';
+import ResponseWriter from '../class/response_writer';
 
 export default class Generator extends GeneratorShape {
     protected gemini_planner: ChatGoogleGenerativeAI;
@@ -132,7 +135,7 @@ export default class Generator extends GeneratorShape {
             });
             let full_response: string = '';
 
-            // console.log(planner_data);
+            console.log(planner_data);
 
             const llm_message = await prisma.message.create({
                 data: {
@@ -224,7 +227,7 @@ export default class Generator extends GeneratorShape {
                 system_message,
             );
         } catch (error) {
-            console.error('Error while new contract generation: ', Error);
+            console.error('Error while new contract generation: ', error);
             parser.reset();
             this.delete_parser(contract_id);
             res.end();
@@ -519,7 +522,7 @@ export default class Generator extends GeneratorShape {
 
         // const gen_file_map = new Map(generated_files.map(file => [file.path, file.content]));
         const remaining_files_map = new Map(remaining_files.map((file) => [file.path, file]));
-        let new_files: FileContent[] = [];
+        const new_files: FileContent[] = [];
 
         // update old
         generated_files.forEach((file: FileContent) => {
@@ -531,7 +534,7 @@ export default class Generator extends GeneratorShape {
             }
         });
 
-        const updated_remaining_files = Array.from(remaining_files_map.values());
+        // const updated_remaining_files = Array.from(remaining_files_map.values());
         const updated_contract = [...remaining_files, ...new_files];
 
         console.log(chalk.bgRed('---------------------------- updated contract'));
@@ -692,6 +695,32 @@ export default class Generator extends GeneratorShape {
                     finalizer_chain,
                 };
             }
+        }
+    }
+
+    public async plan_context(
+        res: Response,
+        chat: 'new' | 'old',
+        user_instruction: string,
+        model: MODEL,
+        contract_id: string,
+        idl?: Object[],
+    ) {
+        try {
+            const planner_chain = RunnableSequence.from([
+                planning_context_prompt,
+                this.gemini_planner.withStructuredOutput(plan_context_schema),
+            ]);
+            const planner_data = await planner_chain.invoke({ user_instruction });
+            ResponseWriter.success(
+                res,
+                planner_data,
+                `successfully outlined your plan for ${planner_data.contract_title}`,
+            );
+            console.log('planner data is : ', planner_data);
+        } catch (err) {
+            ResponseWriter.error(res, 'error in outlining your plan');
+            console.error('Error while planning context ', err);
         }
     }
 

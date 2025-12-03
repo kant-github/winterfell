@@ -1,14 +1,14 @@
 'use client';
 import 'react-complex-tree/lib/style-modern.css';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
-import { SidePanelValues } from './EditorSidePanel';
-import GithubPanel from './GithubPanel';
-import FileTree from './Filetree';
-import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import useResize from '@/src/hooks/useResize';
+import { ReactNode } from 'react';
 
-export default function SidePanel() {
-    const { currentState } = useSidePanelStore();
+interface SidePanelProps {
+    children: ReactNode;
+}
+
+export default function SidePanel({ children }: SidePanelProps) {
     const { collapseFileTree, setCollapseFileTree } = useCodeEditor();
     const { dimension } = useResize({
         side: 'width',
@@ -19,17 +19,6 @@ export default function SidePanel() {
 
     if (!collapseFileTree) return null;
 
-    function renderSidePanels() {
-        switch (currentState) {
-            case SidePanelValues.FILE:
-                return <FileTree />;
-            case SidePanelValues.GITHUB:
-                return <GithubPanel />;
-            default:
-                return <div></div>;
-        }
-    }
-
     return (
         <div
             className="flex max-h-full bg-[#16171a] uext-neutral-200 border-r border-neutral-800 min-w-[15rem] max-w-[18rem] cursor-ew-resize "
@@ -39,7 +28,7 @@ export default function SidePanel() {
             }}
         >
             <div className="flex-1 flex-col h-full select-none cursor-default ">
-                <div className="w-full h-full ">{renderSidePanels()}</div>
+                <div className="w-full h-full ">{children}</div>
             </div>
         </div>
     );

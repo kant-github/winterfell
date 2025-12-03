@@ -23,12 +23,6 @@ export default async function generateContractController(req: Request, res: Resp
         // safe parse validation check
         const { contract_id, instruction, model } = parsed_data.data;
 
-        // checking for instruction length
-        if (instruction.length > 200) {
-            ResponseWriter.error(res, 'instruction crossed the length limit!', 413);
-            return;
-        }
-
         if (model === MODEL.CLAUDE) {
             const existing_user = await prisma.user.findUnique({
                 where: {
@@ -61,9 +55,12 @@ export default async function generateContractController(req: Request, res: Resp
         });
 
         if (existing_contract) {
-            // call for update
-
-            // const total_messages = existing_contract.messages.filter(m => m.role === ChatRole.USER);
+            // const total_messages = existing_contract.messages.filter((m) => {
+            //     if (m.role === ChatRole.USER && !m.plannerContext) {
+            //         return true;
+            //     }
+            //     return false;
+            // });
             const total_messages = 1;
 
             if (total_messages > 5) {

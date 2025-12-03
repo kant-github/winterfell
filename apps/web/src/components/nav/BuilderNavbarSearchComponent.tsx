@@ -115,7 +115,7 @@ export default function BuilderNavbarSearchComponent() {
             </span>
 
             {showDropdown && searchResults.length > 0 && (
-                <div className="absolute top-full mt-1 bg-dark-base border border-neutral-800 rounded-md shadow-lg max-h-[300px] w-full min-w-[20rem] overflow-y-auto z-50">
+                <div className="absolute top-full mt-1 bg-dark-base border border-neutral-800 rounded-[4px] shadow-lg max-h-[300px] w-full min-w-[20rem] overflow-y-auto z-50">
                     {searchResults.map((file, index) => (
                         <div
                             key={file.id}
