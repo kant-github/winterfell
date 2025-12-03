@@ -4,7 +4,7 @@ export const API_URL = BACKEND_URL + '/api/v1';
 export const SIGNIN_URL = API_URL + '/sign-in';
 
 export const GENERATE_CONTRACT = API_URL + '/generate';
-export const PLAN_CONTEXT_URL = API_URL + '/generate';
+export const PLAN_CONTEXT_URL = API_URL + '/plan';
 export const GET_CHAT_URL = API_URL + '/contract/get-chat';
 
 // subscription

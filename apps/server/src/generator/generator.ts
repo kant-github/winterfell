@@ -31,6 +31,8 @@ import {
     old_planner,
 } from './types/generator_types';
 import { planning_context_prompt } from './prompts/planning_context_prompt';
+import { plan_context_schema } from './schema/plan_context_schema';
+import ResponseWriter from '../class/response_writer';
 
 export default class Generator extends GeneratorShape {
     protected gemini_planner: ChatGoogleGenerativeAI;
@@ -707,11 +709,17 @@ export default class Generator extends GeneratorShape {
         try {
             const planner_chain = RunnableSequence.from([
                 planning_context_prompt,
-                this.gemini_planner,
+                this.gemini_planner.withStructuredOutput(plan_context_schema),
             ]);
-            const planner_data = planner_chain.invoke({});
+            const planner_data = await planner_chain.invoke({ user_instruction });
+            ResponseWriter.success(
+                res,
+                planner_data,
+                `successfully outlined your plan for ${planner_data.contract_title}`,
+            );
             console.log('planner data is : ', planner_data);
         } catch (err) {
+            ResponseWriter.error(res, 'error in outlining your plan');
             console.error('Error while planning context ', err);
         }
     }

@@ -7,9 +7,8 @@ import { cn } from '@/src/lib/utils';
 import { Button } from '../ui/button';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { IoMdExpand } from 'react-icons/io';
-import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
-import { useCodeEditor } from '@/src/store/code/useCodeEditor';
-import { SidePanelValues } from './EditorSidePanel';
+import { AiFillEdit } from "react-icons/ai";
+
 
 const data = [
     {
@@ -20,7 +19,7 @@ const data = [
     {
         selected: false,
         title: 'Initialize Position',
-        description: 'Opens a new liquidity position for a user within the pool’s bins.',
+        description: `Opens a new liquidity position for a user within the pool's bins.`,
     },
     {
         selected: false,
@@ -31,12 +30,12 @@ const data = [
     {
         selected: false,
         title: 'Remove Liquidity',
-        description: 'Withdraws liquidity from the user’s selected bins, returning tokens.',
+        description: `Withdraws liquidity from the user's selected bins, returning tokens.`,
     },
     {
         selected: false,
         title: 'Swap Tokens',
-        description: 'Executes a token swap using the pool’s concentrated liquidity across bins.',
+        description: `Executes a token swap using the pool's concentrated liquidity across bins.`,
     },
     {
         selected: false,
@@ -48,23 +47,29 @@ const data = [
 interface PlanExecutorPanelProps {
     className?: string;
     hidePlanSvg?: boolean;
-    expanded: boolean
+    collapse: boolean;
+    expanded: boolean;
+    editExeutorPlanPanel: boolean;
+    onEdit?: () => void;
+    onExpand?: () => void;
+    onCollapse?: () => void;
 }
 
-export default function PlanExecutorPanel({ className, expanded, hidePlanSvg = false }: PlanExecutorPanelProps): JSX.Element {
+export default function PlanExecutorPanel({
+    className,
+    expanded,
+    collapse,
+    onEdit,
+    onExpand,
+    onCollapse,
+    editExeutorPlanPanel = false,
+}: PlanExecutorPanelProps): JSX.Element {
     const [instructions, setInstructions] = useState(data);
-    const [collapsePanel, setCollapsePanel] = useState<boolean>(false);
-    const { setCollapseFileTree } = useCodeEditor();
-    const { setCurrentState } = useSidePanelStore();
+
     function toggleSelected(index: number) {
         setInstructions((prev) =>
             prev.map((item, i) => (i === index ? { ...item, selected: !item.selected } : item)),
         );
-    }
-
-    function handleOpenPlanExecutionPanel() {
-        setCurrentState(SidePanelValues.PLAN);
-        setCollapseFileTree(false);
     }
 
     function toggleSelectAll() {
@@ -83,20 +88,45 @@ export default function PlanExecutorPanel({ className, expanded, hidePlanSvg = f
     return (
         <div
             className={cn(
-                "max-w-lg px-4 py-2 pb-3.5 text-left relative transition-all duration-300 overflow-hidden",
-                collapsePanel ? "max-h-[12rem] min-h-[12rem]" : "min-h-fit",
-                className
+                'max-w-lg px-4 py-2 pb-3.5 text-left relative transition-all duration-300 overflow-hidden',
+                collapse ? 'max-h-48 min-h-48' : 'min-h-fit',
+                className,
             )}
         >
-            {collapsePanel && <div
-                className="absolute bottom-0 left-0 right-0 h-20 z-10 pointer-events-none"
-                style={{
-                    background: "linear-gradient(to top, rgb(17, 17, 17), rgb(18, 18, 18), rgba(14, 14, 14, 0.389), transparent)",
-                }}
-            />}
+            {collapse && (
+                <div
+                    className="absolute bottom-0 left-0 right-0 h-20 z-10 pointer-events-none"
+                    style={{
+                        background:
+                            'linear-gradient(to top, rgb(17, 17, 17), rgb(18, 18, 18), rgba(14, 14, 14, 0.389), transparent)',
+                    }}
+                />
+            )}
             <div className="absolute top-2 right-2 flex items-center justify-end gap-x-3">
-                {!expanded && <IoMdExpand onClick={handleOpenPlanExecutionPanel} className={cn('size-3 text-light cursor-pointer transition-transform duration-300')} />}
-                {!expanded && <MdKeyboardArrowDown onClick={() => setCollapsePanel(prev => !prev)} className={cn('size-5 text-light cursor-pointer transition-transform duration-300', collapsePanel && 'rotate-180')} />}
+                <AiFillEdit
+                    onClick={onEdit}
+                    className={cn(
+                        'size-3 text-light cursor-pointer transition-transform duration-300',
+                    )}
+                />
+                {!expanded && (
+                    <IoMdExpand
+                        onClick={onExpand}
+                        className={cn(
+                            'size-3 text-light cursor-pointer transition-transform duration-300',
+                        )}
+                    />
+                )}
+                {!expanded && (
+                    <MdKeyboardArrowDown
+                        onClick={onCollapse}
+                        className={cn(
+                            'size-5 text-light cursor-pointer transition-transform duration-300',
+                            collapse && 'rotate-180',
+                        )}
+                    />
+                )}
+
             </div>
             <div className="flex items-center justify-start gap-x-2 text-light/70">
                 <RiListCheck2 className="size-3" />
@@ -105,7 +135,7 @@ export default function PlanExecutorPanel({ className, expanded, hidePlanSvg = f
                 </span>
             </div>
 
-            <h1 className="text-2xl font-bold text-left mt-3 text-light/90">
+            <h1 className="text-2xl font-bold text-left mt-3 text-light/90 select-none">
                 Dlmm Pool Smart Contract
             </h1>
             <p className="text-left text-[13px] text-light/70 mt-1">
@@ -117,7 +147,7 @@ export default function PlanExecutorPanel({ className, expanded, hidePlanSvg = f
                 read detailed plan
             </div>
 
-            <div className="w-full border border-neutral-800 rounded-[6px] bg-[#16171a] px-3 pb-3 pt-2 mt-1 relative">
+            <div className={cn("w-full border rounded-[6px]  px-3 pb-3 pt-2 mt-1 relative", editExeutorPlanPanel ? "border-[#80a1c260] bg-[#80a1c210]" : "border-neutral-800 bg-dark-base")}>
                 <div className="text-xs text-light/70 flex items-center justify-start gap-x-2">
                     <GiBookmarklet className="text-light/70 size-3 mt-0.5" />
                     <span>instructions</span>
@@ -138,12 +168,12 @@ export default function PlanExecutorPanel({ className, expanded, hidePlanSvg = f
                     <span className="text-xs">{allSelected ? 'selected all' : 'select all'}</span>
                 </Button>
 
-                <div className="flex flex-col gap-y-4 mt-3">
+                <div className="flex flex-col gap-y-5 mt-5">
                     {instructions.map((ins, index) => (
                         <div
                             key={index}
                             className="flex items-start gap-x-2.5 cursor-pointer"
-                            onClick={() => toggleSelected(index)}
+                            onClick={() => !editExeutorPlanPanel && toggleSelected(index)}
                         >
                             <span
                                 className={cn(
@@ -152,17 +182,50 @@ export default function PlanExecutorPanel({ className, expanded, hidePlanSvg = f
                                 )}
                             />
 
-                            <div className="flex flex-col -mt-1">
-                                <span
-                                    className={cn(
-                                        'text-[13px]',
-                                        ins.selected && 'line-through text-light/40',
-                                    )}
-                                >
-                                    {ins.title}
-                                </span>
+                            <div className="flex flex-col -mt-1 flex-1">
+                                {editExeutorPlanPanel ? (
+                                    <input
+                                        aria-label='title'
+                                        type="text"
+                                        value={ins.title}
+                                        onChange={(e) => {
+                                            const newInstructions = [...instructions];
+                                            newInstructions[index].title = e.target.value;
+                                            setInstructions(newInstructions);
+                                        }}
+                                        className={cn(
+                                            'text-[13px] bg-transparent border-none outline-none p-0 m-0 w-full',
+                                            ins.selected && 'line-through text-light/40',
+                                        )}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                ) : (
+                                    <span
+                                        className={cn(
+                                            'text-[13px]',
+                                            ins.selected && 'line-through text-light/40',
+                                        )}
+                                    >
+                                        {ins.title}
+                                    </span>
+                                )}
 
-                                <span className="text-[12px] text-light/70">{ins.description}</span>
+                                {editExeutorPlanPanel ? (
+                                    <input
+                                        aria-label='description'
+                                        type="text"
+                                        value={ins.description}
+                                        onChange={(e) => {
+                                            const newInstructions = [...instructions];
+                                            newInstructions[index].description = e.target.value;
+                                            setInstructions(newInstructions);
+                                        }}
+                                        className="text-[12px] text-light/70 bg-transparent border-none outline-none p-0 m-0 w-full"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                ) : (
+                                    <span className="text-[12px] text-light/70">{ins.description}</span>
+                                )}
                             </div>
                         </div>
                     ))}

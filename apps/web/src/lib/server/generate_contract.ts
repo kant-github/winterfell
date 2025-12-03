@@ -1,26 +1,64 @@
-import { PLAN_CONTEXT_URL, GENERATE_CONTRACT } from "@/routes/api_routes";
-import axios from "axios";
+import { PLAN_CONTEXT_URL, GENERATE_CONTRACT } from '@/routes/api_routes';
+import axios from 'axios';
 import {
     StreamEvent,
     PHASE_TYPES,
     STAGE,
     FILE_STRUCTURE_TYPES,
     FileContent,
-    MODEL
+    MODEL,
 } from '@/src/types/stream_event_types';
 import { Message } from '@/src/types/prisma-types';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
+import { useExecutorStore } from '@/src/store/model/useExecutorStore';
+import { EXECUTOR } from '@winterfell/types';
 
 export default class GenerateContract {
+    static async router(
+        token: string,
+        contract_id: string,
+        instruction: string,
+        setHasContext: (hasContext: boolean) => void,
+        onError?: (error: Error) => void,
+    ) {
+        const { executor } = useExecutorStore.getState();
+        console.log("executor is : ", executor);
+        switch (executor) {
+            case EXECUTOR.PLAN:
+                return await this.start_plan_executor(
+                    token,
+                    contract_id,
+                    instruction,
+                    setHasContext,
+                    onError,
+                );
+            case EXECUTOR.AGENTIC:
+                return await this.start_new_chat(
+                    token,
+                    contract_id,
+                    instruction,
+                    setHasContext,
+                    onError,
+                );
+        }
+    }
+
     static async start_plan_executor(
         token: string,
         contract_id: string,
         instruction: string,
+        setHasContext: (hasContext: boolean) => void,
+        onError?: (error: Error) => void,
     ): Promise<{
         data: unknown | null;
         message: string;
     }> {
+        console.log("data is : ", {
+            token,
+            contract_id,
+            instruction,
+        })
         try {
             if (!token || !contract_id || !instruction) {
                 return {
@@ -28,18 +66,24 @@ export default class GenerateContract {
                     message: 'some data is not provided',
                 };
             }
-            const { data } = await axios.post(PLAN_CONTEXT_URL, {
-                contractId: contract_id,
-                instruction
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            console.log("found everything");
+            const { data } = await axios.post(
+                PLAN_CONTEXT_URL,
+                {
+                    contract_id,
+                    instruction,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+            console.log('data is : ', data);
             return {
                 data: data.context,
-                message: data.message
-            }
+                message: data.message,
+            };
         } catch (err) {
             console.error('error in starting the plan executor', err);
             return {
@@ -54,12 +98,11 @@ export default class GenerateContract {
         contractId: string,
         message: string,
         setHasContext: (hasContext: boolean) => void,
-        onError?: (error: Error) => void
+        onError?: (error: Error) => void,
     ): Promise<void> {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
             useBuilderChatStore.getState();
-        const { deleteFile, parseFileStructure, setCollapseFileTree } =
-            useCodeEditor.getState();
+        const { deleteFile, parseFileStructure, setCollapseFileTree } = useCodeEditor.getState();
 
         try {
             setLoading(true);
@@ -199,12 +242,11 @@ export default class GenerateContract {
         token: string,
         contractId: string,
         message: string,
-        onError?: (error: Error) => void
+        onError?: (error: Error) => void,
     ): Promise<void> {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
             useBuilderChatStore.getState();
-        const { deleteFile, parseFileStructure, setCollapseFileTree } =
-            useCodeEditor.getState();
+        const { deleteFile, parseFileStructure, setCollapseFileTree } = useCodeEditor.getState();
 
         try {
             setLoading(true);

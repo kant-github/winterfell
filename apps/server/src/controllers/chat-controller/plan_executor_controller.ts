@@ -7,6 +7,7 @@ import { MODEL } from '@winterfell/types';
 
 // we are not tracking the plan context count from the user side, future update will have it
 export default async function plan_executor_controller(req: Request, res: Response) {
+    console.log('request hit');
     const user = req.user;
     if (!user || !user.id) {
         ResponseWriter.unauthorized(res);
@@ -16,7 +17,7 @@ export default async function plan_executor_controller(req: Request, res: Respon
     try {
         const parsed = generate_contract_schema.safeParse(req.body);
         if (!parsed.success) {
-            ResponseWriter.error(res, 'Invalid data', 400);
+            ResponseWriter.validation_error(res, 'Invalid data');
             return;
         }
 
@@ -45,20 +46,21 @@ export default async function plan_executor_controller(req: Request, res: Respon
             });
         }
 
-        await prisma.message.create({
+        const message = await prisma.message.create({
             data: {
                 role: ChatRole.USER,
                 content: parsed.data.instruction,
                 contractId: parsed.data.contract_id,
             },
         });
-        generator.generate(
+        console.log('messsage created is : ', message);
+        generator.plan_context(
             res,
             contract.messages.length === 1 ? 'new' : 'old',
             parsed.data.instruction,
             parsed.data.model || MODEL.GEMINI,
             contract.id,
-            JSON.parse(contract.summarisedObject || ''),
+            contract.summarisedObject ? JSON.parse(contract.summarisedObject) : undefined,
         );
     } catch (error) {
         ResponseWriter.server_error(
@@ -66,7 +68,7 @@ export default async function plan_executor_controller(req: Request, res: Respon
             'Internal server error',
             error instanceof Error ? error.message : undefined,
         );
-        console.error('error in plan context controller');
+        console.error('error in plan context controller', error);
         return;
     }
 }

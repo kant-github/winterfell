@@ -16,6 +16,7 @@ import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import FileTree from '../code/Filetree';
 import GithubPanel from '../code/GithubPanel';
 import PlanExecutorPanel from '../code/PlanExecutorPanel';
+import PlanPanel from '../code/PlanPanel';
 
 export default function BuilderDashboard(): JSX.Element {
     const { loading } = useBuilderChatStore();
@@ -100,7 +101,7 @@ function Editing() {
             case SidePanelValues.GITHUB:
                 return <CodeEditor />;
             case SidePanelValues.PLAN:
-                return <PlanExecutorPanel expanded className="bg-[#16171a] w-full px-2 py-2" />;
+                return <PlanPanel />;
         }
     }
 

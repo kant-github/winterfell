@@ -11,13 +11,12 @@ import LoginModal from '../utility/LoginModal';
 import { ChatRole } from '@/src/types/prisma-types';
 import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import ContractServer from '@/src/lib/server/contract-server';
 import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import Image from 'next/image';
 import ExecutorSelect from './ExecutorSelect';
-import { useModelStore } from '@/src/store/model/useExecutorStore';
 import { RxCross2 } from 'react-icons/rx';
+import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -28,7 +27,7 @@ export default function DashboardTextAreaComponent() {
     const { session } = useUserSessionStore();
     const { setMessage } = useBuilderChatStore();
     const { setTemplates } = useTemplateStore();
-    const { executor, setExecutor } = useModelStore();
+    const { executor, setExecutor } = useExecutorStore();
     const { activeTemplate, resetTemplate } = useActiveTemplateStore();
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
     const templatePanelRef = useRef<HTMLDivElement | null>(null);
@@ -85,7 +84,7 @@ export default function DashboardTextAreaComponent() {
     }
 
     const isDisabled = !inputValue.trim() && !activeTemplate;
-
+    console.log("executor is : ", executor);
     return (
         <>
             <div className="relative group ">

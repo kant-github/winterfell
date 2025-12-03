@@ -26,19 +26,26 @@ import { toast } from 'sonner';
 import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 import PlanExecutorPanel from '../code/PlanExecutorPanel';
 import GenerateContract from '@/src/lib/server/generate_contract';
+import { useExecutorStore } from '@/src/store/model/useExecutorStore';
+import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
+import { SidePanelValues } from '../code/EditorSidePanel';
+import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 
 export default function BuilderChats() {
-    const { session } = useUserSessionStore();
+    const [hasContext, setHasContext] = useState<boolean>(false);
+    const [collapsePanel, setCollapsePanel] = useState<boolean>(false);
     const params = useParams();
     const contractId = params.contractId as string;
     const hasInitialized = useRef<boolean>(false);
     const messageEndRef = useRef<HTMLDivElement>(null);
-    const { setContractId } = useChatStore();
-    const { messages, loading } =
-        useBuilderChatStore();
     const router = useRouter();
-    const [hasContext, setHasContext] = useState<boolean>(false);
     const { activeTemplate, resetTemplate } = useActiveTemplateStore();
+    const { session } = useUserSessionStore();
+    const { setContractId } = useChatStore();
+    const { messages, loading } = useBuilderChatStore();
+    const { editExeutorPlanPanel, setEditExeutorPlanPanel } = useExecutorStore()
+    const { setCollapseFileTree } = useCodeEditor();
+    const { setCurrentState } = useSidePanelStore();
 
     useEffect(() => {
         if (messageEndRef.current) {
@@ -106,7 +113,7 @@ export default function BuilderChats() {
     }
 
     async function startChat(message: string) {
-        await GenerateContract.start_new_chat(
+        await GenerateContract.router(
             session?.user.token || '',
             contractId,
             message,
@@ -114,7 +121,7 @@ export default function BuilderChats() {
             (error) => {
                 toast.error(error.message);
                 router.push('/');
-            }
+            },
         );
     }
 
@@ -216,7 +223,26 @@ export default function BuilderChats() {
                         )}
                     </div>
                 ))}
-                <PlanExecutorPanel expanded={false} hidePlanSvg={true} className="border border-neutral-800 rounded-[8px] bg-[#1b1d20]" />
+                <PlanExecutorPanel
+                    editExeutorPlanPanel={editExeutorPlanPanel}
+                    onCollapse={() => {
+                        setCollapsePanel(prev => !prev)
+                    }}
+                    onEdit={() => {
+                        setEditExeutorPlanPanel(true);
+                        setCurrentState(SidePanelValues.PLAN)
+                        setCollapseFileTree(false)
+                        setCollapsePanel(true)
+                    }}
+                    onExpand={() => {
+                        setCollapseFileTree(false)
+                        setCurrentState(SidePanelValues.PLAN)
+                    }}
+                    collapse={collapsePanel}
+                    expanded={false}
+                    hidePlanSvg={true}
+                    className="border border-neutral-800 rounded-[8px] bg-[#1b1d20]"
+                />
                 <div ref={messageEndRef} />
             </div>
             <div className="flex items-center justify-center w-full py-4 px-6 flex-shrink-0">

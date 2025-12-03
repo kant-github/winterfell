@@ -15,7 +15,7 @@ Provide:
     - short_description
     - long_description explaining what the instruction does and how it works
 
-Generate only structured planning information. No code, no extra text.
+Generate only structured planning information based on the user instructions, {user_instruction} No code, no extra text.
     `,
-    inputVariables: [],
+    inputVariables: ['user_instruction'],
 });

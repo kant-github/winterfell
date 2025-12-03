@@ -1,4 +1,4 @@
-import './opentelemtry/instrumentation';
+// import './opentelemtry/instrumentation';
 
 import express from 'express';
 import http from 'http';
@@ -6,17 +6,17 @@ import env from './configs/config.env';
 import cors from 'cors';
 import router from './routes';
 import init_services from './services/init';
-import { loggingMiddleware } from './middlewares/middleware.logger';
+// import { loggingMiddleware } from './middlewares/middleware.logger';
 import { logger } from './utils/logger';
 import cookieParser from 'cookie-parser';
-import { seedTemplates } from './services/seed_templates';
+// import { seedTemplates } from './services/seed_templates';
 
 const app = express();
 const server = http.createServer(app);
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(loggingMiddleware);
+// app.use(loggingMiddleware);
 app.use(
     cors({
         origin: 'http://localhost:3000',

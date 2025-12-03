@@ -10,17 +10,16 @@ import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
 import ExecutorSelect from '../base/ExecutorSelect';
 import { ChatRole } from '@/src/types/prisma-types';
-import { useModelStore } from '@/src/store/model/useExecutorStore';
 import { toast } from 'sonner';
 import GenerateContract from '@/src/lib/server/generate_contract';
+import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
-    const { executor, setExecutor } = useModelStore();
+    const { executor, setExecutor } = useExecutorStore();
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const { session } = useUserSessionStore();
-    const { messages, setMessage } =
-        useBuilderChatStore();
+    const { messages, setMessage } = useBuilderChatStore();
     const params = useParams();
     const contractId = params.contractId as string;
 
@@ -65,9 +64,8 @@ export default function BuilderChatInput() {
 
                     // Optionally restore the input value on error
                     setInputValue(messageContent);
-                }
+                },
             );
-
         } catch (error) {
             console.error('Chat stream error:', error);
             toast.error('An unexpected error occurred');
@@ -147,7 +145,7 @@ export default function BuilderChatInput() {
                                 className={cn(
                                     'w-3 h-3 transition-transform',
                                     inputValue.trim() &&
-                                    'group-hover/submit:translate-x-0.5 duration-200',
+                                        'group-hover/submit:translate-x-0.5 duration-200',
                                 )}
                             />
                         </Button>

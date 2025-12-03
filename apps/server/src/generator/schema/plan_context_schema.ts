@@ -1,7 +1,7 @@
 import z from 'zod';
 
 export const plan_context_schema = z.object({
-    contarct_name: z.string(),
+    contarct_name: z.string().describe('snake case contract name'),
     contract_title: z
         .string()
         .describe(

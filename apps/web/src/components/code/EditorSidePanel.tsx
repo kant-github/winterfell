@@ -17,13 +17,12 @@ export enum SidePanelValues {
 
 interface EditorSidePanel {
     setSidePanelRenderer:
-    | Dispatch<SetStateAction<SidePanelValues>>
-    | ((value: SidePanelValues | null) => void);
+        | Dispatch<SetStateAction<SidePanelValues>>
+        | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {
-    const { setCollapseFileTree, setCollapsechat, collapseChat } =
-        useCodeEditor();
+    const { setCollapseFileTree, setCollapsechat, collapseChat } = useCodeEditor();
     const { currentState, setCurrentState } = useSidePanelStore();
 
     const sidePanelData = [
