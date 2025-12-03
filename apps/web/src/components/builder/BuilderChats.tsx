@@ -42,9 +42,9 @@ export default function BuilderChats() {
     const { activeTemplate, resetTemplate } = useActiveTemplateStore();
     const { session } = useUserSessionStore();
     const { setContractId } = useChatStore();
-    const { messages, loading } = useBuilderChatStore();
+    const { messages, loading, setLoading } = useBuilderChatStore();
     const { editExeutorPlanPanel, setEditExeutorPlanPanel } = useExecutorStore()
-    const { setCollapseFileTree } = useCodeEditor();
+    const { setCollapseFileTree, parseFileStructure } = useCodeEditor();
     const { setCurrentState } = useSidePanelStore();
 
     useEffect(() => {
