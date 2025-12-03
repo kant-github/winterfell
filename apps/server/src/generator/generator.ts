@@ -115,7 +115,7 @@ export default class Generator extends GeneratorShape {
             console.error('Error while generating: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 
@@ -155,7 +155,7 @@ export default class Generator extends GeneratorShape {
                 console.log('planner said to not continue.');
                 parser.reset();
                 this.delete_parser(contract_id);
-                res.end();
+                ResponseWriter.stream.end(res);
                 return;
             }
 
@@ -230,7 +230,7 @@ export default class Generator extends GeneratorShape {
             console.error('Error while new contract generation: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 
@@ -304,7 +304,7 @@ export default class Generator extends GeneratorShape {
             console.error('Error while finalizing: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 
@@ -341,7 +341,7 @@ export default class Generator extends GeneratorShape {
             console.log('planner said to not continue.');
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
             return;
         }
 
@@ -493,7 +493,7 @@ export default class Generator extends GeneratorShape {
             console.error('Error while finalizing: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 
@@ -814,7 +814,7 @@ export default class Generator extends GeneratorShape {
             timestamp: Date.now(),
         };
 
-        res.write(`data: ${JSON.stringify(event)}\n\n`);
+        ResponseWriter.stream.write(res, `data: ${JSON.stringify(event)}\n\n`);
     }
 
     protected create_stream(res: Response): void {

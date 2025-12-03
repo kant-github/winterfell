@@ -15,6 +15,7 @@ interface ApiResponse<T = unknown> {
 }
 
 export default class ResponseWriter {
+
     static success<T>(res: Response, data: T, message: string, status_code: number = 200): void {
         const response: ApiResponse<T> = {
             success: true,
@@ -88,5 +89,15 @@ export default class ResponseWriter {
                 timestamp: new Date().toISOString(),
             },
         });
+    }
+    
+    static stream = class Stream {
+        static write(res: Response, data: string) {
+            res.write(data);
+        }
+
+        static end(res: Response) {
+            res.end();
+        }
     }
 }

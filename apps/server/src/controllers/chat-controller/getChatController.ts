@@ -132,6 +132,8 @@ export default async function (req: Request, res: Response) {
 
             const contractFiles = await response.text();
 
+            console.log(contractFiles);
+
             res.status(200).json({
                 success: true,
                 latestMessage: latestMessage,
