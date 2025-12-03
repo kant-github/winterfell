@@ -150,6 +150,8 @@ model Message {
   error          Boolean @default(false)
   plannerContext String?
 
+  isPlanExecuted Boolean @default(false)
+
   // isCodeBuilt Boolean? @default(false)
   // buildStatus
 

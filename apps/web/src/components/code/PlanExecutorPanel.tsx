@@ -9,6 +9,7 @@ import { MdKeyboardArrowDown } from 'react-icons/md';
 import { IoMdExpand } from 'react-icons/io';
 import { AiFillEdit } from "react-icons/ai";
 import ToolTipComponent from '../ui/TooltipComponent';
+import { FaPlus } from 'react-icons/fa';
 
 
 const data = [
@@ -54,6 +55,7 @@ interface PlanExecutorPanelProps {
     onEdit?: () => void;
     onExpand?: () => void;
     onCollapse?: () => void;
+    onDone?: () => void;
 }
 
 export default function PlanExecutorPanel({
@@ -63,6 +65,7 @@ export default function PlanExecutorPanel({
     onEdit,
     onExpand,
     onCollapse,
+    onDone,
     editExeutorPlanPanel = false,
 }: PlanExecutorPanelProps): JSX.Element {
     const [instructions, setInstructions] = useState(data);
@@ -73,6 +76,7 @@ export default function PlanExecutorPanel({
         );
     }
 
+    const hasAnySelected = instructions.some((item) => item.selected);
     function toggleSelectAll() {
         const allSelected = instructions.every((item) => item.selected);
 
@@ -82,6 +86,24 @@ export default function PlanExecutorPanel({
                 selected: !allSelected,
             })),
         );
+    }
+
+    function addInstruction() {
+        const newInstruction = {
+            selected: false,
+            title: '',
+            description: '',
+        };
+        setInstructions((prev) => [...prev, newInstruction]);
+
+        // Focus the new input after it's rendered
+        setTimeout(() => {
+            const inputs = document.querySelectorAll('input[aria-label="title"]');
+            const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
+            if (lastInput) {
+                lastInput.focus();
+            }
+        }, 0);
     }
 
     const allSelected = instructions.every((item) => item.selected);
@@ -105,13 +127,9 @@ export default function PlanExecutorPanel({
             )}
             <div className="absolute top-2 right-2 flex items-center justify-end gap-x-2">
                 <ToolTipComponent content='edit your planning context'>
-                    <div className='size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 exec-button-dark'>
+                    <div onClick={onEdit} className='size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 select-none'>
                         <span className='text-[12px] tex-light/90'>edit</span>
-                        <AiFillEdit
-                            onClick={onEdit}
-                            className={cn(
-                            )}
-                        />
+                        <AiFillEdit />
                     </div>
 
                 </ToolTipComponent>
@@ -120,7 +138,7 @@ export default function PlanExecutorPanel({
                         <IoMdExpand
                             onClick={onExpand}
                             className={cn(
-                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 w-fit h-5.5 p-1 exec-button-dark',
+                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 w-fit h-5.5 p-1',
                             )}
                         />
                     </ToolTipComponent>
@@ -130,7 +148,7 @@ export default function PlanExecutorPanel({
                         <MdKeyboardArrowDown
                             onClick={onCollapse}
                             className={cn(
-                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 w-fit h-5.5 p-1 exec-button-dark',
+                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 w-fit h-5.5 p-1',
                                 collapse && 'rotate-180',
                             )}
                         />
@@ -163,20 +181,47 @@ export default function PlanExecutorPanel({
                     <span>instructions</span>
                 </div>
 
-                <Button
-                    size={'mini'}
-                    variant={'ghost'}
-                    className={cn(
-                        'text-light absolute top-2 right-2 gap-x-2 hover:bg-[#16171a] bg-[#16171a]',
-                        !allSelected
-                            ? 'text-light/40  hover:text-light/40'
-                            : 'text-light hover:text-light',
+                <div className='flex items-center justify-end gap-x-2 w-fit absolute top-2 right-2 '>
+                    {editExeutorPlanPanel && (
+                        <Button
+                            size={'mini'}
+                            variant={'ghost'}
+                            className={cn(
+                                'text-light hover:text-light gap-x-2 hover:bg-dark/80 bg-dark border border-neutral-700 rounded-[8px]',
+                            )}
+                            onClick={addInstruction}
+                        >
+                            <FaPlus className="size-2" />
+                            <span className="text-xs">Add instruction</span>
+                        </Button>
                     )}
-                    onClick={toggleSelectAll}
-                >
-                    <FaCheckDouble className="size-2" />
-                    <span className="text-xs">{allSelected ? 'selected all' : 'select all'}</span>
-                </Button>
+                    {editExeutorPlanPanel && (
+                        <Button
+                            size={'mini'}
+                            variant={'ghost'}
+                            className={cn(
+                                'text-light hover:text-light gap-x-2 hover:bg-dark/80 bg-dark border border-neutral-700 rounded-[8px]',
+                            )}
+                            onClick={onDone}
+                        >
+                            <span className="text-xs">Done</span>
+                        </Button>
+                    )}
+                    <Button
+                        size={'mini'}
+                        variant={'ghost'}
+                        className={cn(
+                            'text-light gap-x-2 hover:bg-dark/80 bg-dark border border-neutral-700 rounded-[8px]',
+                            !allSelected
+                                ? 'text-light/40  hover:text-light/40'
+                                : 'text-light hover:text-light',
+                        )}
+                        onClick={toggleSelectAll}
+                    >
+                        <FaCheckDouble className="size-2" />
+                        <span className="text-xs">{allSelected ? 'selected all' : 'select all'}</span>
+                    </Button>
+                </div>
 
                 <div className="flex flex-col gap-y-5 mt-5">
                     {instructions.map((ins, index) => (
@@ -198,13 +243,14 @@ export default function PlanExecutorPanel({
                                         aria-label='title'
                                         type="text"
                                         value={ins.title}
+                                        placeholder='instruction title'
                                         onChange={(e) => {
                                             const newInstructions = [...instructions];
                                             newInstructions[index].title = e.target.value;
                                             setInstructions(newInstructions);
                                         }}
                                         className={cn(
-                                            'text-[13px] bg-transparent border-none outline-none p-0 m-0 w-full underline',
+                                            'text-[13px] bg-transparent border-none outline-none p-0 m-0 w-full',
                                             ins.selected && 'line-through text-light/40',
                                         )}
                                         onClick={(e) => e.stopPropagation()}
@@ -225,6 +271,7 @@ export default function PlanExecutorPanel({
                                         aria-label='description'
                                         type="text"
                                         value={ins.description}
+                                        placeholder='describe your instruction'
                                         onChange={(e) => {
                                             const newInstructions = [...instructions];
                                             newInstructions[index].description = e.target.value;
@@ -239,6 +286,19 @@ export default function PlanExecutorPanel({
                             </div>
                         </div>
                     ))}
+                </div>
+
+                <div className='flex items-start justify-end gap-x-3 mt-4'>
+                    {!editExeutorPlanPanel && (
+                        <Button
+                            disabled={!hasAnySelected}
+                            className='bg-[#80a1c2] hover:bg-[#80a1c290] !text-light/70 text-[12px] h-auto font-semibold !py-0.5 exec-button-dark disabled:opacity-40 disabled:cursor-not-allowed'
+                            variant={'ghost'}
+                            size={'xs'}
+                        >
+                            Execute
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>
