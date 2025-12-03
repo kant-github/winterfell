@@ -141,11 +141,7 @@ export default function BuilderChatInput() {
                                     : 'bg-neutral-900 text-neutral-700 cursor-not-allowed',
                             )}
                         >
-                            <ArrowRight
-                                className={cn(
-                                    'w-3 h-3 transition-transform',
-                                )}
-                            />
+                            <ArrowRight className={cn('w-3 h-3 transition-transform')} />
                         </Button>
                     </div>
                 </div>

@@ -17,8 +17,8 @@ export enum SidePanelValues {
 
 interface EditorSidePanel {
     setSidePanelRenderer:
-        | Dispatch<SetStateAction<SidePanelValues>>
-        | ((value: SidePanelValues | null) => void);
+    | Dispatch<SetStateAction<SidePanelValues>>
+    | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {
@@ -74,8 +74,8 @@ export default function EditorSidePanel() {
     return (
         <div className="h-full min-w-14 bg-dark-base border-neutral-800 border-r">
             <div className="flex flex-col gap-y-7 items-center py-5">
-                {sidePanelData.map((item) => (
-                    <ToolTipComponent side="right" key={item.tooltip} content={item.tooltip}>
+                {sidePanelData.map((item, index) => (
+                    <ToolTipComponent key={index} side="right" content={item.tooltip}>
                         <div
                             onClick={item.onClick}
                             className={cn(

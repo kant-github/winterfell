@@ -9,7 +9,6 @@ interface SessionSetterProps {
 }
 export default function SessionSetter({ session }: SessionSetterProps) {
     const { setSession } = useUserSessionStore();
-
     useEffect(() => {
         setSession(session);
     }, [session, setSession]);

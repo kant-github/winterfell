@@ -72,36 +72,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
         };
     }, [messages.length, hasShownReview]);
 
-    async function get_chat() {
-        try {
-            if (!session?.user.token) return;
-            const { data } = await axios.post(
-                GET_CHAT_URL,
-                {
-                    contractId: contractId,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${session.user.token}`,
-                    },
-                },
-            );
-            const sortedMessages = [...data.messages].sort((a, b) => {
-                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-            });
-            for (let i = 0; i < sortedMessages.length; i++) {
-                upsertMessage(sortedMessages[i]);
-            }
-            const parsedFiles = JSON.parse(data.contractFiles);
-            if (parsedFiles) {
-                parseFileStructure(parsedFiles);
-            }
-            setCollapseFileTree(true);
-        } catch (error) {
-            console.error('Error while fetching chats from server: ', error);
-        }
-    }
-
     useEffect(() => {
         if (loading || !session || !session.user || !session.user.token) return;
         Playyground.get_chat(session.user.token, contractId);

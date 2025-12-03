@@ -6,14 +6,13 @@ interface ModelState {
     editExeutorPlanPanel: boolean;
     setEditExeutorPlanPanel: (value: boolean) => void;
     setExecutor: (executor: EXECUTOR) => void;
-
 }
 
 export const useExecutorStore = create<ModelState>((set) => ({
     executor: EXECUTOR.AGENTIC,
     editExeutorPlanPanel: false,
     setEditExeutorPlanPanel: function (value: boolean) {
-        set({ editExeutorPlanPanel: value })
+        set({ editExeutorPlanPanel: value });
     },
     setExecutor: (executor: EXECUTOR) => set({ executor: executor }),
 }));

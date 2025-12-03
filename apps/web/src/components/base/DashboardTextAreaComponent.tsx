@@ -84,7 +84,7 @@ export default function DashboardTextAreaComponent() {
     }
 
     const isDisabled = !inputValue.trim() && !activeTemplate;
-    console.log("executor is : ", executor);
+    console.log('executor is : ', executor);
     return (
         <>
             <div className="relative group ">

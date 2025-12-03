@@ -43,7 +43,10 @@ export default function ExecutorSelect({
                     </div>
                 </SelectTrigger>
                 <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-300">
-                    <SelectItem value={EXECUTOR.AGENTIC} className="text-xs flex items-center gap-2">
+                    <SelectItem
+                        value={EXECUTOR.AGENTIC}
+                        className="text-xs flex items-center gap-2"
+                    >
                         <GoInfinity />
                         Agentic
                     </SelectItem>

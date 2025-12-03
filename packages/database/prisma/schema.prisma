@@ -151,7 +151,6 @@ model Message {
   End            Boolean @default(false)
   error          Boolean @default(false)
   plannerContext String?
-
   isPlanExecuted Boolean @default(false)
 
   // isCodeBuilt Boolean? @default(false)
