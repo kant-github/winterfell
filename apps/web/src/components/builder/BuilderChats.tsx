@@ -35,10 +35,10 @@ export default function BuilderChats() {
     const [hasContext, setHasContext] = useState<boolean>(false);
     const [collapsePanel, setCollapsePanel] = useState<boolean>(false);
     const params = useParams();
+    const router = useRouter();
     const contractId = params.contractId as string;
     const hasInitialized = useRef<boolean>(false);
     const messageEndRef = useRef<HTMLDivElement>(null);
-    const router = useRouter();
     const { activeTemplate, resetTemplate } = useActiveTemplateStore();
     const { session } = useUserSessionStore();
     const { setContractId } = useChatStore();

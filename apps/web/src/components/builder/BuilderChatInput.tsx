@@ -135,7 +135,7 @@ export default function BuilderChatInput() {
                             className={cn(
                                 'group/submit flex items-center gap-2 h-8 w-9 px-2 py-1 rounded-[4px] font-mono text-xs duration-200',
                                 'transition-all duration-200',
-                                'disabled:cursor-not-allowed',
+                                'disabled:cursor-not-allowed exec-button-dark',
                                 inputValue.trim()
                                     ? 'bg-neutral-800 text-neutral-300 hover:text-neutral-200'
                                     : 'bg-neutral-900 text-neutral-700 cursor-not-allowed',
@@ -144,8 +144,6 @@ export default function BuilderChatInput() {
                             <ArrowRight
                                 className={cn(
                                     'w-3 h-3 transition-transform',
-                                    inputValue.trim() &&
-                                        'group-hover/submit:translate-x-0.5 duration-200',
                                 )}
                             />
                         </Button>

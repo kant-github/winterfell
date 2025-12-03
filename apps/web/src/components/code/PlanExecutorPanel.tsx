@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { IoMdExpand } from 'react-icons/io';
 import { AiFillEdit } from "react-icons/ai";
+import ToolTipComponent from '../ui/TooltipComponent';
 
 
 const data = [
@@ -102,29 +103,38 @@ export default function PlanExecutorPanel({
                     }}
                 />
             )}
-            <div className="absolute top-2 right-2 flex items-center justify-end gap-x-3">
-                <AiFillEdit
-                    onClick={onEdit}
-                    className={cn(
-                        'size-3 text-light cursor-pointer transition-transform duration-300',
-                    )}
-                />
+            <div className="absolute top-2 right-2 flex items-center justify-end gap-x-2">
+                <ToolTipComponent content='edit your planning context'>
+                    <div className='size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 exec-button-dark'>
+                        <span className='text-[12px] tex-light/90'>edit</span>
+                        <AiFillEdit
+                            onClick={onEdit}
+                            className={cn(
+                            )}
+                        />
+                    </div>
+
+                </ToolTipComponent>
                 {!expanded && (
-                    <IoMdExpand
-                        onClick={onExpand}
-                        className={cn(
-                            'size-3 text-light cursor-pointer transition-transform duration-300',
-                        )}
-                    />
+                    <ToolTipComponent content='expand'>
+                        <IoMdExpand
+                            onClick={onExpand}
+                            className={cn(
+                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 w-fit h-5.5 p-1 exec-button-dark',
+                            )}
+                        />
+                    </ToolTipComponent>
                 )}
                 {!expanded && (
-                    <MdKeyboardArrowDown
-                        onClick={onCollapse}
-                        className={cn(
-                            'size-5 text-light cursor-pointer transition-transform duration-300',
-                            collapse && 'rotate-180',
-                        )}
-                    />
+                    <ToolTipComponent content='collapse'>
+                        <MdKeyboardArrowDown
+                            onClick={onCollapse}
+                            className={cn(
+                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 w-fit h-5.5 p-1 exec-button-dark',
+                                collapse && 'rotate-180',
+                            )}
+                        />
+                    </ToolTipComponent>
                 )}
 
             </div>
@@ -194,7 +204,7 @@ export default function PlanExecutorPanel({
                                             setInstructions(newInstructions);
                                         }}
                                         className={cn(
-                                            'text-[13px] bg-transparent border-none outline-none p-0 m-0 w-full',
+                                            'text-[13px] bg-transparent border-none outline-none p-0 m-0 w-full underline',
                                             ins.selected && 'line-through text-light/40',
                                         )}
                                         onClick={(e) => e.stopPropagation()}
