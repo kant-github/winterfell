@@ -83,6 +83,7 @@ export interface Message {
     building: boolean;
     creatingFiles: boolean;
     finalzing: boolean;
+    End: boolean;
     error: boolean;
     plannerContext?: PlanMessage;
     isPlanExecuted: boolean;
