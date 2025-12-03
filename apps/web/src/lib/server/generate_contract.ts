@@ -23,7 +23,7 @@ export default class GenerateContract {
         onError?: (error: Error) => void,
     ) {
         const { executor } = useExecutorStore.getState();
-        console.log("executor is : ", executor);
+        console.log('executor is : ', executor);
         switch (executor) {
             case EXECUTOR.PLAN:
                 return await this.start_plan_executor(
@@ -54,11 +54,7 @@ export default class GenerateContract {
         data: unknown | null;
         message: string;
     }> {
-        console.log("data is : ", {
-            token,
-            contract_id,
-            instruction,
-        })
+        const { setMessage } = useBuilderChatStore.getState();
         try {
             if (!token || !contract_id || !instruction) {
                 return {
@@ -66,7 +62,7 @@ export default class GenerateContract {
                     message: 'some data is not provided',
                 };
             }
-            console.log("found everything");
+
             const { data } = await axios.post(
                 PLAN_CONTEXT_URL,
                 {
@@ -79,9 +75,10 @@ export default class GenerateContract {
                     },
                 },
             );
-            console.log('data is : ', data);
+            console.log('data came in frontend is : ', data.data);
+            setMessage(data.data);
             return {
-                data: data.context,
+                data: data.data,
                 message: data.message,
             };
         } catch (err) {

@@ -704,20 +704,28 @@ export default class Generator extends GeneratorShape {
         user_instruction: string,
         model: MODEL,
         contract_id: string,
-        idl?: Object[],
+        // idl?: Object[],
     ) {
         try {
             const planner_chain = RunnableSequence.from([
                 planning_context_prompt,
                 this.gemini_planner.withStructuredOutput(plan_context_schema),
             ]);
+
             const planner_data = await planner_chain.invoke({ user_instruction });
+            const message = await prisma.message.create({
+                data: {
+                    contractId: contract_id,
+                    role: ChatRole.PLAN,
+                    content: planner_data.short_description,
+                    plannerContext: JSON.stringify(planner_data),
+                },
+            });
             ResponseWriter.success(
                 res,
-                planner_data,
+                message,
                 `successfully outlined your plan for ${planner_data.contract_title}`,
             );
-            console.log('planner data is : ', planner_data);
         } catch (err) {
             ResponseWriter.error(res, 'error in outlining your plan');
             console.error('Error while planning context ', err);

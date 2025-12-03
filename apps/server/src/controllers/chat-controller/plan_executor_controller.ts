@@ -60,7 +60,7 @@ export default async function plan_executor_controller(req: Request, res: Respon
             parsed.data.instruction,
             parsed.data.model || MODEL.GEMINI,
             contract.id,
-            contract.summarisedObject ? JSON.parse(contract.summarisedObject) : undefined,
+            // contract.summarisedObject ? JSON.parse(contract.summarisedObject) : undefined,
         );
     } catch (error) {
         ResponseWriter.server_error(

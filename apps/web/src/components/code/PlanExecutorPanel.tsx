@@ -1,5 +1,6 @@
 'use client';
-import { JSX, useState } from 'react';
+
+import { JSX, useState, useEffect } from 'react';
 import { RiListCheck2 } from 'react-icons/ri';
 import { GiBookmarklet } from 'react-icons/gi';
 import { FaCheckDouble } from 'react-icons/fa6';
@@ -7,55 +8,31 @@ import { cn } from '@/src/lib/utils';
 import { Button } from '../ui/button';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { IoMdExpand } from 'react-icons/io';
-import { AiFillEdit } from "react-icons/ai";
+import { AiFillEdit } from 'react-icons/ai';
 import ToolTipComponent from '../ui/TooltipComponent';
 import { FaPlus } from 'react-icons/fa';
+import { PlanMessage } from '@/src/types/prisma-types';
 
 
-const data = [
-    {
-        selected: false,
-        title: 'Initialize Pool',
-        description: 'Creates a new DLMM pool with the required configuration and state accounts.',
-    },
-    {
-        selected: false,
-        title: 'Initialize Position',
-        description: `Opens a new liquidity position for a user within the pool's bins.`,
-    },
-    {
-        selected: false,
-        title: 'Add Liquidity',
-        description:
-            "Deposits tokens into selected price bins to increase the user's liquidity position.",
-    },
-    {
-        selected: false,
-        title: 'Remove Liquidity',
-        description: `Withdraws liquidity from the user's selected bins, returning tokens.`,
-    },
-    {
-        selected: false,
-        title: 'Swap Tokens',
-        description: `Executes a token swap using the pool's concentrated liquidity across bins.`,
-    },
-    {
-        selected: false,
-        title: 'Collect Fees',
-        description: 'Collects accumulated trading fees earned from providing liquidity.',
-    },
-];
-
-interface PlanExecutorPanelProps {
+export interface PlanExecutorPanelProps {
     className?: string;
     hidePlanSvg?: boolean;
     collapse: boolean;
     expanded: boolean;
     editExeutorPlanPanel: boolean;
+
+    plan: PlanMessage
+
     onEdit?: () => void;
     onExpand?: () => void;
     onCollapse?: () => void;
     onDone?: () => void;
+}
+
+export interface ExecutorInstruction {
+    selected: boolean;
+    title: string;
+    description: string; // using plan.short_description
 }
 
 export default function PlanExecutorPanel({
@@ -67,42 +44,56 @@ export default function PlanExecutorPanel({
     onCollapse,
     onDone,
     editExeutorPlanPanel = false,
+    plan,
 }: PlanExecutorPanelProps): JSX.Element {
-    const [instructions, setInstructions] = useState(data);
+    const [_, setShowDetailedPlan] = useState<boolean>(expanded);
+    const [instructions, setInstructions] = useState<ExecutorInstruction[]>(
+        plan.contract_instructions.map((ins) => ({
+            selected: false,
+            title: ins.title,
+            description: ins.short_description,
+        }))
+    );
 
-    function toggleSelected(index: number) {
+    // Refresh when new plan arrives
+    useEffect(() => {
+        setInstructions(
+            plan.contract_instructions.map((ins) => ({
+                selected: false,
+                title: ins.title,
+                description: ins.short_description,
+            }))
+        );
+    }, [plan]);
+
+    function toggleSelected(index: number): void {
         setInstructions((prev) =>
             prev.map((item, i) => (i === index ? { ...item, selected: !item.selected } : item)),
         );
     }
 
     const hasAnySelected = instructions.some((item) => item.selected);
-    function toggleSelectAll() {
-        const allSelected = instructions.every((item) => item.selected);
 
+    function toggleSelectAll(): void {
+        const allSelected = instructions.every((item) => item.selected);
         setInstructions((prev) =>
-            prev.map((item) => ({
-                ...item,
-                selected: !allSelected,
-            })),
+            prev.map((item) => ({ ...item, selected: !allSelected })),
         );
     }
 
-    function addInstruction() {
-        const newInstruction = {
+    function addInstruction(): void {
+        const newInstruction: ExecutorInstruction = {
             selected: false,
             title: '',
             description: '',
         };
+
         setInstructions((prev) => [...prev, newInstruction]);
 
-        // Focus the new input after it's rendered
         setTimeout(() => {
             const inputs = document.querySelectorAll('input[aria-label="title"]');
             const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
-            if (lastInput) {
-                lastInput.focus();
-            }
+            if (lastInput) lastInput.focus();
         }, 0);
     }
 
@@ -125,104 +116,134 @@ export default function PlanExecutorPanel({
                     }}
                 />
             )}
+
             <div className="absolute top-2 right-2 flex items-center justify-end gap-x-2">
-                <ToolTipComponent content='edit your planning context'>
-                    <div onClick={onEdit} className='size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 select-none'>
-                        <span className='text-[12px] tex-light/90'>edit</span>
+                <ToolTipComponent content="edit your planning context">
+                    <div
+                        onClick={onEdit}
+                        className="size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 select-none"
+                    >
+                        <span className="text-[12px] tex-light/90">edit</span>
                         <AiFillEdit />
                     </div>
-
                 </ToolTipComponent>
+
                 {!expanded && (
-                    <ToolTipComponent content='expand'>
+                    <ToolTipComponent content="expand">
                         <IoMdExpand
                             onClick={onExpand}
-                            className={cn(
-                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 w-fit h-5.5 p-1',
-                            )}
+                            className="size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1"
                         />
                     </ToolTipComponent>
                 )}
+
                 {!expanded && (
-                    <ToolTipComponent content='collapse'>
+                    <ToolTipComponent content="collapse">
                         <MdKeyboardArrowDown
                             onClick={onCollapse}
                             className={cn(
-                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 w-fit h-5.5 p-1',
+                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1',
                                 collapse && 'rotate-180',
                             )}
                         />
                     </ToolTipComponent>
                 )}
-
             </div>
+
+            {/* FILE NAME */}
             <div className="flex items-center justify-start gap-x-2 text-light/70">
                 <RiListCheck2 className="size-3" />
                 <span className="text-[11px] font-semibold select-none">
-                    580f57fd-abd8-4487-90f1-777527d2abac.plan.md
+                    auto-generated.plan.md
                 </span>
             </div>
 
             <h1 className="text-2xl font-bold text-left mt-3 text-light/90 select-none">
-                Dlmm Pool Smart Contract
+                {plan.contract_title}
             </h1>
+
             <p className="text-left text-[13px] text-light/70 mt-1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aspernatur sint odit vel
-                eligendi est enim id itaque, temporibus nam animi ea quo magnam amet veritatis eos?
+                {plan.short_description}
             </p>
 
-            <div className="text-[#80a1c2] text-left text-[11px] mt-2 pl-1 hover:underline cursor-pointer">
+            <div onClick={() => setShowDetailedPlan(true)} className="text-[#80a1c2] text-left text-[11px] mt-2 pl-1 hover:underline cursor-pointer">
                 read detailed plan
             </div>
+            <div>
+                {/* add detailed plan , show instructions here too, with the longer description, not the shorter description , take colors intutions from the below styling, do not change any other styling just add the deatilsed instructions the way it would look is , a instructions title in bulletins and then the longer descriptions */}
+                {expanded && (
+                    <div className="mt-4 pt-4 border-t border-light/10 space-y-3">
+                        <div className="text-[13px] font-medium text-light/90">Detailed Instructions</div>
+                        {plan.contract_instructions.map((instruction, index) => (
+                            <div key={index} className="space-y-1.5">
+                                <div className="flex items-start gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400/70 mt-1.5 flex-shrink-0" />
+                                    <div className="text-[13px] font-medium text-light/90">
+                                        {instruction.title}
+                                    </div>
+                                </div>
+                                <div className="pl-3.5 text-[12px] text-light/60 leading-relaxed">
+                                    {instruction.long_description}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
 
-            <div className={cn("w-full border rounded-[6px]  px-3 pb-3 pt-2 mt-1 relative", editExeutorPlanPanel ? "border-[#80a1c260] bg-[#80a1c210]" : "border-neutral-800 bg-dark-base")}>
+            <div
+                className={cn(
+                    'w-full border rounded-[6px] px-3 pb-3 pt-2 mt-1 relative',
+                    editExeutorPlanPanel
+                        ? 'border-[#80a1c260] bg-[#80a1c210]'
+                        : 'border-neutral-800 bg-dark-base',
+                )}
+            >
                 <div className="text-xs text-light/70 flex items-center justify-start gap-x-2">
                     <GiBookmarklet className="text-light/70 size-3 mt-0.5" />
                     <span>instructions</span>
                 </div>
 
-                <div className='flex items-center justify-end gap-x-2 w-fit absolute top-2 right-2 '>
+                {/* BUTTONS RIGHT */}
+                <div className="flex items-center justify-end gap-x-2 w-fit absolute top-2 right-2 ">
                     {editExeutorPlanPanel && (
                         <Button
                             size={'mini'}
                             variant={'ghost'}
-                            className={cn(
-                                'text-light hover:text-light gap-x-2 hover:bg-dark/80 bg-dark border border-neutral-700 rounded-[8px]',
-                            )}
+                            className="text-light hover:text-light gap-x-2 hover:bg-dark/80 bg-dark border border-neutral-700 rounded-[8px]"
                             onClick={addInstruction}
                         >
                             <FaPlus className="size-2" />
                             <span className="text-xs">Add instruction</span>
                         </Button>
                     )}
+
                     {editExeutorPlanPanel && (
                         <Button
                             size={'mini'}
                             variant={'ghost'}
-                            className={cn(
-                                'text-light hover:text-light gap-x-2 hover:bg-dark/80 bg-dark border border-neutral-700 rounded-[8px]',
-                            )}
+                            className="text-light hover:text-light gap-x-2 hover:bg-dark/80 bg-dark border border-neutral-700 rounded-[8px]"
                             onClick={onDone}
                         >
                             <span className="text-xs">Done</span>
                         </Button>
                     )}
+
                     <Button
                         size={'mini'}
                         variant={'ghost'}
+                        onClick={toggleSelectAll}
                         className={cn(
                             'text-light gap-x-2 hover:bg-dark/80 bg-dark border border-neutral-700 rounded-[8px]',
-                            !allSelected
-                                ? 'text-light/40  hover:text-light/40'
-                                : 'text-light hover:text-light',
+                            !allSelected ? 'text-light/40 hover:text-light/40' : 'text-light',
                         )}
-                        onClick={toggleSelectAll}
                     >
                         <FaCheckDouble className="size-2" />
                         <span className="text-xs">{allSelected ? 'selected all' : 'select all'}</span>
                     </Button>
                 </div>
 
+                {/* INSTRUCTION LIST */}
                 <div className="flex flex-col gap-y-5 mt-5">
                     {instructions.map((ins, index) => (
                         <div
@@ -240,14 +261,14 @@ export default function PlanExecutorPanel({
                             <div className="flex flex-col -mt-1 flex-1">
                                 {editExeutorPlanPanel ? (
                                     <input
-                                        aria-label='title'
+                                        aria-label="title"
                                         type="text"
                                         value={ins.title}
-                                        placeholder='instruction title'
+                                        placeholder="instruction title"
                                         onChange={(e) => {
-                                            const newInstructions = [...instructions];
-                                            newInstructions[index].title = e.target.value;
-                                            setInstructions(newInstructions);
+                                            const updated = [...instructions];
+                                            updated[index].title = e.target.value;
+                                            setInstructions(updated);
                                         }}
                                         className={cn(
                                             'text-[13px] bg-transparent border-none outline-none p-0 m-0 w-full',
@@ -268,31 +289,34 @@ export default function PlanExecutorPanel({
 
                                 {editExeutorPlanPanel ? (
                                     <input
-                                        aria-label='description'
+                                        aria-label="description"
                                         type="text"
                                         value={ins.description}
-                                        placeholder='describe your instruction'
+                                        placeholder="describe your instruction"
                                         onChange={(e) => {
-                                            const newInstructions = [...instructions];
-                                            newInstructions[index].description = e.target.value;
-                                            setInstructions(newInstructions);
+                                            const updated = [...instructions];
+                                            updated[index].description = e.target.value;
+                                            setInstructions(updated);
                                         }}
                                         className="text-[12px] text-light/70 bg-transparent border-none outline-none p-0 m-0 w-full"
                                         onClick={(e) => e.stopPropagation()}
                                     />
                                 ) : (
-                                    <span className="text-[12px] text-light/70">{ins.description}</span>
+                                    <span className="text-[12px] text-light/70">
+                                        {ins.description}
+                                    </span>
                                 )}
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div className='flex items-start justify-end gap-x-3 mt-4'>
+                {/* EXECUTE BUTTON */}
+                <div className="flex items-start justify-end gap-x-3 mt-4">
                     {!editExeutorPlanPanel && (
                         <Button
                             disabled={!hasAnySelected}
-                            className='bg-[#80a1c2] hover:bg-[#80a1c290] !text-light/70 text-[12px] h-auto font-semibold !py-0.5 exec-button-dark disabled:opacity-40 disabled:cursor-not-allowed'
+                            className="bg-[#80a1c2] hover:bg-[#80a1c290] !text-light/70 text-[12px] h-auto font-semibold !py-0.5 exec-button-dark disabled:opacity-40 disabled:cursor-not-allowed"
                             variant={'ghost'}
                             size={'xs'}
                         >

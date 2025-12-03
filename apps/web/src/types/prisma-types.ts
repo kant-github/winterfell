@@ -84,8 +84,23 @@ export interface Message {
     creatingFiles: boolean;
     finalzing: boolean;
     error: boolean;
+    plannerContext?: PlanMessage;
+    isPlanExecuted: boolean;
     createdAt: Date;
 }
+
+export interface PlanMessage {
+    contract_name: string;
+    contract_title: string;
+    short_description: string;
+    long_description: string;
+    contract_instructions: {
+        title: string;
+        short_description: string;
+        long_description: string;
+    }[];
+}
+
 
 export interface Subscription {
     id: string;
@@ -130,6 +145,7 @@ export enum DeploymentStatus {
 }
 
 export enum ChatRole {
+    PLAN = 'PLAN',
     USER = 'USER',
     AI = 'AI',
     SYSTEM = 'SYSTEM',
