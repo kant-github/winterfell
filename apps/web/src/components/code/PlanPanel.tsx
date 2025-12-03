@@ -20,6 +20,9 @@ export default function PlanPanel(): JSX.Element {
                 onExpand={() => {
                     setCurrentState(SidePanelValues.PLAN)
                 }}
+                onDone={() => {
+                    setEditExeutorPlanPanel(false);
+                }}
                 collapse={collapsePanel}
                 expanded
                 editExeutorPlanPanel={editExeutorPlanPanel}
