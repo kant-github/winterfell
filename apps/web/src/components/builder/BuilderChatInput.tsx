@@ -48,6 +48,7 @@ export default function BuilderChatInput() {
                 building: false,
                 creatingFiles: false,
                 finalzing: false,
+                End: false,
                 error: false,
                 createdAt: new Date(),
             });
