@@ -50,6 +50,7 @@ export default function BuilderChatInput() {
                 finalzing: false,
                 End: false,
                 error: false,
+                isPlanExecuted: false,
                 createdAt: new Date(),
             });
 

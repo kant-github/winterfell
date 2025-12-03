@@ -11,20 +11,14 @@ export default async function (req: Request, res: Response) {
         const user = req.user;
 
         if (!user) {
-            res.status(401).json({
-                success: false,
-                message: 'Unauthorized',
-            });
+            ResponseWriter.unauthorized(res);
             return;
         }
 
         const { contractId } = req.body;
 
         if (!contractId) {
-            res.status(400).json({
-                success: false,
-                message: 'chat-id not found!',
-            });
+            ResponseWriter.no_content(res);
             return;
         }
 
@@ -65,10 +59,7 @@ export default async function (req: Request, res: Response) {
         });
 
         if (!contract) {
-            res.status(404).json({
-                success: false,
-                messsage: `contract with id: ${contractId} was not found!`,
-            });
+            ResponseWriter.not_found(res, `contract with id: ${contractId} was not found!`);
             return;
         }
 
@@ -80,14 +71,6 @@ export default async function (req: Request, res: Response) {
             }
             const templateFiles = await response.text();
 
-            res.status(200).json({
-                success: true,
-                message: 'template fetched successfully',
-                latestMessage: '',
-                messages: contract.messages,
-                templateFiles: templateFiles,
-            });
-
             ResponseWriter.custom(res, 200, {
                 success: true,
                 data: { templateFiles },
@@ -97,7 +80,6 @@ export default async function (req: Request, res: Response) {
         }
 
         console.log(chalk.bgRed('--------------------------------- idl'));
-        console.log(JSON.parse(contract.summarisedObject!).map((f: any) => console.log(f.path)));
 
         const sortedMessages = [...contract.messages].sort(
             (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
@@ -131,8 +113,6 @@ export default async function (req: Request, res: Response) {
             }
 
             const contractFiles = await response.text();
-
-            console.log(contractFiles);
 
             res.status(200).json({
                 success: true,
