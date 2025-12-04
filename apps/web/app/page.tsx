@@ -1,5 +1,4 @@
 'use client';
-import { useRef } from 'react';
 import Features from '@/src/components/base/Features';
 import Footer from '@/src/components/base/Footer';
 import Hero from '@/src/components/base/Hero';
@@ -11,7 +10,6 @@ import Faq from '@/src/components/base/Faq';
 import ReviewsSection from '@/src/components/utility/ReviewsSection';
 
 export default function Page() {
-    const parallaxContainerRef = useRef<HTMLDivElement>(null);
 
     return (
         <LenisProvider>

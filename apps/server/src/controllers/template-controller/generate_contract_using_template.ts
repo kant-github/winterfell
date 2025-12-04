@@ -5,24 +5,18 @@ import { generate_template_schema } from '../../schemas/generate_template_schema
 import env from '../../configs/config.env';
 import axios from 'axios';
 
-export default async function generate_template_controller(req: Request, res: Response) {
+export default async function generate_contract_using_template(req: Request, res: Response) {
+    console.log('genarate template controller called');
     try {
-        console.log('inside generate template controller');
         const user = req.user;
+        console.log('req body is : ', req.body);
         if (!user || !user.id) {
             ResponseWriter.unauthorized(res);
             return;
         }
-        const db_user = await prisma.user.findUnique({
-            where: { id: user.id },
-        });
-
-        if (!db_user) {
-            ResponseWriter.not_found(res);
-            return;
-        }
 
         const parsed = generate_template_schema.safeParse(req.body);
+        console.log('parsed data is : ', parsed.success);
         if (!parsed.success) {
             ResponseWriter.validation_error(res, 'Invalid data');
             return;
@@ -30,14 +24,14 @@ export default async function generate_template_controller(req: Request, res: Re
 
         const { contract_id, instruction, template_id } = parsed.data;
 
-        const valid_template = await prisma.template.findUnique({
-            where: { id: template_id },
-        });
+        // const valid_template = await prisma.template.findUnique({
+        //     where: { id: template_id },
+        // });
 
-        if (!valid_template) {
-            ResponseWriter.not_found(res, 'Template not found');
-            return;
-        }
+        // if (!valid_template) {
+        //     ResponseWriter.not_found(res, 'Template not found');
+        //     return;
+        // }
 
         const template_data = await axios.get(
             `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${template_id}/resource`,

@@ -2,7 +2,7 @@ import { GET_ALL_CONTRACTS, GET_ALL_TEMPLATES, GET_USER_CONTRACTS } from '@/rout
 import { ContractData, ContractTemplateData } from '@winterfell/types';
 import axios from 'axios';
 
-export default class ContractServer {
+export default class Marketplace {
     public static async getUserContracts(token: string): Promise<ContractData[]> {
         try {
             const response = await axios.get(GET_USER_CONTRACTS, {
