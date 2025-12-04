@@ -13,7 +13,7 @@ import { useCodeEditor } from "@/src/store/code/useCodeEditor";
 import { useExecutorStore } from "@/src/store/model/useExecutorStore";
 import { SidePanelValues } from "../code/EditorSidePanel";
 import { useEditPlanStore } from "@/src/store/code/useEditPlanStore";
-import SystemMessage from "./SystemMsg";
+import SystemMessage from "./SystemMessage";
 
 interface BuilderMessageProps {
     message: Message;
