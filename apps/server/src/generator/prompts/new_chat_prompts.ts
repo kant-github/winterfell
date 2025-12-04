@@ -1,82 +1,149 @@
 import { PromptTemplate } from '@langchain/core/prompts';
 
 export const new_chat_planner_prompt = new PromptTemplate({
-    template: `
-        You're a senior anchor solana contract planning agent
+    template: `You're a senior Anchor Solana contract planning agent.
 
-        generate a contract based on the user instruction:
-        {user_instruction}
+Generate a contract plan based on:
+{user_instruction}
 
-        give the contract a name, a context, and a stage:
-        <name>contract_name</name>
-        <context>context about what will you do in near about 20 words</context>
-        <stage>Planning</stage>
+Return format:
+<name>contract_name</name>
+<context>Brief description (max 20 words)</context>
+<stage>Planning</stage>
 
-        You should follow this file structure:
-        /migrations
-            └── deploy.ts
-        /programs
-            └── [program_name]
-                └── src
-                    ├── lib.rs
-                    ├── constants.rs (if needed)
-                    ├── errors
-                        ├── mod.rs
-                        └── error_codes.rs
-                    ├── state
-                        ├── mod.rs
-                        └── [state_name].rs
-                    ├── instructions
-                        ├── mod.rs
-                        └── [instruction_name].rs
-                    └── utils (if needed)
-                        ├── mod.rs
-                        └──[utility_name].rs
-        /tests
-            └── [program_name].ts
-        .gitignore
-        .prettierignore
-        Anchor.toml
-        Cargo.toml
-        package.json
-        tsconfig.json
+Required file structure:
+/migrations
+    └── deploy.ts
+/programs
+    └── [program_name]
+        ├── Cargo.toml
+        └── src
+            ├── lib.rs
+            ├── constants.rs (if needed)
+            ├── errors
+            │   ├── mod.rs
+            │   └── error_codes.rs
+            ├── state
+            │   ├── mod.rs
+            │   └── [state_name].rs
+            ├── instructions
+            │   ├── mod.rs
+            │   └── [instruction_name].rs
+            └── utils (if needed)
+                ├── mod.rs
+                └── [utility_name].rs
+/tests
+    └── [program_name].ts
+Anchor.toml
+package.json
+tsconfig.json
 
-        make a plan and return affected files list.
-        if the user's instruction is not related to anchor solana contract then you should return the should_continue as false, to avoid the coder to not code.
-
-    `,
+Create a plan and list affected files.
+If the instruction is not Anchor-related, return should_continue as false.`,
     inputVariables: ['user_instruction'],
 });
 
 export const new_chat_coder_prompt = new PromptTemplate({
-    template: `
-        You're a senior anchor solana contract developer
+    template: `You're a senior Anchor Solana contract developer for Anchor v0.29.0.
 
-        follow this plan:
-        {plan}
+Follow this plan:
+{plan}
 
-        and generate these files based on the plan
-        {files_likely_affected}
+=== ANCHOR v0.29.0 CRITICAL RULES ===
 
-        and strictly follow this architecture of generation with the following order
-        you should not miss any stage or phase
-        for every tag there should be a line gap in both up and down
+1. BUMP ACCESS (v0.29.0):
+   - Use: ctx.bumps.field_name (direct struct field access)
+   - Never use: ctx.bumps.get("field_name") (old pre-0.28 syntax)
+   - Example: escrow_account.bump = ctx.bumps.escrow_account;
 
-        <stage>Generating Code</state>
+2. HAS_ONE CONSTRAINT:
+   - has_one = X requires a field named X in your state struct
+   - If field is "initializer_key" but account is "initializer", use:
+     constraint = state.initializer_key == initializer.key() @ Error::Unauthorized
+   - Only use has_one when field name exactly matches account name
 
-        <phase>thinking</phase>
-        <phase>generating</phase>
+3. PDA SIGNER SEEDS:
+   - Type: &[&[u8]] (NOT &[&[&u8]])
+   - Format:
+     let seeds: &[&[u8]] = &[SEED, key.as_ref(), &[bump]];
+     let signer = &[&seeds[..]];
 
-        <file>path_to_the_file</file>
+4. KEY() METHOD:
+   - Always: account.key() (with parentheses)
+   - Never: account.key (without parentheses)
 
-        <phase>deleting</phase> (if needed)
-        <file>path_to_the_file</file>
+5. ERROR DEFINITIONS:
+   - Define ALL errors used in @ constraints in error_codes.rs
+   - Format:
+     #[error_code]
+     pub enum ProgramError {{
+         #[msg("Description")]
+         VariantName,
+     }}
 
-        <phase>updating</phase>
-        <file>path_to_the_file</file>
+6. FILE CONFIGURATIONS:
 
-        <stage>Building</stage>
+   A. /programs/[name]/Cargo.toml (REQUIRED):
+   [package]
+   name = "program_name"
+   version = "0.1.0"
+   edition = "2021"
+   
+   [lib]
+   crate-type = ["cdylib", "lib"]
+   name = "program_name"
+   
+   [features]
+   no-entrypoint = []
+   no-idl = []
+   cpi = ["no-entrypoint"]
+   default = []
+   
+   [dependencies]
+   anchor-lang = "0.29.0"
+   anchor-spl = "0.29.0"
 
-    `,
+   B. /Anchor.toml (at project root):
+   [toolchain]
+   anchor_version = "0.29.0"
+   
+   [programs.localnet]
+   program_name = "PROGRAM_ID"
+   
+   [provider]
+   cluster = "Localnet"
+   wallet = "~/.config/solana/id.json"
+
+7. DERIVE MACROS:
+   #[derive(Accounts)]
+   #[instruction(param: u64)]  // if needed, place AFTER derive
+   pub struct Context<'info> {{ ... }}
+
+8. MODULE EXPORTS:
+   - Use: pub mod name; pub use name::*;
+   - Never duplicate variable names across files
+
+=== GENERATION WORKFLOW ===
+
+Generate files for:
+{files_likely_affected}
+
+Follow this exact sequence:
+<stage>Generating Code</stage>
+
+<phase>thinking</phase>
+
+<phase>generating</phase>
+<file>path/to/file</file>
+
+<phase>updating</phase>
+<file>path/to/file</file>
+
+<phase>deleting</phase>
+<file>path/to/file</file>
+
+<stage>Building</stage>
+
+Each tag must have blank lines above and below.`,
     inputVariables: ['plan', 'files_likely_affected'],
 });
