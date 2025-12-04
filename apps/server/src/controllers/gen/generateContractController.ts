@@ -1,9 +1,11 @@
 import { ChatRole, PlanType, prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
-import { generator } from '../../services/init';
+import { generator, objectStore } from '../../services/init';
 import ResponseWriter from '../../class/response_writer';
 import { generate_contract_schema } from '../../schemas/generate_contract_schema';
-import { MODEL } from '@winterfell/types';
+import { FileContent, MODEL } from '@winterfell/types';
+import env from '../../configs/config.env';
+import axios from 'axios';
 
 export default async function generateContractController(req: Request, res: Response) {
     try {
@@ -14,14 +16,44 @@ export default async function generateContractController(req: Request, res: Resp
         }
 
         const parsed_data = generate_contract_schema.safeParse(req.body);
-
         if (!parsed_data.success) {
             ResponseWriter.error(res, 'Invalid data', 400);
             return;
         }
 
-        // safe parse validation check
         const { contract_id, instruction, model } = parsed_data.data;
+
+        // template override request
+        const contract = await prisma.contract.findUnique({
+            where: {
+                id: contract_id
+            },
+            include: {
+                messages: true
+            }
+        });
+
+        // validates initial message and isTemplate, gets the template from template-cdn and updates the contract to user-contracts' s3
+        // thsi way, it becomes an existing contract and user can continue from there
+        if (contract?.isTemplate && contract.messages.length === 1) {
+            console.log('inside update template');
+            const files = await axios.get(`${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${contract.title}/resource`);
+            if (!files) {
+                ResponseWriter.server_error(res, 'Failed to fetch template files');
+                return;
+            }
+            console.log('files from cdn are: ', files);
+            
+            try {
+                console.log('updating the files to user-contract s3');
+                await objectStore.uploadContractFiles(contract_id, files.data, JSON.stringify(files));
+                console.log('updated the files');
+            } catch (error) {
+                console.error('error in uploading the files to s3', error);
+                return;
+            }
+        }
+
 
         if (model === MODEL.CLAUDE) {
             const existing_user = await prisma.user.findUnique({

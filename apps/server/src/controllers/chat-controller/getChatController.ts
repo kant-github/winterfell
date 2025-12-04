@@ -67,10 +67,13 @@ export default async function (req: Request, res: Response) {
             }
             const templateFiles = await response.text();
 
-            ResponseWriter.custom(res, 200, {
+            res.status(200).json({
                 success: true,
-                data: { templateFiles },
-                meta: { timestamp: Date.now().toString() },
+                latestMessage: contract.messages,
+                message: 'fetched template files',
+                messages: contract.messages,
+                contract: contract,
+                contractFiles: templateFiles,
             });
             return;
         }
