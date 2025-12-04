@@ -1,6 +1,6 @@
 'use client';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
-import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { ChatRole } from '@/src/types/prisma-types';
 import Image from 'next/image';
@@ -12,7 +12,7 @@ import { v4 as uuid } from 'uuid';
 export default function ContractTemplates() {
     const { templates } = useTemplateStore();
     const { setMessage } = useBuilderChatStore();
-    const { activeTemplate, setActiveTemplate } = useActiveTemplateStore();
+    const { activeTemplate, setActiveTemplate } = useTemplateStore();
     const router = useRouter();
 
     function handleStartBuilding() {

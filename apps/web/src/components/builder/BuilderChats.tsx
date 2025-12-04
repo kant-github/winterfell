@@ -9,7 +9,7 @@ import { GENERATE_TEMPLATE } from '@/routes/api_routes';
 import { useChatStore } from '@/src/store/user/useChatStore';
 import { ChatRole } from '@/src/types/prisma-types';
 import { toast } from 'sonner';
-import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import GenerateContract from '@/src/lib/server/generate_contract';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import BuilderMessage from './BuilderMessage';
@@ -21,7 +21,7 @@ export default function BuilderChats() {
     const contractId = params.contractId as string;
     const hasInitialized = useRef<boolean>(false);
     const messageEndRef = useRef<HTMLDivElement>(null);
-    const { activeTemplate, resetTemplate } = useActiveTemplateStore();
+    const { activeTemplate, resetTemplate } = useTemplateStore();
     const { session } = useUserSessionStore();
     const { setContractId } = useChatStore();
     const { messages, loading, setLoading } = useBuilderChatStore();
@@ -108,7 +108,7 @@ export default function BuilderChats() {
         const result = message.split('<stage>')[0];
         return result;
     }
-    
+
     return (
         <div
             className="w-full max-w-md min-w-md flex flex-col pt-4"
