@@ -65,7 +65,7 @@ export default function ArchitectureTitleComponent({
         >
             <AnimatePresence>
                 <motion.div
-                    className="h-[90%] px-8 mt-8"
+                    className="h-[90%] px-3 md:px-8 mt-8"
                     initial="hidden"
                     animate={isInView ? 'visible' : 'hidden'}
                 >

@@ -12,7 +12,7 @@ import React, { useEffect, useState, useCallback, useRef, use } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 import { useRouter } from 'next/navigation';
 import Playyground from '@/src/lib/server/playground';
-import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 
 const REVIEW_STORAGE_KEY = 'contract-reviewed-';
 
@@ -32,7 +32,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     }, [contractId]);
 
     const [hasShownReview, setHasShownReview] = useState(hasReviewed);
-    const { activeTemplate } = useActiveTemplateStore();
+    const { activeTemplate } = useTemplateStore();
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {

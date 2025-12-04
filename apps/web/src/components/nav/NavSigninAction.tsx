@@ -43,7 +43,7 @@ export default function NavbarSigninAction() {
                         onClick={() => setShowDropdown((prev) => !prev)}
                         className="flex items-center justify-center gap-x-3 hover:bg-neutral-700/70 py-1.5 px-3 rounded-lg cursor-pointer select-none"
                     >
-                        <span className="text-light text-sm tracking-wider font-semibold">
+                        <span className="text-light text-sm tracking-wider font-semibold hidden md:block">
                             {`${session?.user?.name?.split(' ')[0]}'s Winterfell`}
                         </span>
                         {session?.user.image && (

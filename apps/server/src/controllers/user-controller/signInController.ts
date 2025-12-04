@@ -16,14 +16,28 @@ type UpdateUserData = {
 export default async function signInController(req: Request, res: Response) {
     try {
         const { user, account, turnstileToken, linkingUserId } = req.body;
+        const isLinking = !!linkingUserId;
+
+        if (!isLinking) {
+            if (!turnstileToken) {
+                return res.status(400).json({ success: false });
+            }
+
+            const clientIp =
+                req.ip || (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+
+            const isValid = await verifyTurnstileToken(turnstileToken, clientIp);
+
+            if (!isValid) {
+                return res.status(403).json({ success: false, message: 'Turnstile verification failed' });
+            }
+        }
 
         if (!user?.email) {
             return res.status(400).json({ success: false });
         }
+
         if (!account?.provider) {
-            return res.status(400).json({ success: false });
-        }
-        if (!turnstileToken) {
             return res.status(400).json({ success: false });
         }
 
@@ -31,24 +45,18 @@ export default async function signInController(req: Request, res: Response) {
             return res.status(500).json({ success: false });
         }
 
-        const clientIp =
-            req.ip || (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
-
-        const isValid = await verifyTurnstileToken(turnstileToken, clientIp);
-
-        if (!isValid) {
-            console.log('turnstile rejected');
-            return res.status(403).json({ success: false });
-        }
-
         const isGithub = account.provider === 'github';
 
         let existingUser = null;
 
-        if (linkingUserId) {
+        if (isLinking) {
             existingUser = await prisma.user.findUnique({
                 where: { id: linkingUserId },
             });
+
+            if (!existingUser) {
+                return res.status(404).json({ success: false, message: 'User not found for linking' });
+            }
         }
 
         if (!existingUser) {
@@ -70,10 +78,7 @@ export default async function signInController(req: Request, res: Response) {
             }
 
             if (isGithub) {
-                console.log('fetching github username');
                 owner = await github_services.get_github_owner(account.access_token);
-                console.log('github owner:', owner);
-
                 updateData.githubAccessToken = account.access_token;
                 updateData.githubId = account.providerAccountId;
                 updateData.githubUsername = owner;
@@ -85,9 +90,7 @@ export default async function signInController(req: Request, res: Response) {
             });
         } else {
             if (isGithub) {
-                console.log('fetching github username for new user');
                 owner = await github_services.get_github_owner(account.access_token);
-                console.log('github owner:', owner);
             }
 
             myUser = await prisma.user.create({
@@ -129,7 +132,7 @@ export default async function signInController(req: Request, res: Response) {
         ResponseWriter.server_error(
             res,
             'Failed to signin',
-            error instanceof Error ? error.message : undefined,
+            error instanceof Error ? error.message : undefined
         );
         return;
     }
@@ -143,7 +146,7 @@ async function verifyTurnstileToken(token: string, ip?: string): Promise<boolean
                 secret: env.SERVER_TURNSTILE_SERVER_KEY,
                 response: token,
                 remoteip: ip,
-            },
+            }
         );
         return response.data.success === true;
     } catch {

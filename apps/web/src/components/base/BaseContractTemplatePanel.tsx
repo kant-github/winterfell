@@ -2,15 +2,13 @@ import Image from 'next/image';
 import { HiPlus } from 'react-icons/hi';
 import { cn } from '@/src/lib/utils';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 
 interface BaseContractTemplatePanelProps {
     closePanel: () => void;
 }
 
 export default function BaseContractTemplatesPanel({ closePanel }: BaseContractTemplatePanelProps) {
-    const { setActiveTemplate } = useActiveTemplateStore();
-    const { templates } = useTemplateStore();
+    const { templates, setActiveTemplate } = useTemplateStore();
 
     return (
         <div

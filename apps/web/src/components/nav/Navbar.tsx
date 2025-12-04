@@ -61,7 +61,7 @@ export default function Navbar() {
         <>
             <div
                 className={cn(
-                    'fixed w-full z-[100] flex items-center justify-between px-6 top-4 transition-all duration-500 ease-in-out',
+                    'fixed w-full z-[100] flex items-center justify-between px-3 md:px-6 top-4 transition-all duration-500 ease-in-out',
                     isNavbarVisible
                         ? 'translate-y-0'
                         : '-translate-y-[calc(100%+2rem)] pointer-events-none',

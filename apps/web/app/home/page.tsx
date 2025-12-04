@@ -25,7 +25,7 @@ export default function Home() {
             const all_contracts = await ContractServer.getAllContracts(session.user.token);
             setAllContracts(all_contracts);
 
-            const all_templates = await ContractServer.getTemplates(session.user.token);
+            const all_templates = await ContractServer.getTemplates();
             setTemplates(all_templates);
         };
 

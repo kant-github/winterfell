@@ -27,6 +27,7 @@ model User {
   contracts                 Contract[]
   contractGenerationReviews ContractGenerationReviews[]
   publicReviews             PublicReview[]
+  uploadedFiles   FileUpload[]
 }
 
 model Contract {
@@ -62,6 +63,18 @@ model Contract {
   buildJob                  BuildJob[]
   messages                  Message[]
   contractGenerationReviews ContractGenerationReviews[]
+}
+
+model FileUpload {
+  id    String  @id @default(cuid())
+  filename  String
+  size  Int
+  s3Url String
+
+  user    User @relation(fields: [userId], references: [id])
+  userId  String
+
+  createdAt DateTime @default(now())
 }
 
 model Template {
