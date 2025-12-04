@@ -9,18 +9,18 @@ import DashboardTextAreaComponent from './DashboardTextAreaComponent';
 import HighlighterTicker from '../tickers/HighlighterTicker';
 import { useRouter } from 'next/navigation';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import ContractServer from '@/src/lib/server/contract-server';
+import Marketplace from '@/src/lib/server/contract-server';
 
 export default function Hero() {
     const heroRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(heroRef, { once: true });
     const controls = useAnimation();
     const router = useRouter();
-    const { setTemplates, templates } = useTemplateStore();
+    const { setTemplates } = useTemplateStore();
 
     useEffect(() => {
         const get_templates = async () => {
-            const response = await ContractServer.getTemplates();
+            const response = await Marketplace.getTemplates();
             setTemplates(response);
         };
         get_templates();

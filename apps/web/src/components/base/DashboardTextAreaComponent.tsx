@@ -10,13 +10,13 @@ import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
 import { ChatRole } from '@/src/types/prisma-types';
 import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useActiveTemplateStore } from '@/src/store/user/useActiveTemplateStore';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import Image from 'next/image';
 import ExecutorSelect from './ExecutorSelect';
 import { RxCross2 } from 'react-icons/rx';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
+import { STAGE } from '@/src/types/stream_event_types';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -26,7 +26,6 @@ export default function DashboardTextAreaComponent() {
     const router = useRouter();
     const { session } = useUserSessionStore();
     const { setMessage } = useBuilderChatStore();
-    const { setTemplates } = useTemplateStore();
     const { executor, setExecutor } = useExecutorStore();
     const { activeTemplate, resetTemplate } = useActiveTemplateStore();
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -49,12 +48,8 @@ export default function DashboardTextAreaComponent() {
                 contractId: contractId,
                 role: ChatRole.USER,
                 content: `Generate ${activeTemplate.id} template for me`,
-                planning: false,
-                generatingCode: false,
-                building: false,
-                creatingFiles: false,
-                finalzing: false,
-                error: false,
+                stage: STAGE.START,
+                isPlanExecuted: false,
                 createdAt: new Date(),
             });
         } else {
@@ -63,12 +58,8 @@ export default function DashboardTextAreaComponent() {
                 contractId: contractId,
                 role: ChatRole.USER,
                 content: inputValue,
-                planning: false,
-                generatingCode: false,
-                building: false,
-                creatingFiles: false,
-                finalzing: false,
-                error: false,
+                stage: STAGE.START,
+                isPlanExecuted: false,
                 createdAt: new Date(),
             });
         }
@@ -211,7 +202,7 @@ export default function DashboardTextAreaComponent() {
                                 className={cn(
                                     'md:w-3 md:h-3 w-1 h-1 transition-transform',
                                     (inputValue.trim() || activeTemplate) &&
-                                        'group-hover/submit:translate-x-0.5 duration-200',
+                                    'group-hover/submit:translate-x-0.5 duration-200',
                                 )}
                             />
                         </Button>

@@ -2,9 +2,6 @@ import { prisma } from '@winterfell/database';
 import { Request, Response } from 'express';
 import env from '../../configs/config.env';
 import ResponseWriter from '../../class/response_writer';
-import chalk from 'chalk';
-import axios from 'axios';
-import { title } from 'process';
 import { STAGE } from '@winterfell/types';
 
 export default async function (req: Request, res: Response) {

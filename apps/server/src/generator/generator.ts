@@ -216,6 +216,7 @@ export default class Generator extends GeneratorShape {
             this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
 
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
+            console.log('files from llm: ', llm_generated_files);
             const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
             const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
 

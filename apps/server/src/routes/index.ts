@@ -18,8 +18,8 @@ import githubProjectZipController from '../controllers/github-deploy-controller/
 import getUserContracts from '../controllers/contract-controller/getUserContracts';
 import getAllContracts from '../controllers/contract-controller/getAllContracts';
 import getAllTemplates from '../controllers/template-controller/getAllTemplates';
-import generate_template_controller from '../controllers/template-controller/generate_template_controller';
 import plan_executor_controller from '../controllers/chat-controller/plan_executor_controller';
+import generate_contract_using_template from '../controllers/template-controller/generate_contract_using_template';
 
 const router: Router = Router();
 
@@ -65,7 +65,7 @@ router.post('/review', authMiddleware, createContractReview);
 // templates
 router.post('/templates/sync-templates', syncTemplate);
 router.get('/template/get-templates', getAllTemplates);
-router.post('/template/generate-template', authMiddleware, generate_template_controller);
+router.post('/template/generate-template', authMiddleware, generate_contract_using_template);
 
 // contracts
 router.get('/contracts/get-user-contracts', authMiddleware, getUserContracts);
