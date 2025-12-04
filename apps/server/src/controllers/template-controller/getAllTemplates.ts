@@ -18,10 +18,7 @@ export default async function getAllTemplates(req: Request, res: Response) {
             },
         });
 
-        if (!templates || templates.length === 0) {
-            ResponseWriter.server_error(res, 'Failed to fetch templates');
-            return;
-        }
+        console.log('templates fetched:', templates);
 
         ResponseWriter.success(res, templates, 'Fetched templates successfully');
         return;

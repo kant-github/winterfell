@@ -83,9 +83,10 @@ model Template {
   description   String?
   category      String
   tags          String[]
-  s3_prefix     String
+  s3_prefix     String?
   solanaVersion String
   anchorVersion String
+  summarisedObject String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
