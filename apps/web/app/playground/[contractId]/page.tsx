@@ -1,18 +1,15 @@
 'use client';
-import { GET_CHAT_URL } from '@/routes/api_routes';
 import BuilderDashboard from '@/src/components/builder/BuilderDashboard';
 import BuilderNavbar from '@/src/components/nav/BuilderNavbar';
 import { cleanWebSocketClient } from '@/src/lib/singletonWebSocket';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import axios from 'axios';
 import { useChatStore } from '@/src/store/user/useChatStore';
 import React, { useEffect, useState, useCallback, useRef, use } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 import { useRouter } from 'next/navigation';
 import Playyground from '@/src/lib/server/playground';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 
 const REVIEW_STORAGE_KEY = 'contract-reviewed-';
 
@@ -32,7 +29,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     }, [contractId]);
 
     const [hasShownReview, setHasShownReview] = useState(hasReviewed);
-    const { activeTemplate } = useTemplateStore();
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
