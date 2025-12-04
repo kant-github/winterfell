@@ -4,7 +4,6 @@ import { LayoutGrid } from "../ui/animated/layout-grid-icon";
 import AppLogo from "../tickers/AppLogo";
 import { useUserSessionStore } from "@/src/store/user/useUserSessionStore";
 import Image from "next/image";
-import SystemMessage from "./SystemMessage";
 import { TextShimmer } from "../ui/shimmer-text";
 import { formatChatTime } from '@/src/lib/format_chat_time';
 import { useBuilderChatStore } from "@/src/store/code/useBuilderChatStore";
@@ -14,6 +13,7 @@ import { useCodeEditor } from "@/src/store/code/useCodeEditor";
 import { useExecutorStore } from "@/src/store/model/useExecutorStore";
 import { SidePanelValues } from "../code/EditorSidePanel";
 import { useEditPlanStore } from "@/src/store/code/useEditPlanStore";
+import SystemMessage from "./SystemMsg";
 
 interface BuilderMessageProps {
     message: Message;
@@ -133,11 +133,6 @@ export default function BuilderMessage({ message, loading, hasContext, returnPar
                             )}
                             <SystemMessage
                                 message={message}
-                                data={{
-                                    currentStage: undefined as never,
-                                    currentPhase: undefined as never,
-                                    currentFile: undefined as never,
-                                }}
                             />
                         </div>
                     </div>

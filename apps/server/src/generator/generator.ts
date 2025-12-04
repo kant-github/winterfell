@@ -165,7 +165,7 @@ export default class Generator extends GeneratorShape {
                         contractId: contract_id,
                         role: ChatRole.SYSTEM,
                         content: 'starting to generate in a few seconds',
-                        planning: true,
+                        stage: STAGE.PLANNING,
                     },
                 });
                 const update_contract = await tx.contract.update({
@@ -206,7 +206,7 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                 },
                 data: {
-                    creatingFiles: true,
+                    stage: STAGE.CREATING_FILES,
                 },
             });
 
@@ -250,7 +250,7 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                 },
                 data: {
-                    finalzing: true,
+                    stage: STAGE.FINALIZING,
                 },
             });
 
@@ -267,7 +267,7 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                 },
                 data: {
-                    End: true,
+                    stage: STAGE.END,
                 },
             });
             console.log('the stage: ', chalk.green('END'));
@@ -351,7 +351,7 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                     role: ChatRole.SYSTEM,
                     content: 'starting to generate in a few seconds',
-                    planning: true,
+                    stage: STAGE.PLANNING,
                 },
             });
 
@@ -400,7 +400,7 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                 },
                 data: {
-                    building: true,
+                    stage: STAGE.BUILDING,
                 },
             });
 
@@ -416,7 +416,7 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                 },
                 data: {
-                    creatingFiles: true,
+                    stage: STAGE.CREATING_FILES,
                 },
             });
 
@@ -457,7 +457,7 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                 },
                 data: {
-                    finalzing: true,
+                    stage: STAGE.FINALIZING,
                 },
             });
 
@@ -474,7 +474,7 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                 },
                 data: {
-                    End: true,
+                    stage: STAGE.END,
                 },
             });
             console.log('the stage: ', chalk.green('END'));

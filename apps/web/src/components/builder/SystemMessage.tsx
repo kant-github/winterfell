@@ -150,13 +150,7 @@ function dataFetcher({ message, data }: SystemMessageProps): {
     let currentFile;
 
     if (message) {
-        if (message.error) currentStage = STAGE.ERROR;
-        else if (message.finalzing) currentStage = STAGE.END;
-        else if (message.creatingFiles) currentStage = STAGE.CREATING_FILES;
-        else if (message.building) currentStage = STAGE.BUILDING;
-        else if (message.generatingCode) currentStage = STAGE.GENERATING_CODE;
-        else if (message.planning) currentStage = STAGE.PLANNING;
-        else currentStage = STAGE.START;
+        currentStage = message.stage;
     } else {
         currentStage = data.currentStage;
         currentPhase = data.currentPhase;

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FaListUl } from "react-icons/fa6";
 import { CircleDotDashed } from "../ui/animated/circle-dot-dashed";
 import { Check } from "lucide-react";
+import { BsCheck2All } from "react-icons/bs";
 
 interface StageItem {
     stage: STAGE;
@@ -34,9 +35,11 @@ export default function SystemMessage({ message, currentPhase, currentFile }: Sy
     const showPhases = currentStage === STAGE.GENERATING_CODE;
     const currentStageIndex = stages.findIndex(s => s.stage === currentStage);
     const allCompleted = currentStage === STAGE.END;
+    const completedStage = stages.find((s) => s.stage === STAGE.END)!;
 
     useEffect(() => {
-        setCurrentStage(dataFetcher(message));
+        console.log({ message });
+        setCurrentStage(message.stage);
     }, [message]);
 
     return (
@@ -99,24 +102,16 @@ export default function SystemMessage({ message, currentPhase, currentFile }: Sy
                     );
                 })}
             </div>
-
+            {allCompleted && (
+                <div className="px-5 pb-4 flex items-center gap-x-3 animate-fade-in">
+                    <div className="text-green-600">
+                        <BsCheck2All className="size-4" />
+                    </div>
+                    <div className="text-light/70 tracking-wider text-[13px]">
+                        {completedStage.show}
+                    </div>
+                </div>
+            )}
         </div>
     );
-}
-
-function dataFetcher(message: Message) {
-
-    let currentStage: STAGE;
-
-    if (message.error) currentStage = STAGE.ERROR;
-    else if (message.End) currentStage = STAGE.END;
-    else if (message.finalzing) currentStage = STAGE.FINALIZING;
-    else if (message.creatingFiles) currentStage = STAGE.CREATING_FILES;
-    else if (message.building) currentStage = STAGE.BUILDING;
-    else if (message.generatingCode) currentStage = STAGE.GENERATING_CODE;
-    else if (message.planning) currentStage = STAGE.PLANNING;
-    else currentStage = STAGE.START;
-
-    return currentStage;
-
 }

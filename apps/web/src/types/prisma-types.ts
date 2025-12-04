@@ -1,3 +1,5 @@
+import { STAGE } from "./stream_event_types";
+
 export enum PlanType {
     FREE = 'FREE',
     PREMIUM = 'PREMIUM',
@@ -78,13 +80,7 @@ export interface Message {
     contract?: Contract;
     role: ChatRole;
     content: string;
-    planning: boolean;
-    generatingCode: boolean;
-    building: boolean;
-    creatingFiles: boolean;
-    finalzing: boolean;
-    End: boolean;
-    error: boolean;
+    stage: STAGE,
     plannerContext?: PlanMessage;
     isPlanExecuted: boolean;
     createdAt: Date;

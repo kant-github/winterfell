@@ -5,6 +5,7 @@ import ResponseWriter from '../../class/response_writer';
 import chalk from 'chalk';
 import axios from 'axios';
 import { title } from 'process';
+import { STAGE } from '@winterfell/types';
 
 export default async function (req: Request, res: Response) {
     try {
@@ -43,12 +44,7 @@ export default async function (req: Request, res: Response) {
                         id: true,
                         role: true,
                         content: true,
-                        planning: true,
-                        generatingCode: true,
-                        building: true,
-                        creatingFiles: true,
-                        finalzing: true,
-                        error: true,
+                        stage: true,
                         createdAt: true,
                     },
                     orderBy: {
@@ -79,22 +75,21 @@ export default async function (req: Request, res: Response) {
             return;
         }
 
-        console.log(chalk.bgRed('--------------------------------- idl'));
-
         const sortedMessages = [...contract.messages].sort(
             (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
         );
 
         // this is the latest system message
+        // check it out once
         const latestMessage = sortedMessages.find(
-            (m) => m.role === 'SYSTEM' && m.finalzing && !m.error,
+            (m) => m.role === 'SYSTEM' && m.stage === STAGE.END,
         );
 
         if (!latestMessage) {
             throw new Error('system message not found');
         }
 
-        if (latestMessage.error) {
+        if (latestMessage.stage === STAGE.ERROR) {
             res.status(200).json({
                 success: true,
                 message: 'contract generation threw an error',
@@ -105,7 +100,7 @@ export default async function (req: Request, res: Response) {
             return;
         }
 
-        if (latestMessage.finalzing) {
+        if (latestMessage.stage === STAGE.END) {
             const contract_url = `${env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/resource`;
             const response = await fetch(contract_url);
             if (!response.ok) {

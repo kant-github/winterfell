@@ -143,13 +143,7 @@ model Message {
   role    ChatRole
   content String   @db.Text
 
-  planning       Boolean @default(false)
-  generatingCode Boolean @default(false)
-  building       Boolean @default(false)
-  creatingFiles  Boolean @default(false)
-  finalzing      Boolean @default(false)
-  End            Boolean @default(false)
-  error          Boolean @default(false)
+  stage          ContractGenerationStage?
   plannerContext String?
   isPlanExecuted Boolean @default(false)
 
@@ -260,10 +254,12 @@ enum SystemMessageType {
   BUILD_ERROR
 }
 
-enum ContractGenerationPhase {
+enum ContractGenerationStage {
   PLANNING
   GENERATING_CODE
   BUILDING
   CREATING_FILES
   FINALIZING
+  END
+  ERROR
 }
