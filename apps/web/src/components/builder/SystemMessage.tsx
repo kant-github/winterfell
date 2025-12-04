@@ -105,7 +105,7 @@ export default function SystemMessage({ message, currentPhase, currentFile }: Sy
                                     {show}
                                 </div>
 
-                                {stage === STAGE.GENERATING_CODE &&
+                                {/* {stage === STAGE.GENERATING_CODE &&
                                     currentStage === STAGE.GENERATING_CODE && (
                                         <div className="pl-5 text-xs opacity-50">
                                             {currentFile
@@ -114,7 +114,7 @@ export default function SystemMessage({ message, currentPhase, currentFile }: Sy
                                                   ? `phase: ${currentPhase}`
                                                   : 'editing files'}
                                         </div>
-                                    )}
+                                    )} */}
                             </div>
                         </div>
                     );

@@ -108,8 +108,7 @@ export default function BuilderChats() {
         const result = message.split('<stage>')[0];
         return result;
     }
-    console.log('messages is at frontend : ', messages);
-
+    
     return (
         <div
             className="w-full max-w-md min-w-md flex flex-col pt-4"
