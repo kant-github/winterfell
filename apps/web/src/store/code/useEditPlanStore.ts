@@ -1,5 +1,5 @@
-import { PlanMessage } from "@/src/types/prisma-types";
-import { create } from "zustand";
+import { PlanMessage } from '@/src/types/prisma-types';
+import { create } from 'zustand';
 
 interface EditPlanStore {
     message: PlanMessage | null;

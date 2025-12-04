@@ -13,6 +13,7 @@ import { ChatRole } from '@/src/types/prisma-types';
 import { toast } from 'sonner';
 import GenerateContract from '@/src/lib/server/generate_contract';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
+import { STAGE } from '@/src/types/stream_event_types';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -43,12 +44,7 @@ export default function BuilderChatInput() {
                 contractId: contractId,
                 role: ChatRole.USER,
                 content: messageContent,
-                planning: false,
-                generatingCode: false,
-                building: false,
-                creatingFiles: false,
-                finalzing: false,
-                error: false,
+                isPlanExecuted: false,
                 createdAt: new Date(),
             });
 

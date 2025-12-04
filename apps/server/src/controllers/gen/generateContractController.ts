@@ -114,13 +114,14 @@ export default async function generateContractController(req: Request, res: Resp
             ResponseWriter.server_error(res);
             return;
         } else {
-            res.write(
+            ResponseWriter.stream.write(
+                res,
                 `data: ${JSON.stringify({
                     type: 'error',
                     error: 'Internal server error',
                 })}\n\n`,
             );
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 }

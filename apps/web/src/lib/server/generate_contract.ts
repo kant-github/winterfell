@@ -176,6 +176,7 @@ export default class GenerateContract {
                             case STAGE.CREATING_FILES:
                             case STAGE.FINALIZING:
                                 if (event.systemMessage) {
+                                    setPhase(event.systemMessage.stage);
                                     upsertMessage(event.systemMessage);
                                 }
                                 break;

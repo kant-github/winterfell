@@ -1,14 +1,19 @@
+'use client';
+
+import { cn } from '@/src/lib/utils';
+import { Message } from '@/src/types/prisma-types';
 import {
     FILE_STRUCTURE_TYPES,
     LOADER_STATES,
     PHASE_TYPES,
     STAGE,
 } from '@/src/types/stream_event_types';
-import { Check } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
-import { Message } from '@/src/types/prisma-types';
-import { BsCheck2All } from 'react-icons/bs';
+
+import { useEffect, useMemo, useState } from 'react';
 import { FaListUl } from 'react-icons/fa6';
+import { BsCheck2All } from 'react-icons/bs';
+import { Check } from 'lucide-react';
+
 import { CircleDotDashed } from '../ui/animated/circle-dot-dashed';
 
 interface StageItem {
@@ -22,61 +27,45 @@ const stages: StageItem[] = [
     { stage: STAGE.BUILDING, show: 'Building' },
     { stage: STAGE.CREATING_FILES, show: 'Structuring Files' },
     { stage: STAGE.FINALIZING, show: 'Finalizing' },
-    { stage: STAGE.COMPLETED, show: 'Completed' },
+    { stage: STAGE.END, show: 'Completed' },
 ];
 
-type SystemMessageProps =
-    | {
-          message: Message;
-          data: {
-              currentStage: never;
-              currentPhase: never;
-              currentFile: never;
-          };
-      }
-    | {
-          message: never;
-          data: {
-              currentStage: STAGE;
-              currentPhase?: PHASE_TYPES | FILE_STRUCTURE_TYPES;
-              currentFile?: string;
-          };
-      };
+interface SystemMessageProps {
+    message: Message;
+    currentPhase?: PHASE_TYPES | FILE_STRUCTURE_TYPES;
+    currentFile?: string;
+}
 
-export default function SystemMessage(systemMessage: SystemMessageProps) {
-    const { currentStage } = dataFetcher(systemMessage);
+export default function SystemMessage({ message, currentPhase, currentFile }: SystemMessageProps) {
+    const [currentStage, setCurrentStage] = useState<STAGE>(STAGE.PLANNING);
 
-    const stagesExceptCompleted = stages.filter((s) => s.stage !== STAGE.COMPLETED);
+    useEffect(() => {
+        if (!message?.stage) return;
+        setCurrentStage(message.stage);
+    }, [message?.stage]);
 
-    const completedStage = stages.find((s) => s.stage === STAGE.COMPLETED)!;
+    const currentStageIndex = useMemo(() => {
+        const index = stages.findIndex((s) => s.stage === currentStage);
+        return index === -1 ? 0 : index;
+    }, [currentStage]);
 
-    /**
-     * END is the ONLY state that means everything is done
-     */
+    const stagesExceptEnd = stages.filter((s) => s.stage !== STAGE.END);
     const allCompleted = currentStage === STAGE.END;
-
-    /**
-     * END means all prior stages are completed
-     * FINALIZING remains an in-progress stage
-     */
-    const currentIndex =
-        currentStage === STAGE.END
-            ? stagesExceptCompleted.length
-            : stagesExceptCompleted.findIndex((s) => s.stage === currentStage);
+    const completedStage = stages[stages.length - 1];
 
     return (
-        <div className="relative w-[80%] rounded-[4px] overflow-hidden border border-neutral-800 bg-[#0e0e0f] text-neutral-300 select-none">
+        <div className="relative w-[80%] overflow-hidden rounded-[4px] border border-neutral-800 bg-[#0e0e0f] text-neutral-300 select-none">
             <div className="px-5 pt-4 flex items-center gap-x-1.5 text-light/90">
                 <FaListUl />
                 <div>Execution strategy</div>
             </div>
 
             <div className="relative z-10 w-full flex flex-col gap-y-3 px-5 py-4.5">
-                {stagesExceptCompleted.map(({ stage, show }, index) => {
+                {stagesExceptEnd.map(({ stage, show }, index) => {
                     const status =
-                        index < currentIndex
+                        index < currentStageIndex
                             ? LOADER_STATES.COMPLETED
-                            : index === currentIndex
+                            : index === currentStageIndex
                               ? LOADER_STATES.BUFFERING
                               : LOADER_STATES.HUNG;
 
@@ -85,7 +74,7 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
                     const isHung = status === LOADER_STATES.HUNG;
 
                     return (
-                        <div key={stage} className="flex items-center gap-x-3">
+                        <div key={stage} className="flex items-start gap-x-3">
                             <div
                                 className={cn(
                                     'flex items-center justify-center rounded-full transition-all',
@@ -118,7 +107,13 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
 
                                 {stage === STAGE.GENERATING_CODE &&
                                     currentStage === STAGE.GENERATING_CODE && (
-                                        <div className="pl-5 text-xs opacity-50">editing files</div>
+                                        <div className="pl-5 text-xs opacity-50">
+                                            {currentFile
+                                                ? `editing ${currentFile}`
+                                                : currentPhase
+                                                  ? `phase: ${currentPhase}`
+                                                  : 'editing files'}
+                                        </div>
                                     )}
                             </div>
                         </div>
@@ -138,34 +133,4 @@ export default function SystemMessage(systemMessage: SystemMessageProps) {
             )}
         </div>
     );
-}
-
-function dataFetcher({ message, data }: SystemMessageProps): {
-    currentStage: STAGE;
-    currentPhase?: PHASE_TYPES | FILE_STRUCTURE_TYPES;
-    currentFile?: string;
-} {
-    let currentStage: STAGE;
-    let currentPhase;
-    let currentFile;
-
-    if (message) {
-        if (message.error) currentStage = STAGE.ERROR;
-        else if (message.finalzing) currentStage = STAGE.END;
-        else if (message.creatingFiles) currentStage = STAGE.CREATING_FILES;
-        else if (message.building) currentStage = STAGE.BUILDING;
-        else if (message.generatingCode) currentStage = STAGE.GENERATING_CODE;
-        else if (message.planning) currentStage = STAGE.PLANNING;
-        else currentStage = STAGE.START;
-    } else {
-        currentStage = data.currentStage;
-        currentPhase = data.currentPhase;
-        currentFile = data.currentFile;
-    }
-
-    return {
-        currentStage,
-        currentPhase,
-        currentFile,
-    };
 }

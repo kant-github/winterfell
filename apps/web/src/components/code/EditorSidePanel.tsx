@@ -17,8 +17,8 @@ export enum SidePanelValues {
 
 interface EditorSidePanel {
     setSidePanelRenderer:
-    | Dispatch<SetStateAction<SidePanelValues>>
-    | ((value: SidePanelValues | null) => void);
+        | Dispatch<SetStateAction<SidePanelValues>>
+        | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {

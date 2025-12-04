@@ -89,4 +89,14 @@ export default class ResponseWriter {
             },
         });
     }
+
+    static stream = class Stream {
+        static write(res: Response, data: string) {
+            res.write(data);
+        }
+
+        static end(res: Response) {
+            res.end();
+        }
+    };
 }

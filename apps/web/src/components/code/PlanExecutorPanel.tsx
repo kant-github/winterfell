@@ -13,7 +13,6 @@ import ToolTipComponent from '../ui/TooltipComponent';
 import { FaPlus } from 'react-icons/fa';
 import { PlanMessage } from '@/src/types/prisma-types';
 
-
 export interface PlanExecutorPanelProps {
     className?: string;
     hidePlanSvg?: boolean;
@@ -21,7 +20,7 @@ export interface PlanExecutorPanelProps {
     expanded: boolean;
     editExeutorPlanPanel: boolean;
 
-    plan: PlanMessage
+    plan: PlanMessage;
 
     onEdit?: () => void;
     onExpand?: () => void;
@@ -52,7 +51,7 @@ export default function PlanExecutorPanel({
             selected: false,
             title: ins.title,
             description: ins.short_description,
-        }))
+        })),
     );
 
     // Refresh when new plan arrives
@@ -62,7 +61,7 @@ export default function PlanExecutorPanel({
                 selected: false,
                 title: ins.title,
                 description: ins.short_description,
-            }))
+            })),
         );
     }, [plan]);
 
@@ -76,9 +75,7 @@ export default function PlanExecutorPanel({
 
     function toggleSelectAll(): void {
         const allSelected = instructions.every((item) => item.selected);
-        setInstructions((prev) =>
-            prev.map((item) => ({ ...item, selected: !allSelected })),
-        );
+        setInstructions((prev) => prev.map((item) => ({ ...item, selected: !allSelected })));
     }
 
     function addInstruction(): void {
@@ -162,18 +159,21 @@ export default function PlanExecutorPanel({
                 {plan.contract_title}
             </h1>
 
-            <p className="text-left text-[13px] text-light/70 mt-1">
-                {plan.short_description}
-            </p>
+            <p className="text-left text-[13px] text-light/70 mt-1">{plan.short_description}</p>
 
-            <div onClick={() => setShowDetailedPlan(true)} className="text-[#80a1c2] text-left text-[11px] mt-2 pl-1 hover:underline cursor-pointer">
+            <div
+                onClick={() => setShowDetailedPlan(true)}
+                className="text-[#80a1c2] text-left text-[11px] mt-2 pl-1 hover:underline cursor-pointer"
+            >
                 read detailed plan
             </div>
             <div>
                 {/* add detailed plan , show instructions here too, with the longer description, not the shorter description , take colors intutions from the below styling, do not change any other styling just add the deatilsed instructions the way it would look is , a instructions title in bulletins and then the longer descriptions */}
                 {expanded && (
                     <div className="mt-4 pt-4 border-t border-light/10 space-y-3">
-                        <div className="text-[13px] font-medium text-light/90">Detailed Instructions</div>
+                        <div className="text-[13px] font-medium text-light/90">
+                            Detailed Instructions
+                        </div>
                         {plan.contract_instructions.map((instruction, index) => (
                             <div key={index} className="space-y-1.5">
                                 <div className="flex items-start gap-2">
@@ -239,7 +239,9 @@ export default function PlanExecutorPanel({
                         )}
                     >
                         <FaCheckDouble className="size-2" />
-                        <span className="text-xs">{allSelected ? 'selected all' : 'select all'}</span>
+                        <span className="text-xs">
+                            {allSelected ? 'selected all' : 'select all'}
+                        </span>
                     </Button>
                 </div>
 

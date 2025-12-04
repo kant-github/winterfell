@@ -115,7 +115,7 @@ export default class Generator extends GeneratorShape {
             console.error('Error while generating: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 
@@ -155,17 +155,17 @@ export default class Generator extends GeneratorShape {
                 console.log('planner said to not continue.');
                 parser.reset();
                 this.delete_parser(contract_id);
-                res.end();
+                ResponseWriter.stream.end(res);
                 return;
             }
 
-            const { system_message } = await prisma.$transaction(async (tx) => {
+            let { system_message } = await prisma.$transaction(async (tx) => {
                 const system_message = await tx.message.create({
                     data: {
                         contractId: contract_id,
                         role: ChatRole.SYSTEM,
                         content: 'starting to generate in a few seconds',
-                        planning: true,
+                        stage: STAGE.PLANNING,
                     },
                 });
                 const update_contract = await tx.contract.update({
@@ -185,6 +185,7 @@ export default class Generator extends GeneratorShape {
 
             // send planning stage from here
             console.log('the stage: ', chalk.green('Planning'));
+            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
 
             const code_stream = await coder_chain.stream({
@@ -200,17 +201,18 @@ export default class Generator extends GeneratorShape {
                 }
             }
 
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
                 },
                 data: {
-                    creatingFiles: true,
+                    stage: STAGE.CREATING_FILES,
                 },
             });
 
             console.log('the stage: ', chalk.green('Creating Files'));
+            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
 
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
@@ -230,7 +232,7 @@ export default class Generator extends GeneratorShape {
             console.error('Error while new contract generation: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 
@@ -244,33 +246,35 @@ export default class Generator extends GeneratorShape {
         system_message: Message,
     ) {
         try {
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
                 },
                 data: {
-                    finalzing: true,
+                    stage: STAGE.FINALIZING,
                 },
             });
 
             console.log('the stage: ', chalk.green('Finalizing'));
+            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
             const finalizer_data = await finalizer_chain.invoke({
                 generated_files: generated_files,
             });
 
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
                 },
                 data: {
-                    End: true,
+                    stage: STAGE.END,
                 },
             });
             console.log('the stage: ', chalk.green('END'));
+            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.END, { stage: 'End', data: generated_files }, system_message);
 
             const llm_message = await prisma.message.create({
@@ -304,7 +308,7 @@ export default class Generator extends GeneratorShape {
             console.error('Error while finalizing: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 
@@ -318,119 +322,126 @@ export default class Generator extends GeneratorShape {
         parser: StreamParser,
         idl: Object[],
     ) {
-        const planner_data = await planner_chain.invoke({
-            user_instruction: user_instruction,
-            idl: idl,
-        });
+        try {
+            const planner_data = await planner_chain.invoke({
+                user_instruction: user_instruction,
+                idl: idl,
+            });
 
-        const llm_message = await prisma.message.create({
-            data: {
-                content: planner_data.context,
-                contractId: contract_id,
-                role: ChatRole.AI,
-            },
-        });
+            const llm_message = await prisma.message.create({
+                data: {
+                    content: planner_data.context,
+                    contractId: contract_id,
+                    role: ChatRole.AI,
+                },
+            });
 
-        console.log('the context: ', chalk.red(planner_data.context));
-        this.send_sse(res, STAGE.CONTEXT, {
-            context: planner_data.context,
-            llmMessage: llm_message,
-        });
+            console.log('the context: ', chalk.red(planner_data.context));
+            this.send_sse(res, STAGE.CONTEXT, {
+                context: planner_data.context,
+                llmMessage: llm_message,
+            });
 
-        if (!planner_data.should_continue) {
-            console.log('planner said to not continue.');
+            if (!planner_data.should_continue) {
+                console.log('planner said to not continue.');
+                parser.reset();
+                this.delete_parser(contract_id);
+                ResponseWriter.stream.end(res);
+                return;
+            }
+
+            let system_message = await prisma.message.create({
+                data: {
+                    contractId: contract_id,
+                    role: ChatRole.SYSTEM,
+                    content: 'starting to generate in a few seconds',
+                    stage: STAGE.PLANNING,
+                },
+            });
+
+            // send planning stage from here
+            console.log('the stage: ', chalk.green('Planning'));
+            this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
+
+            const delete_files = planner_data.files_likely_affected
+                .filter((f) => f.do === 'delete')
+                .map((f) => f.file_path);
+
+            const promptValue = await old_chat_coder_prompt.invoke({
+                plan: planner_data.plan,
+                contract_id,
+                files_likely_affected: planner_data.files_likely_affected,
+            });
+
+            const initialMessages = promptValue.toChatMessages();
+
+            const toolStepResult = await this.gemini_coder
+                .bindTools([Tool.get_file])
+                .invoke(initialMessages);
+
+            const { toolResults } = await Tool.runner.invoke(toolStepResult);
+            const { messages: toolMessages } = await Tool.convert.invoke({ toolResults });
+
+            const code_stream = await this.gemini_coder.stream([
+                ...initialMessages,
+                toolStepResult,
+                ...toolMessages,
+                {
+                    role: 'user',
+                    content: 'Use the fetched file contents to implement the planned changes.',
+                },
+            ]);
+
+            for await (const chunk of code_stream) {
+                if (chunk && chunk.text) {
+                    parser.feed(chunk.text, system_message);
+                }
+            }
+
+            system_message = await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    stage: STAGE.BUILDING,
+                },
+            });
+
+            console.log('the stage: ', chalk.green('Building'));
+            this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Building' }, system_message);
+
+            const gen_files = parser.getGeneratedFiles();
+            await this.update_contract_2(contract_id, gen_files, delete_files);
+
+            system_message = await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
+                    stage: STAGE.CREATING_FILES,
+                },
+            });
+
+            console.log('the stage: ', chalk.green('Creating Files'));
+            this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
+
+            this.old_finalizer(
+                res,
+                finalizer_chain,
+                gen_files,
+                contract_id,
+                parser,
+                system_message,
+                delete_files,
+            );
+        } catch (error) {
+            console.error('Error in old_contract: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
-            return;
+            ResponseWriter.stream.end(res);
         }
-
-        const system_message = await prisma.message.create({
-            data: {
-                contractId: contract_id,
-                role: ChatRole.SYSTEM,
-                content: 'starting to generate in a few seconds',
-                planning: true,
-            },
-        });
-
-        // send planning stage from here
-        console.log('the stage: ', chalk.green('Planning'));
-        this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
-
-        const delete_files = planner_data.files_likely_affected
-            .filter((f) => f.do === 'delete')
-            .map((f) => f.file_path);
-
-        const promptValue = await old_chat_coder_prompt.invoke({
-            plan: planner_data.plan,
-            contract_id,
-            files_likely_affected: planner_data.files_likely_affected,
-        });
-
-        const initialMessages = promptValue.toChatMessages();
-
-        const toolStepResult = await this.gemini_coder
-            .bindTools([Tool.get_file])
-            .invoke(initialMessages);
-
-        const { toolResults } = await Tool.runner.invoke(toolStepResult);
-        const { messages: toolMessages } = await Tool.convert.invoke({ toolResults });
-
-        const code_stream = await this.gemini_coder.stream([
-            ...initialMessages,
-            toolStepResult,
-            ...toolMessages,
-            {
-                role: 'user',
-                content: 'Use the fetched file contents to implement the planned changes.',
-            },
-        ]);
-
-        for await (const chunk of code_stream) {
-            if (chunk && chunk.text) {
-                parser.feed(chunk.text, system_message);
-            }
-        }
-
-        await prisma.message.update({
-            where: {
-                id: system_message.id,
-                contractId: contract_id,
-            },
-            data: {
-                building: true,
-            },
-        });
-
-        console.log('the stage: ', chalk.green('Building'));
-        this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Building' }, system_message);
-
-        const gen_files = parser.getGeneratedFiles();
-        await this.update_contract_2(contract_id, gen_files, delete_files);
-
-        await prisma.message.update({
-            where: {
-                id: system_message.id,
-                contractId: contract_id,
-            },
-            data: {
-                creatingFiles: true,
-            },
-        });
-
-        console.log('the stage: ', chalk.green('Creating Files'));
-        this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
-
-        this.old_finalizer(
-            res,
-            finalizer_chain,
-            gen_files,
-            contract_id,
-            parser,
-            system_message,
-            delete_files,
-        );
     }
 
     protected async old_finalizer(
@@ -443,13 +454,13 @@ export default class Generator extends GeneratorShape {
         delete_files: string[],
     ) {
         try {
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
                 },
                 data: {
-                    finalzing: true,
+                    stage: STAGE.FINALIZING,
                 },
             });
 
@@ -460,13 +471,13 @@ export default class Generator extends GeneratorShape {
                 generated_files: generated_files,
             });
 
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
                 },
                 data: {
-                    End: true,
+                    stage: STAGE.END,
                 },
             });
             console.log('the stage: ', chalk.green('END'));
@@ -493,7 +504,7 @@ export default class Generator extends GeneratorShape {
             console.error('Error while finalizing: ', error);
             parser.reset();
             this.delete_parser(contract_id);
-            res.end();
+            ResponseWriter.stream.end(res);
         }
     }
 
@@ -502,15 +513,19 @@ export default class Generator extends GeneratorShape {
         generated_files: FileContent[],
         deleting_files_path: string[],
     ) {
-        console.log(chalk.bgRed('---------------------------- generated files'));
-        console.log(generated_files.map((file) => console.log(file.path)));
+        console.log(chalk.bgBlueBright('------------------ updation starts here'));
 
-        console.log(chalk.bgRed('---------------------------- deleting files'));
+        console.log(
+            chalk.bgRed('---------------------------- files which are generated / updated now'),
+        );
+        console.log(generated_files.forEach((file) => console.log(file.path)));
+
+        console.log(chalk.bgRed('---------------------------- files to be deleted'));
         console.log(deleting_files_path);
 
         const contract = await objectStore.get_resource_files(contract_id);
 
-        console.log(chalk.bgRed('---------------------------- contract'));
+        console.log(chalk.bgRed('---------------------------- current contract'));
         console.log(contract.map((file) => console.log(file.path)));
 
         let remaining_files: FileContent[] = contract;
@@ -524,24 +539,29 @@ export default class Generator extends GeneratorShape {
         const remaining_files_map = new Map(remaining_files.map((file) => [file.path, file]));
         const new_files: FileContent[] = [];
 
-        // update old
-        generated_files.forEach((file: FileContent) => {
-            const file_exists = remaining_files_map.get(file.path);
-            if (file_exists) {
+        // update old + add new
+        generated_files.forEach((file) => {
+            if (remaining_files_map.has(file.path)) {
                 remaining_files_map.set(file.path, file);
             } else {
                 new_files.push(file);
             }
         });
 
-        // const updated_remaining_files = Array.from(remaining_files_map.values());
-        const updated_contract = [...remaining_files, ...new_files];
+        const updated_contract: FileContent[] = [
+            ...Array.from(remaining_files_map.values()),
+            ...new_files,
+        ];
 
-        console.log(chalk.bgRed('---------------------------- updated contract'));
-        console.log(updated_contract.map((file) => console.log(file.path)));
+        console.log(chalk.bgRed('---------------------------- final updated contract'));
+        console.log(updated_contract.forEach((file) => console.log(file.path)));
 
         console.log(chalk.yellowBright('updating contract in s3...'));
         await objectStore.updateContractFiles(contract_id, updated_contract);
+
+        const fetched_contract = await objectStore.get_resource_files(contract_id);
+        console.log(chalk.bgRed('---------------------------- again fetched contract'));
+        console.log(fetched_contract);
     }
 
     protected async update_contract(
@@ -814,7 +834,7 @@ export default class Generator extends GeneratorShape {
             timestamp: Date.now(),
         };
 
-        res.write(`data: ${JSON.stringify(event)}\n\n`);
+        ResponseWriter.stream.write(res, `data: ${JSON.stringify(event)}\n\n`);
     }
 
     protected create_stream(res: Response): void {

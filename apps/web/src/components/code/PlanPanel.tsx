@@ -10,7 +10,12 @@ export default function PlanPanel(): JSX.Element {
     const { editExeutorPlanPanel, setEditExeutorPlanPanel } = useExecutorStore();
     const { setCurrentState } = useSidePanelStore();
     const { message } = useEditPlanStore();
-    if (!message) return <div className="w-full h-full flex items-center justify-center text-light-secondary">No Plan Selected</div>;
+    if (!message)
+        return (
+            <div className="w-full h-full flex items-center justify-center text-light-secondary">
+                No Plan Selected
+            </div>
+        );
     return (
         <div className="w-full bg-[#16171a]">
             <PlanExecutorPanel

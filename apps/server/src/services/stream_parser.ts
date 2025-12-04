@@ -251,7 +251,7 @@ export default class StreamParser {
                         id: systemMessage.id,
                     },
                     data: {
-                        planning: true,
+                        stage: STAGE.PLANNING,
                     },
                 });
                 this.currentStage = stage;
@@ -264,8 +264,7 @@ export default class StreamParser {
                         id: systemMessage.id,
                     },
                     data: {
-                        planning: true,
-                        generatingCode: true,
+                        stage: STAGE.GENERATING_CODE,
                     },
                 });
                 this.currentStage = stage;
@@ -278,7 +277,7 @@ export default class StreamParser {
                         id: systemMessage.id,
                     },
                     data: {
-                        building: true,
+                        stage: STAGE.BUILDING,
                     },
                 });
                 this.currentStage = stage;
@@ -291,7 +290,7 @@ export default class StreamParser {
                         id: systemMessage.id,
                     },
                     data: {
-                        creatingFiles: true,
+                        stage: STAGE.CREATING_FILES,
                     },
                 });
                 this.currentStage = stage;
@@ -304,7 +303,7 @@ export default class StreamParser {
                         id: systemMessage.id,
                     },
                     data: {
-                        finalzing: true,
+                        stage: STAGE.FINALIZING,
                     },
                 });
                 this.currentStage = stage;
@@ -321,7 +320,7 @@ export default class StreamParser {
                         id: systemMessage.id,
                     },
                     data: {
-                        error: true,
+                        stage: STAGE.ERROR,
                     },
                 });
                 this.currentStage = null;
@@ -332,13 +331,16 @@ export default class StreamParser {
     }
 
     protected async phaseMatch(phase: string, systemMessage: Message) {
-        if (this.currentStage !== STAGE.GENERATING_CODE && !systemMessage.generatingCode) {
-            await prisma.message.update({
+        if (
+            this.currentStage !== STAGE.GENERATING_CODE &&
+            systemMessage.stage !== STAGE.GENERATING_CODE
+        ) {
+            systemMessage = await prisma.message.update({
                 where: {
                     id: systemMessage.id,
                 },
                 data: {
-                    generatingCode: true,
+                    stage: STAGE.GENERATING_CODE,
                 },
             });
             console.log('the stage: ', chalk.green('Generating Code'));
