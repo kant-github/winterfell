@@ -1,7 +1,7 @@
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { TextShimmer } from '../ui/shimmer-text';
 import { LiaServicestack } from 'react-icons/lia';
-import { FILE_STRUCTURE_TYPES, PHASE_TYPES } from '@/src/types/stream_event_types';
+import { FILE_STRUCTURE_TYPES, PHASE_TYPES, STAGE } from '@/src/types/stream_event_types';
 import { useMemo } from 'react';
 import FileIcon from '../tickers/FileIcon';
 
@@ -40,6 +40,12 @@ export default function BuilderLoader() {
                     title: 'Complete',
                     description: 'Smart contract is ready',
                 };
+
+            case STAGE.FINALIZING:
+                return {
+                    title: 'Finalizing',
+                    description: 'Getting your contract ready for production',
+                }
             default:
                 return {
                     title: 'Processing',
