@@ -36,11 +36,7 @@ interface SystemMessageProps {
     currentFile?: string;
 }
 
-export default function SystemMessage({
-    message,
-    currentPhase,
-    currentFile,
-}: SystemMessageProps) {
+export default function SystemMessage({ message, currentPhase, currentFile }: SystemMessageProps) {
     const [currentStage, setCurrentStage] = useState<STAGE>(STAGE.PLANNING);
 
     useEffect(() => {
@@ -70,8 +66,8 @@ export default function SystemMessage({
                         index < currentStageIndex
                             ? LOADER_STATES.COMPLETED
                             : index === currentStageIndex
-                                ? LOADER_STATES.BUFFERING
-                                : LOADER_STATES.HUNG;
+                              ? LOADER_STATES.BUFFERING
+                              : LOADER_STATES.HUNG;
 
                     const isCompleted = status === LOADER_STATES.COMPLETED;
                     const isBuffering = status === LOADER_STATES.BUFFERING;
@@ -83,9 +79,9 @@ export default function SystemMessage({
                                 className={cn(
                                     'flex items-center justify-center rounded-full transition-all',
                                     isCompleted &&
-                                    'border border-green-600 text-green-600 w-3.5 h-3.5 p-0.5',
+                                        'border border-green-600 text-green-600 w-3.5 h-3.5 p-0.5',
                                     isBuffering && 'w-4 h-4',
-                                    isHung && 'border border-neutral-700 w-4 h-4 p-0.5'
+                                    isHung && 'border border-neutral-700 w-4 h-4 p-0.5',
                                 )}
                             >
                                 {isBuffering ? (
@@ -103,7 +99,7 @@ export default function SystemMessage({
                                     className={cn(
                                         'tracking-wider text-[13px] transition-all',
                                         isHung && 'opacity-50',
-                                        isCompleted && 'text-light/70'
+                                        isCompleted && 'text-light/70',
                                     )}
                                 >
                                     {show}
@@ -115,8 +111,8 @@ export default function SystemMessage({
                                             {currentFile
                                                 ? `editing ${currentFile}`
                                                 : currentPhase
-                                                    ? `phase: ${currentPhase}`
-                                                    : 'editing files'}
+                                                  ? `phase: ${currentPhase}`
+                                                  : 'editing files'}
                                         </div>
                                     )}
                             </div>
@@ -138,4 +134,3 @@ export default function SystemMessage({
         </div>
     );
 }
-

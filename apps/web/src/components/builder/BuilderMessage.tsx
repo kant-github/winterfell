@@ -1,29 +1,33 @@
-import { Message } from "@/src/types/prisma-types"
-import { JSX, useEffect, useState } from "react";
-import { LayoutGrid } from "../ui/animated/layout-grid-icon";
-import AppLogo from "../tickers/AppLogo";
-import { useUserSessionStore } from "@/src/store/user/useUserSessionStore";
-import Image from "next/image";
-import { TextShimmer } from "../ui/shimmer-text";
+import { Message } from '@/src/types/prisma-types';
+import { JSX, useState } from 'react';
+import { LayoutGrid } from '../ui/animated/layout-grid-icon';
+import AppLogo from '../tickers/AppLogo';
+import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
+import Image from 'next/image';
+import { TextShimmer } from '../ui/shimmer-text';
 import { formatChatTime } from '@/src/lib/format_chat_time';
-import { useBuilderChatStore } from "@/src/store/code/useBuilderChatStore";
-import PlanExecutorPanel from "../code/PlanExecutorPanel";
-import { useSidePanelStore } from "@/src/store/code/useSidePanelStore";
-import { useCodeEditor } from "@/src/store/code/useCodeEditor";
-import { useExecutorStore } from "@/src/store/model/useExecutorStore";
-import { SidePanelValues } from "../code/EditorSidePanel";
-import { useEditPlanStore } from "@/src/store/code/useEditPlanStore";
-import SystemMessage from "./SystemMessage";
+import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
+import PlanExecutorPanel from '../code/PlanExecutorPanel';
+import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
+import { useCodeEditor } from '@/src/store/code/useCodeEditor';
+import { useExecutorStore } from '@/src/store/model/useExecutorStore';
+import { SidePanelValues } from '../code/EditorSidePanel';
+import { useEditPlanStore } from '@/src/store/code/useEditPlanStore';
+import SystemMessage from './SystemMessage';
 
 interface BuilderMessageProps {
     message: Message;
-    loading: boolean
+    loading: boolean;
     hasContext: boolean;
-    returnParsedData: (message: string) => string
+    returnParsedData: (message: string) => string;
 }
 
-
-export default function BuilderMessage({ message, loading, hasContext, returnParsedData }: BuilderMessageProps): JSX.Element {
+export default function BuilderMessage({
+    message,
+    loading,
+    hasContext,
+    returnParsedData,
+}: BuilderMessageProps): JSX.Element {
     const { session } = useUserSessionStore();
     const { messages } = useBuilderChatStore();
     const [collapsePanel, setCollapsePanel] = useState<boolean>(false);
@@ -31,11 +35,6 @@ export default function BuilderMessage({ message, loading, hasContext, returnPar
     const { setCollapseFileTree } = useCodeEditor();
     const { setCurrentState } = useSidePanelStore();
     const { setMessage } = useEditPlanStore();
-
-    useEffect(() => {
-        console.log('message from builder message: ', message);
-    }, [message]);
-
 
     return (
         <div className="w-full shrink-0">
@@ -128,22 +127,15 @@ export default function BuilderMessage({ message, loading, hasContext, returnPar
                         <div className="rounded-[4px] text-sm font-normal w-full text-light text-left tracking-wider text-[13px]">
                             {loading && (
                                 <div className="flex items-center gap-x-1 mb-2">
-                                    <LayoutGrid
-                                        shouldAnimate={loading}
-                                        className="h-4 w-4"
-                                    />
-                                    <TextShimmer>
-                                        Processing your request...
-                                    </TextShimmer>
+                                    <LayoutGrid shouldAnimate={loading} className="h-4 w-4" />
+                                    <TextShimmer>Processing your request...</TextShimmer>
                                 </div>
                             )}
-                            <SystemMessage
-                                message={message}
-                            />
+                            <SystemMessage message={message} />
                         </div>
                     </div>
                 </div>
             )}
         </div>
-    )
+    );
 }

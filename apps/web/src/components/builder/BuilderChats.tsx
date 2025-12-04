@@ -6,7 +6,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { GENERATE_TEMPLATE } from '@/routes/api_routes';
 
-
 import { useChatStore } from '@/src/store/user/useChatStore';
 import { ChatRole } from '@/src/types/prisma-types';
 import { toast } from 'sonner';
@@ -109,7 +108,7 @@ export default function BuilderChats() {
         const result = message.split('<stage>')[0];
         return result;
     }
-    console.log("messages is at frontend : ", messages);
+    console.log('messages is at frontend : ', messages);
 
     return (
         <div
@@ -118,7 +117,13 @@ export default function BuilderChats() {
         >
             <div className="flex-1 flex flex-col gap-y-3 text-light text-sm pl-4 overflow-y-auto min-h-0 custom-scrollbar">
                 {messages.map((message) => (
-                    <BuilderMessage returnParsedData={returnParsedData} hasContext={hasContext} key={message.id} message={message} loading={loading} />
+                    <BuilderMessage
+                        returnParsedData={returnParsedData}
+                        hasContext={hasContext}
+                        key={message.id}
+                        message={message}
+                        loading={loading}
+                    />
                 ))}
                 <div ref={messageEndRef} />
             </div>

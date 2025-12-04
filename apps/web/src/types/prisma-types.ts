@@ -1,4 +1,4 @@
-import { STAGE } from "./stream_event_types";
+import { STAGE } from './stream_event_types';
 
 export enum PlanType {
     FREE = 'FREE',
@@ -80,7 +80,7 @@ export interface Message {
     contract?: Contract;
     role: ChatRole;
     content: string;
-    stage: STAGE,
+    stage: STAGE;
     plannerContext?: PlanMessage;
     isPlanExecuted: boolean;
     createdAt: Date;
@@ -97,7 +97,6 @@ export interface PlanMessage {
         long_description: string;
     }[];
 }
-
 
 export interface Subscription {
     id: string;

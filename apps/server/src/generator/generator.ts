@@ -185,7 +185,7 @@ export default class Generator extends GeneratorShape {
 
             // send planning stage from here
             console.log('the stage: ', chalk.green('Planning'));
-            console.log("sysmte message; ", system_message);
+            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
 
             const code_stream = await coder_chain.stream({
@@ -212,7 +212,7 @@ export default class Generator extends GeneratorShape {
             });
 
             console.log('the stage: ', chalk.green('Creating Files'));
-            console.log("sysmte message; ", system_message);
+            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
 
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
@@ -257,7 +257,7 @@ export default class Generator extends GeneratorShape {
             });
 
             console.log('the stage: ', chalk.green('Finalizing'));
-            console.log("sysmte message; ", system_message);
+            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
             const finalizer_data = await finalizer_chain.invoke({
@@ -274,7 +274,7 @@ export default class Generator extends GeneratorShape {
                 },
             });
             console.log('the stage: ', chalk.green('END'));
-            console.log("sysmte message; ", system_message);
+            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.END, { stage: 'End', data: generated_files }, system_message);
 
             const llm_message = await prisma.message.create({
@@ -442,7 +442,6 @@ export default class Generator extends GeneratorShape {
             this.delete_parser(contract_id);
             ResponseWriter.stream.end(res);
         }
-
     }
 
     protected async old_finalizer(
@@ -514,10 +513,11 @@ export default class Generator extends GeneratorShape {
         generated_files: FileContent[],
         deleting_files_path: string[],
     ) {
-
         console.log(chalk.bgBlueBright('------------------ updation starts here'));
 
-        console.log(chalk.bgRed('---------------------------- files which are generated / updated now'));
+        console.log(
+            chalk.bgRed('---------------------------- files which are generated / updated now'),
+        );
         console.log(generated_files.forEach((file) => console.log(file.path)));
 
         console.log(chalk.bgRed('---------------------------- files to be deleted'));
@@ -552,7 +552,6 @@ export default class Generator extends GeneratorShape {
             ...Array.from(remaining_files_map.values()),
             ...new_files,
         ];
-
 
         console.log(chalk.bgRed('---------------------------- final updated contract'));
         console.log(updated_contract.forEach((file) => console.log(file.path)));

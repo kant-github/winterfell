@@ -45,7 +45,7 @@ export default function BuilderLoader() {
                 return {
                     title: 'Finalizing',
                     description: 'Getting your contract ready for production',
-                }
+                };
             default:
                 return {
                     title: 'Processing',
