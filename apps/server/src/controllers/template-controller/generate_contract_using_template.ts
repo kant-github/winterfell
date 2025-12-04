@@ -6,10 +6,8 @@ import env from '../../configs/config.env';
 import axios from 'axios';
 
 export default async function generate_contract_using_template(req: Request, res: Response) {
-    console.log('genarate template controller called');
     try {
         const user = req.user;
-        console.log('req body is : ', req.body);
         if (!user || !user.id) {
             ResponseWriter.unauthorized(res);
             return;
@@ -24,15 +22,6 @@ export default async function generate_contract_using_template(req: Request, res
 
         const { contract_id, instruction, template_id } = parsed.data;
 
-        // const valid_template = await prisma.template.findUnique({
-        //     where: { id: template_id },
-        // });
-
-        // if (!valid_template) {
-        //     ResponseWriter.not_found(res, 'Template not found');
-        //     return;
-        // }
-
         const template_data = await axios.get(
             `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${template_id}/resource`,
             {
@@ -41,7 +30,9 @@ export default async function generate_contract_using_template(req: Request, res
         );
 
         if (!Array.isArray(template_data.data)) {
-            throw new Error('Invalid template data format');
+            // if there is a mistake in template then we should return template not found
+            ResponseWriter.not_found(res, 'Template not found');
+            return;
         }
 
         await prisma.contract.create({
@@ -50,7 +41,6 @@ export default async function generate_contract_using_template(req: Request, res
                 title: template_id,
                 contractType: 'CUSTOM', // take this from template
                 userId: user.id,
-                isTemplate: true,
             },
         });
 

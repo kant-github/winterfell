@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { generator, objectStore } from '../../services/init';
 import ResponseWriter from '../../class/response_writer';
 import { generate_contract_schema } from '../../schemas/generate_contract_schema';
-import { FileContent, MODEL } from '@winterfell/types';
+import {  MODEL } from '@winterfell/types';
 import env from '../../configs/config.env';
 import axios from 'axios';
 
@@ -33,33 +33,7 @@ export default async function generateContractController(req: Request, res: Resp
             },
         });
 
-        // validates initial message and isTemplate, gets the template from template-cdn and updates the contract to user-contracts' s3
-        // thsi way, it becomes an existing contract and user can continue from there
-        if (contract?.isTemplate && contract.messages.length === 1) {
-            console.log('inside update template');
-            const files = await axios.get(
-                `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${contract.title}/resource`,
-            );
-            if (!files) {
-                ResponseWriter.server_error(res, 'Failed to fetch template files');
-                return;
-            }
-            console.log('files from cdn are: ', files);
-
-            try {
-                console.log('updating the files to user-contract s3');
-                await objectStore.uploadContractFiles(
-                    contract_id,
-                    files.data,
-                    JSON.stringify(files),
-                );
-                console.log('updated the files');
-            } catch (error) {
-                console.error('error in uploading the files to s3', error);
-                return;
-            }
-        }
-
+        // check for claude model
         if (model === MODEL.CLAUDE) {
             const existing_user = await prisma.user.findUnique({
                 where: {
@@ -81,6 +55,7 @@ export default async function generateContractController(req: Request, res: Resp
             }
         }
 
+        // check for existing contract
         const existing_contract = await prisma.contract.findUnique({
             where: {
                 id: contract_id,
@@ -114,6 +89,7 @@ export default async function generateContractController(req: Request, res: Resp
                 },
             });
 
+            // call the generator with old chat
             generator.generate(
                 res,
                 'old',
@@ -130,7 +106,6 @@ export default async function generateContractController(req: Request, res: Resp
                     title: 'contractor',
                     contractType: 'CUSTOM',
                     userId: user.id,
-                    isTemplate: false,
                 },
             });
 
@@ -143,6 +118,7 @@ export default async function generateContractController(req: Request, res: Resp
                 },
             });
 
+            // call the generator with new chat
             generator.generate(res, 'new', instruction, model || MODEL.GEMINI, contract.id);
         }
     } catch (error) {
