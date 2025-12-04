@@ -332,7 +332,7 @@ export default class StreamParser {
 
     protected async phaseMatch(phase: string, systemMessage: Message) {
         if (this.currentStage !== STAGE.GENERATING_CODE && systemMessage.stage !== STAGE.GENERATING_CODE) {
-            await prisma.message.update({
+            systemMessage = await prisma.message.update({
                 where: {
                     id: systemMessage.id,
                 },

@@ -1,5 +1,5 @@
 import { Message } from "@/src/types/prisma-types"
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { LayoutGrid } from "../ui/animated/layout-grid-icon";
 import AppLogo from "../tickers/AppLogo";
 import { useUserSessionStore } from "@/src/store/user/useUserSessionStore";
@@ -30,7 +30,13 @@ export default function BuilderMessage({ message, loading, hasContext, returnPar
     const { editExeutorPlanPanel, setEditExeutorPlanPanel } = useExecutorStore();
     const { setCollapseFileTree } = useCodeEditor();
     const { setCurrentState } = useSidePanelStore();
-    const { setMessage } = useEditPlanStore()
+    const { setMessage } = useEditPlanStore();
+
+    useEffect(() => {
+        console.log('message from builder message: ', message);
+    }, [message]);
+
+
     return (
         <div className="w-full shrink-0">
             {message.role === 'USER' && (

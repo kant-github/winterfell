@@ -159,7 +159,7 @@ export default class Generator extends GeneratorShape {
                 return;
             }
 
-            const { system_message } = await prisma.$transaction(async (tx) => {
+            let { system_message } = await prisma.$transaction(async (tx) => {
                 const system_message = await tx.message.create({
                     data: {
                         contractId: contract_id,
@@ -185,6 +185,7 @@ export default class Generator extends GeneratorShape {
 
             // send planning stage from here
             console.log('the stage: ', chalk.green('Planning'));
+            console.log("sysmte message; ", system_message);
             this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
 
             const code_stream = await coder_chain.stream({
@@ -200,7 +201,7 @@ export default class Generator extends GeneratorShape {
                 }
             }
 
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
@@ -211,6 +212,7 @@ export default class Generator extends GeneratorShape {
             });
 
             console.log('the stage: ', chalk.green('Creating Files'));
+            console.log("sysmte message; ", system_message);
             this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
 
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
@@ -244,7 +246,7 @@ export default class Generator extends GeneratorShape {
         system_message: Message,
     ) {
         try {
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
@@ -255,13 +257,14 @@ export default class Generator extends GeneratorShape {
             });
 
             console.log('the stage: ', chalk.green('Finalizing'));
+            console.log("sysmte message; ", system_message);
             this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
             const finalizer_data = await finalizer_chain.invoke({
                 generated_files: generated_files,
             });
 
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
@@ -271,6 +274,7 @@ export default class Generator extends GeneratorShape {
                 },
             });
             console.log('the stage: ', chalk.green('END'));
+            console.log("sysmte message; ", system_message);
             this.send_sse(res, STAGE.END, { stage: 'End', data: generated_files }, system_message);
 
             const llm_message = await prisma.message.create({
@@ -346,7 +350,7 @@ export default class Generator extends GeneratorShape {
                 return;
             }
 
-            const system_message = await prisma.message.create({
+            let system_message = await prisma.message.create({
                 data: {
                     contractId: contract_id,
                     role: ChatRole.SYSTEM,
@@ -394,7 +398,7 @@ export default class Generator extends GeneratorShape {
                 }
             }
 
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
@@ -410,7 +414,7 @@ export default class Generator extends GeneratorShape {
             const gen_files = parser.getGeneratedFiles();
             await this.update_contract_2(contract_id, gen_files, delete_files);
 
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
@@ -451,7 +455,7 @@ export default class Generator extends GeneratorShape {
         delete_files: string[],
     ) {
         try {
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
@@ -468,7 +472,7 @@ export default class Generator extends GeneratorShape {
                 generated_files: generated_files,
             });
 
-            await prisma.message.update({
+            system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
                     contractId: contract_id,
