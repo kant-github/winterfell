@@ -11,40 +11,10 @@ import {
 import { Message } from '@/src/types/prisma-types';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
-import { useExecutorStore } from '@/src/store/model/useExecutorStore';
-import { EXECUTOR } from '@winterfell/types';
 
 export default class GenerateContract {
-    static async router(
-        token: string,
-        contract_id: string,
-        instruction: string,
-        setHasContext: (hasContext: boolean) => void,
-        onError?: (error: Error) => void,
-    ) {
-        const { executor } = useExecutorStore.getState();
-        console.log('executor is : ', executor);
-        switch (executor) {
-            case EXECUTOR.PLAN:
-                return await this.start_plan_executor(
-                    token,
-                    contract_id,
-                    instruction,
-                    setHasContext,
-                    onError,
-                );
-            case EXECUTOR.AGENTIC:
-                return await this.start_new_chat(
-                    token,
-                    contract_id,
-                    instruction,
-                    setHasContext,
-                    onError,
-                );
-        }
-    }
 
-    static async start_plan_executor(
+    static async start_planner_executor(
         token: string,
         contract_id: string,
         instruction: string,
@@ -90,11 +60,12 @@ export default class GenerateContract {
         }
     }
 
-    static async start_new_chat(
+    static async start_agentic_executor(
         token: string,
         contractId: string,
-        message: string,
         setHasContext: (hasContext: boolean) => void,
+        instruction?: string,
+        template_id?: string,
         onError?: (error: Error) => void,
     ): Promise<void> {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
@@ -112,7 +83,8 @@ export default class GenerateContract {
                 },
                 body: JSON.stringify({
                     contract_id: contractId,
-                    instruction: message,
+                    instruction: instruction,
+                    template_id: template_id,
                     model: MODEL.GEMINI,
                 }),
             });
@@ -128,7 +100,8 @@ export default class GenerateContract {
             if (!response.ok) {
                 throw new Error('Failed to start chat');
             }
-
+            
+            
             const reader = response.body?.getReader();
             const decoder = new TextDecoder();
 
@@ -224,6 +197,9 @@ export default class GenerateContract {
                     }
                 }
             }
+
+            // const data = await response.json();
+            // parseFileStructure(data.data);
 
             setCollapseFileTree(true);
         } catch (error) {

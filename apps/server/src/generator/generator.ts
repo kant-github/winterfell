@@ -844,7 +844,7 @@ export default class Generator {
         ResponseWriter.stream.write(res, `data: ${JSON.stringify(event)}\n\n`);
     }
 
-    protected create_stream(res: Response): void {
+    public create_stream(res: Response): void {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');

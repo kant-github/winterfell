@@ -13,49 +13,33 @@ import { RxCross2 } from 'react-icons/rx';
 import DashboardTextAreaBottom from './DashboardTextAreaBottom';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { STAGE } from '@/src/types/stream_event_types';
+import useGenerate from '@/src/hooks/useGenerate';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const router = useRouter();
+    const { handleGeneration } = useGenerate();
     const { session } = useUserSessionStore();
     const { setMessage } = useBuilderChatStore();
     const { activeTemplate, resetTemplate } = useTemplateStore();
 
     function handleSubmit() {
-        if (!activeTemplate && inputValue.trim() === '') return;
         if (!session?.user.id) {
             setOpenLoginModal(true);
             return;
         }
 
         const contractId = uuid();
+        handleGeneration(
+            contractId,
+            'root',
+            inputValue,
+            activeTemplate?.id,
+        );
 
-        if (activeTemplate && activeTemplate.id && inputValue) {
-            alert('active template found with input value');
-            setMessage({
-                id: uuid(),
-                contractId: contractId,
-                role: ChatRole.USER,
-                content: inputValue,
-                stage: STAGE.START,
-                isPlanExecuted: false,
-                createdAt: new Date(),
-            });
-        } else {
-            console.log('else case input value: ', inputValue);
-            setMessage({
-                id: uuid(),
-                contractId: contractId,
-                role: ChatRole.USER,
-                content: inputValue,
-                stage: STAGE.START,
-                isPlanExecuted: false,
-                createdAt: new Date(),
-            });
-        }
-        router.push(`/playground/${contractId}`);
+        alert('fdafsafsa')
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {

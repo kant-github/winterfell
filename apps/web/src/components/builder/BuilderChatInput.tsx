@@ -45,7 +45,6 @@ export default function BuilderChatInput() {
                 role: ChatRole.USER,
                 stage: STAGE.START,
                 content: messageContent,
-                stage: STAGE.START,
                 isPlanExecuted: false,
                 createdAt: new Date(),
             });

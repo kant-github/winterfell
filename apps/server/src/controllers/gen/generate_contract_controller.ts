@@ -63,10 +63,10 @@ export default async function generate_contract_controller(req: Request, res: Re
         if(!existing_contract) {
             // contract is just been created
 
-
             // check if the user is asking with template
             if(template_id) {
                 console.log('template id found for template visualization: ', template_id);
+
                 Contract.generate_with_template(
                     res,
                     contract_id,

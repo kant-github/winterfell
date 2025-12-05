@@ -124,6 +124,7 @@ export interface Template {
     solanaVersion: string;
     anchorVersion: string;
     summarisedObject: string;
+    imageUrl: string;
 
     messages: Message[];
     createdAt: Date;
