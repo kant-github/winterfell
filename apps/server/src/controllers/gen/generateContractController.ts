@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { generator, objectStore } from '../../services/init';
 import ResponseWriter from '../../class/response_writer';
 import { generate_contract_schema } from '../../schemas/generate_contract_schema';
-import {  MODEL } from '@winterfell/types';
+import { MODEL } from '@winterfell/types';
 import env from '../../configs/config.env';
 import axios from 'axios';
 

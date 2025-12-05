@@ -3,26 +3,20 @@ import { Textarea } from '../ui/textarea';
 import { Terminal } from 'lucide-react';
 import { useState, KeyboardEvent } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { useRouter } from 'next/navigation';
-import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
-import { ChatRole } from '@/src/types/prisma-types';
 import Image from 'next/image';
 import { RxCross2 } from 'react-icons/rx';
 import DashboardTextAreaBottom from './DashboardTextAreaBottom';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import { STAGE } from '@/src/types/stream_event_types';
 import useGenerate from '@/src/hooks/useGenerate';
 
 export default function DashboardTextAreaComponent() {
     const [inputValue, setInputValue] = useState<string>('');
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
-    const router = useRouter();
-    const { handleGeneration } = useGenerate();
+    const { set_states } = useGenerate();
     const { session } = useUserSessionStore();
-    const { setMessage } = useBuilderChatStore();
     const { activeTemplate, resetTemplate } = useTemplateStore();
 
     function handleSubmit() {
@@ -30,16 +24,8 @@ export default function DashboardTextAreaComponent() {
             setOpenLoginModal(true);
             return;
         }
-
         const contractId = uuid();
-        handleGeneration(
-            contractId,
-            'root',
-            inputValue,
-            activeTemplate?.id,
-        );
-
-        alert('fdafsafsa')
+        set_states(contractId, inputValue, activeTemplate?.id);
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {

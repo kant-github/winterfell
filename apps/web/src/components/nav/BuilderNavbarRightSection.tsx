@@ -96,7 +96,7 @@ export default function BuilderNavbarRightSection() {
                             onClick={() => setShowRepoPanel((prev) => !prev)}
                             size="xs"
                             className={cn(
-                                'bg-dark text-light hover:bg-dark/90 hover:text-light/90',
+                                'bg-dark text-light hover:bg-dark/90 hover:text-light/90 mt-0.5',
                                 'tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-[4px] text-xs exec-button-dark',
                             )}
                         >

@@ -5,7 +5,7 @@ import { new_planner_output_schema, old_planner_output_schema } from './schema/o
 import Tool from './tools/tool';
 import StreamParser from '../services/stream_parser';
 import { ChatRole, Message, prisma } from '@winterfell/database';
-import GeneratorShape from '../metadata/generator';
+
 import { Response } from 'express';
 import {
     FILE_STRUCTURE_TYPES,
@@ -448,7 +448,6 @@ export default class Generator {
             this.delete_parser(contract_id);
             ResponseWriter.stream.end(res);
         }
-
     }
 
     protected async old_finalizer(
@@ -520,10 +519,11 @@ export default class Generator {
         generated_files: FileContent[],
         deleting_files_path: string[],
     ) {
-
         console.log(chalk.bgBlueBright('------------------ updation starts here'));
 
-        console.log(chalk.bgRed('---------------------------- files which are generated / updated now'));
+        console.log(
+            chalk.bgRed('---------------------------- files which are generated / updated now'),
+        );
         console.log(generated_files.forEach((file) => console.log(file.path)));
 
         console.log(chalk.bgRed('---------------------------- files to be deleted'));
@@ -558,7 +558,6 @@ export default class Generator {
             ...Array.from(remaining_files_map.values()),
             ...new_files,
         ];
-
 
         console.log(chalk.bgRed('---------------------------- final updated contract'));
         console.log(updated_contract.forEach((file) => console.log(file.path)));
@@ -828,7 +827,7 @@ export default class Generator {
         this.parsers.delete(contract_id);
     }
 
-    protected send_sse(
+    public send_sse(
         res: Response,
         type: PHASE_TYPES | FILE_STRUCTURE_TYPES | STAGE,
         data: StreamEventData,

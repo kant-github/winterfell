@@ -1,17 +1,15 @@
-import { MODEL, STAGE } from "@winterfell/types";
-import { Response } from "express";
-import StreamParser from "../../services/stream_parser";
-import { old_finalizer, old_planner } from "../types/generator_types";
-import { ChatRole, prisma } from "@winterfell/database";
-import chalk from "chalk";
-import Generator from "../generator";
-import ResponseWriter from "../../class/response_writer";
-import { old_chat_coder_prompt } from "../prompts/old_chat_prompts";
-import Tool from "../tools/tool";
-
+import { MODEL, STAGE } from '@winterfell/types';
+import { Response } from 'express';
+import StreamParser from '../../services/stream_parser';
+import { old_finalizer, old_planner } from '../types/generator_types';
+import { ChatRole, prisma } from '@winterfell/database';
+import chalk from 'chalk';
+import Generator from '../generator';
+import ResponseWriter from '../../class/response_writer';
+import { old_chat_coder_prompt } from '../prompts/old_chat_prompts';
+import Tool from '../tools/tool';
 
 export default class Template extends Generator {
-
     protected async generate_new_contract(
         res: Response,
         user_instruction: string,
@@ -60,7 +58,6 @@ export default class Template extends Generator {
         // send planning stage from here
         console.log('the stage: ', chalk.green('Planning'));
         this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
-
 
         const promptValue = await old_chat_coder_prompt.invoke({
             plan: planner_data.plan,
@@ -130,7 +127,5 @@ export default class Template extends Generator {
         //     parser,
         //     system_message,
         // );
-
     }
-
 }

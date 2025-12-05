@@ -1,33 +1,23 @@
 'use client';
 import BuilderChatInput from './BuilderChatInput';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
-import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { GENERATE_CONTRACT, GENERATE_TEMPLATE } from '@/routes/api_routes';
 
 import { useChatStore } from '@/src/store/user/useChatStore';
-import { ChatRole } from '@/src/types/prisma-types';
-import { toast } from 'sonner';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import GenerateContract from '@/src/lib/server/generate_contract';
-import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import BuilderMessage from './BuilderMessage';
 import useGenerate from '@/src/hooks/useGenerate';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 
 export default function BuilderChats() {
-    const [hasContext, setHasContext] = useState<boolean>(false);
     const params = useParams();
-    const router = useRouter();
     const contractId = params.contractId as string;
     const hasInitialized = useRef<boolean>(false);
     const messageEndRef = useRef<HTMLDivElement>(null);
-    const { activeTemplate, resetTemplate } = useTemplateStore();
-    const { session } = useUserSessionStore();
     const { setContractId } = useChatStore();
     const { handleGeneration } = useGenerate();
-    const { messages, loading, setLoading } = useBuilderChatStore();
-    const { setCollapseFileTree, parseFileStructure } = useCodeEditor();
+    const { messages, loading } = useBuilderChatStore();
+    const { activeTemplate } = useTemplateStore();
 
     useEffect(() => {
         if (messageEndRef.current) {
@@ -36,26 +26,24 @@ export default function BuilderChats() {
     }, [messages]);
 
     useEffect(() => {
-        if (hasInitialized.current) return;
-        if (
-            messages.length === 1 &&
-            messages[0].role === 'USER' &&
-            messages[0].contractId === contractId
-        ) {
+        if (hasInitialized.current) {
+            return;
+        }
+        if (!messages || messages.length === 0) return;
+        if (messages.length <= 2 && messages[0].contractId === contractId) {
             hasInitialized.current = true;
-            startChat(messages[0].content);
+            if (activeTemplate) {
+                startChat(messages[0].content, activeTemplate.id);
+            } else {
+                startChat(messages[0].content);
+            }
             setContractId(contractId);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, messages.length]);
 
-    async function startChat(instruction: string) {
-        alert('called again');
-        handleGeneration(
-            contractId,
-            'pg',
-            instruction,
-        );
+    async function startChat(instruction: string, template_id?: string) {
+        handleGeneration(contractId, instruction, template_id);
     }
 
     function returnParsedData(message: string) {
@@ -72,7 +60,6 @@ export default function BuilderChats() {
                 {messages.map((message) => (
                     <BuilderMessage
                         returnParsedData={returnParsedData}
-                        hasContext={hasContext}
                         key={message.id}
                         message={message}
                         loading={loading}

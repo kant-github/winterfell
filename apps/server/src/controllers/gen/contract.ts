@@ -1,15 +1,14 @@
-import axios from "axios";
-import env from "../../configs/config.env";
-import ResponseWriter from "../../class/response_writer";
-import { Response } from "express";
-import { ChatRole, Message, prisma } from "@winterfell/database";
-import { generator, objectStore } from "../../services/init";
-import { MODEL, STAGE } from "@winterfell/types";
-import { Contract as ContractType } from "@winterfell/database";
-
+import axios from 'axios';
+import env from '../../configs/config.env';
+import ResponseWriter from '../../class/response_writer';
+import { Response } from 'express';
+import { ChatRole, Message, prisma } from '@winterfell/database';
+import { generator, objectStore } from '../../services/init';
+import { MODEL, STAGE } from '@winterfell/types';
+import { Contract as ContractType } from '@winterfell/database';
+import chalk from 'chalk';
 
 export default class Contract {
-
     static async generate_with_template(
         res: Response,
         contract_id: string,
@@ -19,7 +18,6 @@ export default class Contract {
         model?: MODEL,
     ) {
         try {
-
             // fetch the template data
             const template_data = await axios.get(
                 `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${template_id}/resource`,
@@ -34,10 +32,11 @@ export default class Contract {
                     id: template_id,
                 },
             });
+            console.log('template is : ', chalk.red(template));
 
             // checks if template_data doesn't exist
             if (
-                !template_data || 
+                !template_data ||
                 !Array.isArray(template_data.data) ||
                 !template ||
                 !template.summarisedObject
@@ -57,8 +56,19 @@ export default class Contract {
                         summarisedObject: template.summarisedObject,
                     },
                 });
+            });
 
-                await tx.message.create({
+            // upload the template files to user's contract
+            await objectStore.uploadContractFiles(
+                contract_id,
+                template_data.data,
+                'no raw llm response for contracts generated from templates',
+            );
+
+            console.log('instruction found: ', instruction);
+
+            if (!instruction) {
+                await prisma.message.create({
                     data: {
                         contractId: contract_id,
                         templateId: template_id,
@@ -66,48 +76,32 @@ export default class Contract {
                         role: 'TEMPLATE',
                     },
                 });
-            });
-
-            // upload the template files to user's contract
-            await objectStore.uploadContractFiles(contract_id, template_data.data, 'no raw llm response for contracts generated from templates');
-
-            console.log('instruction found: ', instruction);
-
-            // check if the user sent any instruction or not
-            if (!instruction) {
-                // if instruction not found then send the template
-                ResponseWriter.success(
-                    res,
-                    template_data.data,
-                    `Fetched ${template_id} template succesfully`,
-                );
-
-                // generator.create_stream(res);
-                // const obj = {
-                //     type: STAGE.END,
-                //     data: {
-                //         stage: 'End',
-                //         data: template_data.data,
-                //     },
-
-                // }
-                // ResponseWriter.stream.write(
-                //     res,
-                //     `data: ${JSON.stringify(obj)}`,
-                // )
-                // ResponseWriter.stream.end(res);
+                generator.create_stream(res);
+                generator.send_sse(res, STAGE.END, { stage: 'End', data: template_data.data });
+                ResponseWriter.stream.end(res);
                 return;
             } else {
                 // if yes then continue generation with the sent instruction
-                
+
                 // create user message
-                await prisma.message.create({
-                    data: {
-                        contractId: contract_id,
-                        role: 'USER',
-                        content: instruction,
-                    },
-                });
+
+                await prisma.$transaction([
+                    prisma.message.create({
+                        data: {
+                            contractId: contract_id,
+                            templateId: template_id,
+                            content: '',
+                            role: 'TEMPLATE',
+                        },
+                    }),
+                    prisma.message.create({
+                        data: {
+                            contractId: contract_id,
+                            role: 'USER',
+                            content: instruction,
+                        },
+                    }),
+                ]);
 
                 // start generating the contract
                 generator.generate(
@@ -145,7 +139,6 @@ export default class Contract {
         model?: MODEL,
     ) {
         try {
-
             // create the contract and user message to generate the contract
             await prisma.$transaction(async (tx) => {
                 await tx.contract.create({
@@ -154,7 +147,7 @@ export default class Contract {
                         userId: user_id,
                         title: 'contractor',
                         contractType: 'CUSTOM',
-                    }
+                    },
                 });
 
                 await tx.message.create({
@@ -164,17 +157,10 @@ export default class Contract {
                         content: instruction,
                     },
                 });
-
             });
 
             // generate the new contract
-            generator.generate(
-                res,
-                'new',
-                instruction,
-                model || MODEL.GEMINI,
-                contract_id,
-            );
+            generator.generate(res, 'new', instruction, model || MODEL.GEMINI, contract_id);
         } catch (error) {
             console.error('Error in generate_contract_controller: ', error);
             if (!res.headersSent) {
@@ -200,7 +186,6 @@ export default class Contract {
         model?: MODEL,
     ) {
         try {
-
             // get the total number of messages
             // const total_messages = contract.messages.filter((m) => {
             //     if (m.role === ChatRole.USER && !m.plannerContext) {
@@ -234,7 +219,6 @@ export default class Contract {
                 contract.id,
                 JSON.parse(contract.summarisedObject || ''),
             );
-
         } catch (error) {
             console.error('Error in generate_contract_controller: ', error);
             if (!res.headersSent) {
@@ -252,5 +236,4 @@ export default class Contract {
             }
         }
     }
-
 }

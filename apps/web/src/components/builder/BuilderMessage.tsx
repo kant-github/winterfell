@@ -18,14 +18,12 @@ import SystemMessage from './SystemMessage';
 interface BuilderMessageProps {
     message: Message;
     loading: boolean;
-    hasContext: boolean;
     returnParsedData: (message: string) => string;
 }
 
 export default function BuilderMessage({
     message,
     loading,
-    hasContext,
     returnParsedData,
 }: BuilderMessageProps): JSX.Element {
     const { session } = useUserSessionStore();
@@ -123,7 +121,6 @@ export default function BuilderMessage({
 
             {/* for rendering ai loader */}
             {message.role === 'USER' &&
-                !hasContext &&
                 loading &&
                 !messages.some((m) => m.role === 'AI') && (
                     <div className="flex justify-start w-full mt-2 ">

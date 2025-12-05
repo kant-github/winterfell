@@ -69,7 +69,7 @@ export default class Tool {
             console.log('file requested: ', file_path);
             console.log('template id send: ', template_id);
 
-            if(!file) {
+            if (!file) {
                 console.error('file not found');
                 return;
             }
@@ -80,7 +80,7 @@ export default class Tool {
             description: "fetches a template file content by it's path",
             schema: get_template_file_schema,
         },
-    )
+    );
 
     /**
      * creates a runnable-lambda that executes tool-calling by using specific paths
