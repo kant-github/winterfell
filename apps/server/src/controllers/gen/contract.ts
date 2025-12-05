@@ -3,7 +3,7 @@ import env from "../../configs/config.env";
 import ResponseWriter from "../../class/response_writer";
 import { Response } from "express";
 import { ChatRole, Message, prisma } from "@winterfell/database";
-import { generator } from "../../services/init";
+import { generator, objectStore } from "../../services/init";
 import { MODEL } from "@winterfell/types";
 import { Contract as ContractType } from "@winterfell/database";
 
@@ -13,71 +13,101 @@ export default class Contract {
     static async generate_with_template(
         res: Response,
         contract_id: string,
+        user_id: string,
         template_id: string,
         instruction?: string,
         model?: MODEL,
     ) {
-        // fetch the template data
-        const template_data = await axios.get(
-            `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${template_id}/resource`,
-            {
-                responseType: 'json',
-            },
-        );
+        try {
 
-        // checks if template_data doesn't exist
-        if (!template_data || !Array.isArray(template_data.data)) {
-            ResponseWriter.not_found(res, 'Template not found');
-            return;
-        }
+            // fetch the template data
+            const template_data = await axios.get(
+                `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${template_id}/resource`,
+                {
+                    responseType: 'json',
+                },
+            );
 
-        // first send the user the complete template
-        ResponseWriter.stream.write(
-            res,
-            `data: ${JSON.stringify({
-                contractFiles: template_data,
-            })}\n\n`,
-        );
-
-        // check if the user sent any instruction or not
-        if (!instruction) {
-            // if not then end the stream
-            ResponseWriter.stream.end(res);
-            return;
-        } else {
-            // if yes then continue generation with the sent instruction
-
-            // get the templates idl
+            // get template from the db too
             const template = await prisma.template.findUnique({
                 where: {
                     id: template_id,
                 },
             });
 
-            // this should never hit, as template should exist in s3 and db both
-            if (!template) {
-                ResponseWriter.no_content(res);
+            // checks if template_data doesn't exist
+            if (
+                !template_data || 
+                !Array.isArray(template_data.data) ||
+                !template ||
+                !template.summarisedObject
+            ) {
+                ResponseWriter.not_found(res, 'Template not found');
                 return;
             }
 
-            // create user message
-            await prisma.message.create({
+            // make the user the owner of the contract and add template's summarised-object
+            await prisma.contract.create({
                 data: {
-                    contractId: contract_id,
-                    role: 'USER',
-                    content: instruction,
+                    id: contract_id,
+                    userId: user_id,
+                    title: 'contractor',
+                    contractType: 'CUSTOM',
+                    summarisedObject: template.summarisedObject,
                 },
             });
 
-            // start generating the contract
-            generator.generate(
-                res,
-                'old',
-                instruction,
-                model || MODEL.GEMINI,
-                contract_id,
-                // template.summarisedObject
-            );
+            // upload the template files to user's contract
+            await objectStore.uploadContractFiles(contract_id, template_data.data, 'no raw llm response for contracts generated from templates');
+
+            console.log('instruction found: ', instruction);
+
+            // check if the user sent any instruction or not
+            if (!instruction) {
+                // if instruction not found then send the template
+                ResponseWriter.success(
+                    res,
+                    template_data.data,
+                    `Fetched ${template_id} template succesfully`,
+                );
+                return;
+            } else {
+                // if yes then continue generation with the sent instruction
+                
+                // create user message
+                await prisma.message.create({
+                    data: {
+                        contractId: contract_id,
+                        role: 'USER',
+                        content: instruction,
+                    },
+                });
+
+                // start generating the contract
+                generator.generate(
+                    res,
+                    'old',
+                    instruction,
+                    model || MODEL.GEMINI,
+                    contract_id,
+                    JSON.parse(template.summarisedObject),
+                );
+            }
+        } catch (error) {
+            console.error('Error in generate_contract_controller: ', error);
+            if (!res.headersSent) {
+                ResponseWriter.server_error(res);
+                return;
+            } else {
+                ResponseWriter.stream.write(
+                    res,
+                    `data: ${JSON.stringify({
+                        type: 'error',
+                        error: 'Internal server error',
+                    })}\n\n`,
+                );
+                ResponseWriter.stream.end(res);
+            }
         }
     }
 
@@ -88,36 +118,53 @@ export default class Contract {
         instruction: string,
         model?: MODEL,
     ) {
+        try {
 
-        // create the contract and user message to generate the contract
-        await prisma.$transaction(async (tx) => {
-            await tx.contract.create({
-                data: {
-                    id: contract_id,
-                    userId: user_id,
-                    title: 'contractor',
-                    contractType: 'CUSTOM',
-                }
+            // create the contract and user message to generate the contract
+            await prisma.$transaction(async (tx) => {
+                await tx.contract.create({
+                    data: {
+                        id: contract_id,
+                        userId: user_id,
+                        title: 'contractor',
+                        contractType: 'CUSTOM',
+                    }
+                });
+
+                await tx.message.create({
+                    data: {
+                        contractId: contract_id,
+                        role: 'USER',
+                        content: instruction,
+                    },
+                });
+
             });
 
-            await tx.message.create({
-                data: {
-                    contractId: contract_id,
-                    role: 'USER',
-                    content: instruction,
-                },
-            });
-
-        });
-
-        // generate the new contract
-        generator.generate(
-            res,
-            'new',
-            instruction,
-            model || MODEL.GEMINI,
-            contract_id,
-        );
+            // generate the new contract
+            generator.generate(
+                res,
+                'new',
+                instruction,
+                model || MODEL.GEMINI,
+                contract_id,
+            );
+        } catch (error) {
+            console.error('Error in generate_contract_controller: ', error);
+            if (!res.headersSent) {
+                ResponseWriter.server_error(res);
+                return;
+            } else {
+                ResponseWriter.stream.write(
+                    res,
+                    `data: ${JSON.stringify({
+                        type: 'error',
+                        error: 'Internal server error',
+                    })}\n\n`,
+                );
+                ResponseWriter.stream.end(res);
+            }
+        }
     }
 
     static async continue_old_contract(
@@ -126,41 +173,58 @@ export default class Contract {
         instruction: string,
         model?: MODEL,
     ) {
+        try {
 
-        // get the total number of messages
-        // const total_messages = contract.messages.filter((m) => {
-        //     if (m.role === ChatRole.USER && !m.plannerContext) {
-        //         return true;
-        //     }
-        //     return false;
-        // });
-        const total_messages = 1;
+            // get the total number of messages
+            // const total_messages = contract.messages.filter((m) => {
+            //     if (m.role === ChatRole.USER && !m.plannerContext) {
+            //         return true;
+            //     }
+            //     return false;
+            // });
+            const total_messages = 1;
 
-        // let the user continue only if the message count is less than 5
-        if (total_messages > 5) {
-            ResponseWriter.error(res, 'message limit reached!', 403);
-            return;
+            // let the user continue only if the message count is less than 5
+            if (total_messages > 5) {
+                ResponseWriter.error(res, 'message limit reached!', 403);
+                return;
+            }
+
+            // create user message
+            await prisma.message.create({
+                data: {
+                    role: ChatRole.USER,
+                    content: instruction,
+                    contractId: contract.id,
+                },
+            });
+
+            // call the generator with old chat
+            generator.generate(
+                res,
+                'old',
+                instruction,
+                model || MODEL.GEMINI,
+                contract.id,
+                JSON.parse(contract.summarisedObject || ''),
+            );
+
+        } catch (error) {
+            console.error('Error in generate_contract_controller: ', error);
+            if (!res.headersSent) {
+                ResponseWriter.server_error(res);
+                return;
+            } else {
+                ResponseWriter.stream.write(
+                    res,
+                    `data: ${JSON.stringify({
+                        type: 'error',
+                        error: 'Internal server error',
+                    })}\n\n`,
+                );
+                ResponseWriter.stream.end(res);
+            }
         }
-
-        // create user message
-        await prisma.message.create({
-            data: {
-                role: ChatRole.USER,
-                content: instruction,
-                contractId: contract.id,
-            },
-        });
-
-        // call the generator with old chat
-        generator.generate(
-            res,
-            'old',
-            instruction,
-            model || MODEL.GEMINI,
-            contract.id,
-            JSON.parse(contract.summarisedObject || ''),
-        );
-
     }
 
 }

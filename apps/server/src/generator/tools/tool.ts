@@ -6,8 +6,9 @@ import chalk from 'chalk';
 import { Runnable, RunnableLambda } from '@langchain/core/runnables';
 import { objectStore } from '../../services/init';
 import { tool_schema } from '../schema/tool_schema';
-import { get_file_schema } from '../schema/get_file_schema';
+import { get_file_schema, get_template_file_schema } from '../schema/get_file_schema';
 import { BaseMessage, ToolMessage } from '@langchain/core/messages';
+import env from '../../configs/config.env';
 
 const RULES_DIR = path.resolve(process.cwd(), 'dist/rules');
 
@@ -42,6 +43,8 @@ export default class Tool {
             const contract_files = await objectStore.get_resource_files(contract_id);
             const file = contract_files.find((f) => f.path === file_path);
 
+            console.log('contract files: ', contract_files);
+
             console.log('file requested: ', file_path);
             console.log('contract id sent: ', contract_id);
 
@@ -57,6 +60,27 @@ export default class Tool {
             schema: get_file_schema,
         },
     );
+
+    public static get_template_file = tool(
+        async ({ file_path, template_id }: { file_path: string; template_id: string }) => {
+            const template_files = await objectStore.get_template_files(template_id);
+            const file = template_files.find((f) => f.path === file_path);
+
+            console.log('file requested: ', file_path);
+            console.log('template id send: ', template_id);
+
+            if(!file) {
+                console.error('file not found');
+                return;
+            }
+            return file.content;
+        },
+        {
+            name: 'get_tempplate_file',
+            description: "fetches a template file content by it's path",
+            schema: get_template_file_schema,
+        },
+    )
 
     /**
      * creates a runnable-lambda that executes tool-calling by using specific paths

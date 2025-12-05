@@ -4,7 +4,7 @@ import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { GENERATE_TEMPLATE } from '@/routes/api_routes';
+import { GENERATE_CONTRACT, GENERATE_TEMPLATE } from '@/routes/api_routes';
 
 import { useChatStore } from '@/src/store/user/useChatStore';
 import { ChatRole } from '@/src/types/prisma-types';
@@ -58,7 +58,7 @@ export default function BuilderChats() {
     async function getTemplates(message: string) {
         try {
             setLoading(true);
-            const response = await fetch(GENERATE_TEMPLATE, {
+            const response = await fetch(GENERATE_CONTRACT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

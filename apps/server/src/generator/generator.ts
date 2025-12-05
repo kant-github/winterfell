@@ -34,7 +34,7 @@ import { planning_context_prompt } from './prompts/planning_context_prompt';
 import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
 
-export default class Generator extends GeneratorShape {
+export default class Generator {
     protected gemini_planner: ChatGoogleGenerativeAI;
     protected gemini_coder: ChatGoogleGenerativeAI;
     protected claude_coder: ChatAnthropic;
@@ -43,7 +43,6 @@ export default class Generator extends GeneratorShape {
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
-        super();
         this.gemini_planner = new ChatGoogleGenerativeAI({
             model: 'gemini-2.5-flash',
             temperature: 0.2,
@@ -419,7 +418,7 @@ export default class Generator extends GeneratorShape {
             this.send_sse(res, STAGE.BUILDING, { stage: 'Building' }, system_message);
 
             const gen_files = parser.getGeneratedFiles();
-            await this.update_contract_2(contract_id, gen_files, delete_files);
+            // await this.update_contract_2(contract_id, gen_files, delete_files);
 
             system_message = await prisma.message.update({
                 where: {

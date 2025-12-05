@@ -21,6 +21,7 @@ import getAllTemplates from '../controllers/template-controller/getAllTemplates'
 import plan_executor_controller from '../controllers/chat-controller/plan_executor_controller';
 import generate_contract_using_template from '../controllers/template-controller/generate_contract_using_template';
 import public_review_controller from '../controllers/review/public_review_controller';
+import generate_contract_controller from '../controllers/gen/generate_contract_controller';
 
 const router: Router = Router();
 
@@ -32,7 +33,7 @@ router.get('/health', async (_req: Request, res: Response) => {
 });
 
 // code-routes
-router.post('/generate', authMiddleware, generateContractController);
+router.post('/generate', authMiddleware, generate_contract_controller);
 router.post('/contract/get-chat', authMiddleware, getChatController);
 router.post('/plan', authMiddleware, plan_executor_controller);
 

@@ -48,8 +48,6 @@ export interface Contract {
     title: string;
     description?: string | null;
     contractType: ContractType;
-    isTemplate?: boolean;
-    code: string;
     idl?: JSON;
     clientSdk?: JSON;
     summarisedObject?: string | null;

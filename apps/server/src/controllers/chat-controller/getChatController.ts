@@ -29,7 +29,6 @@ export default async function (req: Request, res: Response) {
                 id: true,
                 title: true,
                 description: true,
-                isTemplate: true,
                 code: true,
                 summarisedObject: true,
                 deployed: true,
@@ -53,25 +52,6 @@ export default async function (req: Request, res: Response) {
 
         if (!contract) {
             ResponseWriter.not_found(res, `contract with id: ${contractId} was not found!`);
-            return;
-        }
-
-        if (contract.isTemplate && contract.messages.length === 1) {
-            const template_url = `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${contract.title}/resource`;
-            const response = await fetch(template_url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch contract: ${response.statusText}`);
-            }
-            const templateFiles = await response.text();
-
-            res.status(200).json({
-                success: true,
-                latestMessage: contract.messages,
-                message: 'fetched template files',
-                messages: contract.messages,
-                contract: contract,
-                contractFiles: templateFiles,
-            });
             return;
         }
 

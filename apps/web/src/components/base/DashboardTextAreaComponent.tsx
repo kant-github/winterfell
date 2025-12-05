@@ -32,12 +32,12 @@ export default function DashboardTextAreaComponent() {
 
         const contractId = uuid();
 
-        if (activeTemplate && activeTemplate.id) {
+        if (activeTemplate && activeTemplate.id && inputValue) {
             setMessage({
                 id: uuid(),
                 contractId: contractId,
                 role: ChatRole.USER,
-                content: `Generate ${activeTemplate.id} template for me`,
+                content: inputValue,
                 stage: STAGE.START,
                 isPlanExecuted: false,
                 createdAt: new Date(),

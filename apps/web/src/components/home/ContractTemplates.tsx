@@ -1,8 +1,8 @@
 'use client';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { ChatRole } from '@/src/types/prisma-types';
+import { STAGE } from '@/src/types/stream_event_types';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaChevronRight, FaHeart } from 'react-icons/fa';
@@ -21,19 +21,15 @@ export default function ContractTemplates() {
         }
         const contractId = uuid();
 
-        setMessage({
-            id: uuid(),
-            contractId: contractId,
-            role: ChatRole.USER,
-            content: `Generate ${activeTemplate?.id} template for me`,
-            planning: false,
-            generatingCode: false,
-            building: false,
-            creatingFiles: false,
-            finalzing: false,
-            error: false,
-            createdAt: new Date(),
-        });
+        // setMessage({
+        //     id: uuid(),
+        //     contractId: contractId,
+        //     role: ChatRole.USER,
+        //     content: `Generate ${activeTemplate?.id} template for me`,
+        //     stage: STAGE.START,
+        //     isPlanExecuted: false,
+        //     createdAt: new Date(),
+        // });
         router.push(`/playground/${contractId}`);
     }
 

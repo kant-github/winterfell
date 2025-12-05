@@ -8,10 +8,11 @@ import Contract from "./contract";
 
 export default async function generate_contract_controller(req: Request, res: Response) {
     try {
-        
+        console.log('generate_contract_controller hit');
         // checking for valid user
         const user = req.user;
         if(!user) {
+            console.log('unauthorised as user not found: ', user);
             ResponseWriter.unauthorized(res, 'Unauthorised');
             return;
         }
@@ -19,6 +20,7 @@ export default async function generate_contract_controller(req: Request, res: Re
         // checking for valid data
         const parsed_data = generate_contract.safeParse(req.body);
         if (!parsed_data.success) {
+            console.log(`parsed data didn't match: `, req.body);
             ResponseWriter.error(res, 'Invalid data', 400);
             return;
         }
@@ -26,28 +28,10 @@ export default async function generate_contract_controller(req: Request, res: Re
         const { contract_id, instruction, template_id, model } = parsed_data.data;
 
         // checking if the contract exists
-        let contract = await prisma.contract.findUnique({
+        let existing_contract = await prisma.contract.findUnique({
             where: {
                 id: contract_id,
                 userId: user.id,
-            },
-            include: {
-                messages: true,
-            }
-        });
-
-        if(!contract) {
-            ResponseWriter.unauthorized(res, 'Unauthorised');
-            return;
-        }
-
-        // if the contract doesn't exist, then create it
-        contract = await prisma.contract.create({
-            data: {
-                id: contract_id,
-                userId: user.id,
-                contractType: 'CUSTOM',
-                title: 'contractor',
             },
             include: {
                 messages: true,
@@ -76,14 +60,17 @@ export default async function generate_contract_controller(req: Request, res: Re
             }
         }
 
-        if(contract.messages.length === 0) {
+        if(!existing_contract) {
             // contract is just been created
+
 
             // check if the user is asking with template
             if(template_id) {
+                console.log('template id found for template visualization: ', template_id);
                 Contract.generate_with_template(
                     res,
                     contract_id,
+                    user.id,
                     template_id,
                     instruction,
                     model,
@@ -91,6 +78,7 @@ export default async function generate_contract_controller(req: Request, res: Re
             } else {
                 // start generation if and only if the instruction is provided
                 if(instruction) {
+                    console.log('new contract generation');
                     Contract.generate_new_contract(
                         res,
                         contract_id,
@@ -99,6 +87,7 @@ export default async function generate_contract_controller(req: Request, res: Re
                         model,
                     );
                 } else {
+                    // in here the contract should delete it self
                     ResponseWriter.error(res, 'Instruction not provided', 401);
                     return;
                 }
@@ -106,9 +95,10 @@ export default async function generate_contract_controller(req: Request, res: Re
         } else {
             // start generation if and only if the instruction is provided
             if(instruction) {
+                console.log('old contract gen');
                 Contract.continue_old_contract(
                     res,
-                    contract,
+                    existing_contract,
                     instruction,
                     model,
                 );

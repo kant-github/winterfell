@@ -81,7 +81,7 @@ export default abstract class GeneratorShape {
      * @param {Response} res
      * @param {RunnableSequence} planner_chain
      * @param {Runnable} coder_chain
-     * @param {RunnableSequence} planner_chain
+     * @param {RunnableSequence} finalizer_chain
      * @param {string} user_instruction
      * @param {string} contract_id
      * @param {StreamParser} parser
@@ -89,6 +89,7 @@ export default abstract class GeneratorShape {
      */
     protected abstract old_contract(
         res: Response,
+        is_template_used: boolean,
         planner_chain: RunnableSequence,
         coder_chain: Runnable,
         finalizer_chain: RunnableSequence,
