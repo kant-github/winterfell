@@ -1,12 +1,12 @@
-import { ContractTemplateData } from '@winterfell/types';
+import { Template } from '@/src/types/prisma-types';
 import { create } from 'zustand';
 
 interface TemplateStoreData {
-    templates: ContractTemplateData[] | [];
-    activeTemplate: ContractTemplateData | null;
-    setActiveTemplate: (template: ContractTemplateData) => void;
+    templates: Template[] | [];
+    activeTemplate: Template | null;
+    setActiveTemplate: (template: Template) => void;
     resetTemplate: () => void;
-    setTemplates: (templates: ContractTemplateData[]) => void;
+    setTemplates: (templates: Template[]) => void;
 }
 
 export const useTemplateStore = create<TemplateStoreData>((set) => ({

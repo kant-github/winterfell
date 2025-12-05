@@ -13,6 +13,7 @@ import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import GenerateContract from '@/src/lib/server/generate_contract';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import BuilderMessage from './BuilderMessage';
+import useGenerate from '@/src/hooks/useGenerate';
 
 export default function BuilderChats() {
     const [hasContext, setHasContext] = useState<boolean>(false);
@@ -24,6 +25,7 @@ export default function BuilderChats() {
     const { activeTemplate, resetTemplate } = useTemplateStore();
     const { session } = useUserSessionStore();
     const { setContractId } = useChatStore();
+    const { handleGeneration } = useGenerate();
     const { messages, loading, setLoading } = useBuilderChatStore();
     const { setCollapseFileTree, parseFileStructure } = useCodeEditor();
 
@@ -47,16 +49,12 @@ export default function BuilderChats() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, messages.length]);
 
-    async function startChat(message: string) {
-        await GenerateContract.router(
-            session?.user.token || '',
+    async function startChat(instruction: string) {
+        alert('called again');
+        handleGeneration(
             contractId,
-            message,
-            setHasContext,
-            (error) => {
-                toast.error(error.message);
-                router.push('/');
-            },
+            'pg',
+            instruction,
         );
     }
 

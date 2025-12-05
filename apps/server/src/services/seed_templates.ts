@@ -1,7 +1,7 @@
-import { prisma } from '@winterfell/database';
+import { Prisma, prisma } from '@winterfell/database';
 
 export async function seedTemplates() {
-    const templates = [
+    const templates: Prisma.TemplateCreateInput[] = [
         {
             id: "456fbc47-4f46-487a-9d7d-01fb16a7396e",
             title: "Counter Contract",
@@ -15,6 +15,7 @@ export async function seedTemplates() {
             ],
             anchorVersion: "0.32.1",
             solanaVersion: "1.18.4",
+            imageUrl: "https://d3k5vke5jsl4rb.cloudfront.net/images/contract-1.jpg",
             summarisedObject: JSON.stringify([
                 {
                     id: "Cargo.toml",

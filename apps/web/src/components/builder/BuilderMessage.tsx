@@ -70,11 +70,8 @@ export default function BuilderMessage({
                                 <span className="text-right flex justify-end text-xs font-semibold mb-1 mr-1">
                                     {formatChatTime(message.createdAt)}
                                 </span>
-                                <div className="px-4 py-2 rounded-b-[8px] rounded-tl-[8px] text-sm font-semibold bg-primary text-light text-right">
-                                    {message.content}
-                                </div>
                             </div>
-                            <div className="relative w-full h-48 rounded-lg overflow-hidden flex items-center justify-end">
+                            <div className="relative w-full h-34 aspect-[4/3] rounded-b-[8px] rounded-tl-[8px] overflow-hidden flex items-center justify-end">
                                 <Image
                                     src={'/templates/contract-2.jpg'}
                                     alt="Contract preview"

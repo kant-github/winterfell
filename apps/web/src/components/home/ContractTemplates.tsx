@@ -11,7 +11,6 @@ import { v4 as uuid } from 'uuid';
 
 export default function ContractTemplates() {
     const { templates } = useTemplateStore();
-    const { setMessage } = useBuilderChatStore();
     const { activeTemplate, setActiveTemplate } = useTemplateStore();
     const router = useRouter();
 
@@ -37,7 +36,7 @@ export default function ContractTemplates() {
                     >
                         <div className="bg-[#0A0C0D70] overflow-hidden shadow-sm border border-neutral-800 rounded-[8px] relative">
                             <Image
-                                src={template.image || '/templates/contract-1.jpg'}
+                                src={template.imageUrl || '/templates/contract-1.jpg'}
                                 alt=""
                                 fill
                                 className="object-cover opacity-90"

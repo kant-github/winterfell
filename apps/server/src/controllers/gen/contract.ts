@@ -4,7 +4,7 @@ import ResponseWriter from "../../class/response_writer";
 import { Response } from "express";
 import { ChatRole, Message, prisma } from "@winterfell/database";
 import { generator, objectStore } from "../../services/init";
-import { MODEL } from "@winterfell/types";
+import { MODEL, STAGE } from "@winterfell/types";
 import { Contract as ContractType } from "@winterfell/database";
 
 
@@ -47,14 +47,25 @@ export default class Contract {
             }
 
             // make the user the owner of the contract and add template's summarised-object
-            await prisma.contract.create({
-                data: {
-                    id: contract_id,
-                    userId: user_id,
-                    title: 'contractor',
-                    contractType: 'CUSTOM',
-                    summarisedObject: template.summarisedObject,
-                },
+            await prisma.$transaction(async (tx) => {
+                await tx.contract.create({
+                    data: {
+                        id: contract_id,
+                        userId: user_id,
+                        title: 'contractor',
+                        contractType: 'CUSTOM',
+                        summarisedObject: template.summarisedObject,
+                    },
+                });
+
+                await tx.message.create({
+                    data: {
+                        contractId: contract_id,
+                        templateId: template_id,
+                        content: '',
+                        role: 'TEMPLATE',
+                    },
+                });
             });
 
             // upload the template files to user's contract
@@ -70,6 +81,21 @@ export default class Contract {
                     template_data.data,
                     `Fetched ${template_id} template succesfully`,
                 );
+
+                // generator.create_stream(res);
+                // const obj = {
+                //     type: STAGE.END,
+                //     data: {
+                //         stage: 'End',
+                //         data: template_data.data,
+                //     },
+
+                // }
+                // ResponseWriter.stream.write(
+                //     res,
+                //     `data: ${JSON.stringify(obj)}`,
+                // )
+                // ResponseWriter.stream.end(res);
                 return;
             } else {
                 // if yes then continue generation with the sent instruction
