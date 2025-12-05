@@ -6,6 +6,7 @@ import ResponseWriter from '../class/response_writer';
 
 export default function authMiddleware(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
+    console.log(authHeader);
     if (!authHeader || !authHeader.startsWith('Bearer')) {
         res.status(401).json({
             success: false,

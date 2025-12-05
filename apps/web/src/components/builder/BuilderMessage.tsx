@@ -62,6 +62,41 @@ export default function BuilderMessage({
                 </div>
             )}
 
+            {message.role === 'TEMPLATE' && (
+                <div className="flex justify-end items-start w-full">
+                    <div className="flex items-start gap-x-2 max-w-[70%]">
+                        <div className="flex flex-col gap-y-2">
+                            <div>
+                                <span className="text-right flex justify-end text-xs font-semibold mb-1 mr-1">
+                                    {formatChatTime(message.createdAt)}
+                                </span>
+                                <div className="px-4 py-2 rounded-b-[8px] rounded-tl-[8px] text-sm font-semibold bg-primary text-light text-right">
+                                    {message.content}
+                                </div>
+                            </div>
+                            <div className="relative w-full h-48 rounded-lg overflow-hidden flex items-center justify-end">
+                                <Image
+                                    src={'/templates/contract-2.jpg'}
+                                    alt="Contract preview"
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
+                                />
+                            </div>
+                        </div>
+                        {session?.user.image && (
+                            <Image
+                                className="rounded-full shrink-0"
+                                src={session.user.image}
+                                alt="user"
+                                width={32}
+                                height={32}
+                            />
+                        )}
+                    </div>
+                </div>
+            )}
+
             {message.role === 'PLAN' && message.plannerContext && (
                 <PlanExecutorPanel
                     plan={JSON.parse(String(message.plannerContext))}

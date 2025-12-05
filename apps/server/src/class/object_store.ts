@@ -108,6 +108,12 @@ export default class ObjectStore {
         return key;
     }
 
+    public async get_template_files(templateId: string): Promise<FileContent[]> {
+        const res = await axios.get(`${this.get_template_files_path(templateId)}`);
+        const template_files: FileContent[] = res.data;
+        return template_files;
+    }
+
     public async get_resource_files(contractId: string): Promise<FileContent[]> {
         const res = await axios.get(`${this.get_resource_files_path(contractId)}`);
         const contract_files: FileContent[] = res.data;
@@ -116,6 +122,10 @@ export default class ObjectStore {
 
     public get_raw_files(contractId: string) {
         return `${process.env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/raw/llm-response.txt`;
+    }
+
+    public get_template_files_path(templateId: string) {
+        return `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${templateId}/resource`;
     }
 
     public get_resource_files_path(contractId: string) {

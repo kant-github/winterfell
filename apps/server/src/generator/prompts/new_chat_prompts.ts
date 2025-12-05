@@ -147,3 +147,38 @@ Follow this exact sequence:
 Each tag must have blank lines above and below.`,
     inputVariables: ['plan', 'files_likely_affected'],
 });
+
+export const chat = new PromptTemplate({
+    template: `
+
+        the plan:
+        {plan}
+
+        Generate files for:
+        {files_likely_affected}
+
+        Follow this exact sequence:
+        <stage>Generating Code</stage>
+
+        <phase>thinking</phase>
+
+        <phase>generating</phase>
+        <file>path/to/file</file>
+
+        <phase>updating</phase>
+        <file>path/to/file</file>
+
+        <phase>deleting</phase>
+        <file>path/to/file</file>
+
+        <stage>Building</stage>
+
+        you got the knowledge about the generation
+        
+        now you should start generating file by file
+        means start with lib.rs, then move to constants.rs, then [instruction].rs, then error_codes.rs and so on..
+        and if you got any changes in any file and that might effect the anyother file, then regeneration the file which is getting affected with the affected data.
+
+    `,
+    inputVariables: ['plan', 'files_likely_affected'],
+})

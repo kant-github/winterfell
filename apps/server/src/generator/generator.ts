@@ -34,7 +34,7 @@ import { planning_context_prompt } from './prompts/planning_context_prompt';
 import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
 
-export default class Generator extends GeneratorShape {
+export default class Generator {
     protected gemini_planner: ChatGoogleGenerativeAI;
     protected gemini_coder: ChatGoogleGenerativeAI;
     protected claude_coder: ChatAnthropic;
@@ -43,7 +43,6 @@ export default class Generator extends GeneratorShape {
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
-        super();
         this.gemini_planner = new ChatGoogleGenerativeAI({
             model: 'gemini-2.5-flash',
             temperature: 0.2,
@@ -73,7 +72,6 @@ export default class Generator extends GeneratorShape {
         contract_id: string,
         idl?: Object[],
     ) {
-        console.log('generate contract hit');
         const parser = this.get_parser(contract_id, res);
         try {
             this.create_stream(res);
@@ -129,7 +127,6 @@ export default class Generator extends GeneratorShape {
         parser: StreamParser,
     ) {
         try {
-            console.log('generate new contract hit');
             const planner_data = await planner_chain.invoke({
                 user_instruction,
             });
@@ -185,7 +182,6 @@ export default class Generator extends GeneratorShape {
 
             // send planning stage from here
             console.log('the stage: ', chalk.green('Planning'));
-            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
 
             const code_stream = await coder_chain.stream({
@@ -207,18 +203,29 @@ export default class Generator extends GeneratorShape {
                     contractId: contract_id,
                 },
                 data: {
+                    stage: STAGE.BUILDING,
+                },
+            });
+
+            console.log('the stage: ', chalk.green('Building'));
+            this.send_sse(res, STAGE.BUILDING, { stage: 'Building' }, system_message);
+
+            const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
+            const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
+            const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
+
+            system_message = await prisma.message.update({
+                where: {
+                    id: system_message.id,
+                    contractId: contract_id,
+                },
+                data: {
                     stage: STAGE.CREATING_FILES,
                 },
             });
 
             console.log('the stage: ', chalk.green('Creating Files'));
-            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Creating Files' }, system_message);
-
-            const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
-            console.log('files from llm: ', llm_generated_files);
-            const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
-            const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
 
             this.new_finalizer(
                 res,
@@ -258,7 +265,6 @@ export default class Generator extends GeneratorShape {
             });
 
             console.log('the stage: ', chalk.green('Finalizing'));
-            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
             const finalizer_data = await finalizer_chain.invoke({
@@ -275,7 +281,6 @@ export default class Generator extends GeneratorShape {
                 },
             });
             console.log('the stage: ', chalk.green('END'));
-            console.log('sysmte message; ', system_message);
             this.send_sse(res, STAGE.END, { stage: 'End', data: generated_files }, system_message);
 
             const llm_message = await prisma.message.create({
@@ -410,10 +415,10 @@ export default class Generator extends GeneratorShape {
             });
 
             console.log('the stage: ', chalk.green('Building'));
-            this.send_sse(res, STAGE.CREATING_FILES, { stage: 'Building' }, system_message);
+            this.send_sse(res, STAGE.BUILDING, { stage: 'Building' }, system_message);
 
             const gen_files = parser.getGeneratedFiles();
-            await this.update_contract_2(contract_id, gen_files, delete_files);
+            // await this.update_contract_2(contract_id, gen_files, delete_files);
 
             system_message = await prisma.message.update({
                 where: {
@@ -443,6 +448,7 @@ export default class Generator extends GeneratorShape {
             this.delete_parser(contract_id);
             ResponseWriter.stream.end(res);
         }
+
     }
 
     protected async old_finalizer(
@@ -514,11 +520,10 @@ export default class Generator extends GeneratorShape {
         generated_files: FileContent[],
         deleting_files_path: string[],
     ) {
+
         console.log(chalk.bgBlueBright('------------------ updation starts here'));
 
-        console.log(
-            chalk.bgRed('---------------------------- files which are generated / updated now'),
-        );
+        console.log(chalk.bgRed('---------------------------- files which are generated / updated now'));
         console.log(generated_files.forEach((file) => console.log(file.path)));
 
         console.log(chalk.bgRed('---------------------------- files to be deleted'));
@@ -553,6 +558,7 @@ export default class Generator extends GeneratorShape {
             ...Array.from(remaining_files_map.values()),
             ...new_files,
         ];
+
 
         console.log(chalk.bgRed('---------------------------- final updated contract'));
         console.log(updated_contract.forEach((file) => console.log(file.path)));

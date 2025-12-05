@@ -39,7 +39,6 @@ export default async function plan_executor_controller(req: Request, res: Respon
                     title: 'contractor',
                     contractType: 'CUSTOM',
                     userId: user.id,
-                    isTemplate: false,
                 },
                 include: {
                     messages: true,
