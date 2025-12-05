@@ -20,16 +20,6 @@ export default function ContractTemplates() {
             throw new Error('invalid request');
         }
         const contractId = uuid();
-
-        // setMessage({
-        //     id: uuid(),
-        //     contractId: contractId,
-        //     role: ChatRole.USER,
-        //     content: `Generate ${activeTemplate?.id} template for me`,
-        //     stage: STAGE.START,
-        //     isPlanExecuted: false,
-        //     createdAt: new Date(),
-        // });
         router.push(`/playground/${contractId}`);
     }
 

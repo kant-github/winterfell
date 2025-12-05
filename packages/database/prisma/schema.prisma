@@ -85,7 +85,9 @@ model Template {
   solanaVersion String
   anchorVersion String
   summarisedObject String
+  imageUrl      String
 
+  message   Message[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -158,7 +160,9 @@ model Message {
   stage          ContractGenerationStage?
   plannerContext String?
   isPlanExecuted Boolean @default(false)
+  templateId     String?
 
+  template       Template? @relation(fields: [templateId], references: [id])
   // isCodeBuilt Boolean? @default(false)
   // buildStatus
 
@@ -244,6 +248,7 @@ enum ChatRole {
   AI
   SYSTEM
   PLAN
+  TEMPLATE
 }
 
 enum PlanType {

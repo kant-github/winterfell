@@ -33,6 +33,7 @@ export default function DashboardTextAreaComponent() {
         const contractId = uuid();
 
         if (activeTemplate && activeTemplate.id && inputValue) {
+            alert('active template found with input value');
             setMessage({
                 id: uuid(),
                 contractId: contractId,
@@ -43,6 +44,7 @@ export default function DashboardTextAreaComponent() {
                 createdAt: new Date(),
             });
         } else {
+            console.log('else case input value: ', inputValue);
             setMessage({
                 id: uuid(),
                 contractId: contractId,

@@ -82,6 +82,8 @@ export interface Message {
     plannerContext?: PlanMessage;
     isPlanExecuted: boolean;
     createdAt: Date;
+    templateId?: string;
+    template?: Template;
 }
 
 export interface PlanMessage {
@@ -112,6 +114,21 @@ export interface Subscription {
     updatedAt: string;
 }
 
+export interface Template {
+    id: string;
+    title: string;
+    description?: string;
+    category: string;
+    tags: string[];
+    s3_prefix?: string;
+    solanaVersion: string;
+    anchorVersion: string;
+    summarisedObject: string;
+
+    messages: Message[];
+    createdAt: Date;
+    updatedAt: Date;
+}
 /* =========================
    ENUMS
    ========================= */
@@ -143,6 +160,7 @@ export enum ChatRole {
     USER = 'USER',
     AI = 'AI',
     SYSTEM = 'SYSTEM',
+    TEMPLATE = 'TEMPLATE',
 }
 
 export enum SubscriptionStatus {
