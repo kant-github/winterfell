@@ -181,4 +181,4 @@ export const chat = new PromptTemplate({
 
     `,
     inputVariables: ['plan', 'files_likely_affected'],
-})
+});

@@ -3,277 +3,276 @@ import { Prisma, prisma } from '@winterfell/database';
 export async function seedTemplates() {
     const templates: Prisma.TemplateCreateInput[] = [
         {
-            id: "456fbc47-4f46-487a-9d7d-01fb16a7396e",
-            title: "Counter Contract",
-            description: "Simple Anchor program demonstrating increment, decrement and initialize instructions.",
-            category: "utility",
-            tags: [
-                "counter",
-                "example",
-                "anchor",
-                "solana"
-            ],
-            anchorVersion: "0.32.1",
-            solanaVersion: "1.18.4",
-            imageUrl: "https://d3k5vke5jsl4rb.cloudfront.net/images/contract-1.jpg",
+            id: '456fbc47-4f46-487a-9d7d-01fb16a7396e',
+            title: 'Counter Contract',
+            description:
+                'Simple Anchor program demonstrating increment, decrement and initialize instructions.',
+            category: 'utility',
+            tags: ['counter', 'example', 'anchor', 'solana'],
+            anchorVersion: '0.32.1',
+            solanaVersion: '1.18.4',
+            imageUrl: 'https://d3k5vke5jsl4rb.cloudfront.net/images/contract-1.jpg',
             summarisedObject: JSON.stringify([
                 {
-                    id: "Cargo.toml",
-                    path: "Cargo.toml",
-                    type: "project_config",
+                    id: 'Cargo.toml',
+                    path: 'Cargo.toml',
+                    type: 'project_config',
                     content: {
-                        name: "workspace",
-                        description: "Root Cargo.toml for the Solana workspace, defining members and release profiles."
-                    }
+                        name: 'workspace',
+                        description:
+                            'Root Cargo.toml for the Solana workspace, defining members and release profiles.',
+                    },
                 },
                 {
-                    id: "package.json",
-                    path: "package.json",
-                    type: "package_config",
+                    id: 'package.json',
+                    path: 'package.json',
+                    type: 'package_config',
                     content: {
-                        description: "Node.js package configuration with scripts, dependencies, and devDependencies for the project."
-                    }
+                        description:
+                            'Node.js package configuration with scripts, dependencies, and devDependencies for the project.',
+                    },
                 },
                 {
-                    id: "tsconfig.json",
-                    path: "tsconfig.json",
-                    type: "typescript_config",
+                    id: 'tsconfig.json',
+                    path: 'tsconfig.json',
+                    type: 'typescript_config',
                     content: {
-                        description: "TypeScript configuration for the project, specifying compiler options and type roots."
-                    }
+                        description:
+                            'TypeScript configuration for the project, specifying compiler options and type roots.',
+                    },
                 },
                 {
-                    id: "rust-toolchain.toml",
-                    path: "rust-toolchain.toml",
-                    type: "toolchain_config",
+                    id: 'rust-toolchain.toml',
+                    path: 'rust-toolchain.toml',
+                    type: 'toolchain_config',
                     content: {
-                        description: "Rust toolchain configuration, specifying channel, components, and profile."
-                    }
+                        description:
+                            'Rust toolchain configuration, specifying channel, components, and profile.',
+                    },
                 },
                 {
-                    id: ".gitignore",
-                    path: ".gitignore",
-                    type: "ignore_config",
+                    id: '.gitignore',
+                    path: '.gitignore',
+                    type: 'ignore_config',
                     content: {
-                        description: "Git ignore file, specifying files and directories to be excluded from version control."
-                    }
+                        description:
+                            'Git ignore file, specifying files and directories to be excluded from version control.',
+                    },
                 },
                 {
-                    id: ".prettierignore",
-                    path: ".prettierignore",
-                    type: "ignore_config",
+                    id: '.prettierignore',
+                    path: '.prettierignore',
+                    type: 'ignore_config',
                     content: {
-                        description: "Prettier ignore file, specifying files and directories to be excluded from formatting."
-                    }
+                        description:
+                            'Prettier ignore file, specifying files and directories to be excluded from formatting.',
+                    },
                 },
                 {
-                    id: "programs/counter/src/instructions/mod.rs",
-                    path: "programs/counter/src/instructions/mod.rs",
-                    type: "module_declaration",
+                    id: 'programs/counter/src/instructions/mod.rs',
+                    path: 'programs/counter/src/instructions/mod.rs',
+                    type: 'module_declaration',
                     content: {
                         mods: [
-                            { name: "initialize" },
-                            { name: "increment" },
-                            { name: "decrement" }
-                        ]
-                    }
+                            { name: 'initialize' },
+                            { name: 'increment' },
+                            { name: 'decrement' },
+                        ],
+                    },
                 },
                 {
-                    id: "programs/counter/src/instructions/initialize.rs",
-                    path: "programs/counter/src/instructions/initialize.rs",
-                    type: "instruction_and_struct",
+                    id: 'programs/counter/src/instructions/initialize.rs',
+                    path: 'programs/counter/src/instructions/initialize.rs',
+                    type: 'instruction_and_struct',
                     content: {
                         instructions: [
                             {
-                                name: "initialize_handler",
+                                name: 'initialize_handler',
                                 params: [],
-                                returns: [
-                                    { type: "Result<()>" }
-                                ]
-                            }
+                                returns: [{ type: 'Result<()>' }],
+                            },
                         ],
                         structs: [
                             {
-                                name: "Initialize",
-                                type: "Accounts",
+                                name: 'Initialize',
+                                type: 'Accounts',
                                 instruction_macro: [],
                                 struct_vars: [
                                     {
-                                        name: "counter",
+                                        name: 'counter',
                                         type: "Account<'info, Counter>",
-                                        macro: "account"
+                                        macro: 'account',
                                     },
                                     {
-                                        name: "signer",
+                                        name: 'signer',
                                         type: "Signer<'info>",
-                                        macro: "account(mut)"
+                                        macro: 'account(mut)',
                                     },
                                     {
-                                        name: "system_program",
+                                        name: 'system_program',
                                         type: "Program<'info, System>",
-                                        macro: "none"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
+                                        macro: 'none',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
-                    id: "programs/counter/src/instructions/increment.rs",
-                    path: "programs/counter/src/instructions/increment.rs",
-                    type: "instruction_and_struct",
+                    id: 'programs/counter/src/instructions/increment.rs',
+                    path: 'programs/counter/src/instructions/increment.rs',
+                    type: 'instruction_and_struct',
                     content: {
                         instructions: [
                             {
-                                name: "increment_handler",
+                                name: 'increment_handler',
                                 params: [],
-                                returns: [
-                                    { type: "Result<()>" }
-                                ]
-                            }
+                                returns: [{ type: 'Result<()>' }],
+                            },
                         ],
                         structs: [
                             {
-                                name: "Increment",
-                                type: "Accounts",
+                                name: 'Increment',
+                                type: 'Accounts',
                                 instruction_macro: [],
                                 struct_vars: [
                                     {
-                                        name: "counter",
+                                        name: 'counter',
                                         type: "Account<'info, Counter>",
-                                        macro: "account(mut)"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
+                                        macro: 'account(mut)',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
-                    id: "programs/counter/src/instructions/decrement.rs",
-                    path: "programs/counter/src/instructions/decrement.rs",
-                    type: "instruction_and_struct",
+                    id: 'programs/counter/src/instructions/decrement.rs',
+                    path: 'programs/counter/src/instructions/decrement.rs',
+                    type: 'instruction_and_struct',
                     content: {
                         instructions: [
                             {
-                                name: "decrement_handler",
+                                name: 'decrement_handler',
                                 params: [],
-                                returns: [
-                                    { type: "Result<()>" }
-                                ]
-                            }
+                                returns: [{ type: 'Result<()>' }],
+                            },
                         ],
                         structs: [
                             {
-                                name: "Decrement",
-                                type: "Accounts",
+                                name: 'Decrement',
+                                type: 'Accounts',
                                 instruction_macro: [],
                                 struct_vars: [
                                     {
-                                        name: "counter",
+                                        name: 'counter',
                                         type: "Account<'info, Counter>",
-                                        macro: "account(mut)"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
+                                        macro: 'account(mut)',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
-                    id: "programs/counter/src/errors/mod.rs",
-                    path: "programs/counter/src/errors/mod.rs",
-                    type: "module_declaration",
+                    id: 'programs/counter/src/errors/mod.rs',
+                    path: 'programs/counter/src/errors/mod.rs',
+                    type: 'module_declaration',
                     content: {
-                        mods: [
-                            { name: "error_codes" }
-                        ]
-                    }
+                        mods: [{ name: 'error_codes' }],
+                    },
                 },
                 {
-                    id: "programs/counter/src/errors/error_codes.rs",
-                    path: "programs/counter/src/errors/error_codes.rs",
-                    type: "error_definition",
+                    id: 'programs/counter/src/errors/error_codes.rs',
+                    path: 'programs/counter/src/errors/error_codes.rs',
+                    type: 'error_definition',
                     content: {
-                        description: "Defines custom error codes for the Counter program, including Overflow and Underflow."
-                    }
+                        description:
+                            'Defines custom error codes for the Counter program, including Overflow and Underflow.',
+                    },
                 },
                 {
-                    id: "programs/counter/src/lib.rs",
-                    path: "programs/counter/src/lib.rs",
-                    type: "program_main",
+                    id: 'programs/counter/src/lib.rs',
+                    path: 'programs/counter/src/lib.rs',
+                    type: 'program_main',
                     content: {
-                        mod_name: "counter",
-                        public_key: "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS",
+                        mod_name: 'counter',
+                        public_key: 'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS',
                         instructions: [
-                            { name: "initialize" },
-                            { name: "increment" },
-                            { name: "decrement" }
-                        ]
-                    }
+                            { name: 'initialize' },
+                            { name: 'increment' },
+                            { name: 'decrement' },
+                        ],
+                    },
                 },
                 {
-                    id: "programs/counter/src/state/mod.rs",
-                    path: "programs/counter/src/state/mod.rs",
-                    type: "struct_definition",
+                    id: 'programs/counter/src/state/mod.rs',
+                    path: 'programs/counter/src/state/mod.rs',
+                    type: 'struct_definition',
                     content: {
                         structs: [
                             {
-                                name: "Counter",
-                                type: "struct",
+                                name: 'Counter',
+                                type: 'struct',
                                 instruction_macro: [],
                                 struct_vars: [
                                     {
-                                        name: "count",
-                                        type: "u64",
-                                        macro: "none"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
+                                        name: 'count',
+                                        type: 'u64',
+                                        macro: 'none',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
                 },
                 {
-                    id: "tests/counter.ts",
-                    path: "tests/counter.ts",
-                    type: "test_file",
+                    id: 'tests/counter.ts',
+                    path: 'tests/counter.ts',
+                    type: 'test_file',
                     content: {
-                        description: "TypeScript tests for the Counter program, covering initialization, increment, decrement, and error handling."
-                    }
+                        description:
+                            'TypeScript tests for the Counter program, covering initialization, increment, decrement, and error handling.',
+                    },
                 },
                 {
-                    id: "migrations/deploy.ts",
-                    path: "migrations/deploy.ts",
-                    type: "migration_script",
+                    id: 'migrations/deploy.ts',
+                    path: 'migrations/deploy.ts',
+                    type: 'migration_script',
                     content: {
-                        description: "Deployment script for the Counter program, setting up the Anchor provider."
-                    }
+                        description:
+                            'Deployment script for the Counter program, setting up the Anchor provider.',
+                    },
                 },
                 {
-                    id: "Anchor.toml",
-                    path: "Anchor.toml",
-                    type: "anchor_config",
+                    id: 'Anchor.toml',
+                    path: 'Anchor.toml',
+                    type: 'anchor_config',
                     content: {
-                        name: "counter",
-                        description: "Anchor project configuration for the Counter program, including toolchain, features, and provider settings."
-                    }
+                        name: 'counter',
+                        description:
+                            'Anchor project configuration for the Counter program, including toolchain, features, and provider settings.',
+                    },
                 },
                 {
-                    id: "programs/counter/Cargo.toml",
-                    path: "programs/counter/Cargo.toml",
-                    type: "program_cargo_config",
+                    id: 'programs/counter/Cargo.toml',
+                    path: 'programs/counter/Cargo.toml',
+                    type: 'program_cargo_config',
                     content: {
-                        name: "counter",
-                        description: "Cargo.toml for the Counter program, defining package metadata and dependencies."
-                    }
-                }
-            ])
-        }
+                        name: 'counter',
+                        description:
+                            'Cargo.toml for the Counter program, defining package metadata and dependencies.',
+                    },
+                },
+            ]),
+        },
     ];
 
     for (const template of templates) {
         await prisma.template.upsert({
             where: { id: template.id },
             update: template,
-            create: template
+            create: template,
         });
     }
 
