@@ -43,6 +43,7 @@ export default function BuilderChatInput() {
                 id: uuid(),
                 contractId: contractId,
                 role: ChatRole.USER,
+                stage: STAGE.START,
                 content: messageContent,
                 isPlanExecuted: false,
                 createdAt: new Date(),

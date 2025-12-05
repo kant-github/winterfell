@@ -9,12 +9,15 @@ export async function createContractReview(req: Request, res: Response) {
             ResponseWriter.unauthorized(res);
             return;
         }
+        console.log('review controller hit');
         const parsedData = contractReviewSchema.safeParse(req.body);
         if (!parsedData.success) {
             console.log('error is : ', parsedData.error);
             ResponseWriter.validation_error(res, '', 'invalid data format');
             return;
         }
+
+        console.log('parsed data is: ', parsedData.data);
 
         await prisma.contractGenerationReviews.create({
             data: {

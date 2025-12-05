@@ -6,29 +6,19 @@ import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useChatStore } from '@/src/store/user/useChatStore';
-import React, { useEffect, useState, useCallback, useRef, use } from 'react';
+import React, { useEffect, use } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
-import { useRouter } from 'next/navigation';
 import Playyground from '@/src/lib/server/playground';
-
-const REVIEW_STORAGE_KEY = 'contract-reviewed-';
+import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
 
 export default function Page({ params }: { params: Promise<{ contractId: string }> }) {
-    const { cleanStore, loading, messages, upsertMessage } = useBuilderChatStore();
-    const { reset, collapseFileTree, setCollapseFileTree, parseFileStructure } = useCodeEditor();
+    const { cleanStore, loading } = useBuilderChatStore();
+    const { reset, collapseFileTree, setCollapseFileTree } = useCodeEditor();
     const unwrappedParams = React.use(params);
     const { contractId } = unwrappedParams;
     const { resetContractId } = useChatStore();
     const { session } = useUserSessionStore();
-    const router = useRouter();
-    const [showReviewCard, setShowReviewCard] = useState(false);
-    const navigationAttemptedRef = useRef(false);
-    const hasReviewed = useCallback(() => {
-        if (typeof window === 'undefined') return true;
-        return localStorage.getItem(`${REVIEW_STORAGE_KEY}${contractId}`) === 'true';
-    }, [contractId]);
-
-    const [hasShownReview, setHasShownReview] = useState(hasReviewed);
+    const { open, hide } = useReviewModalStore();
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
@@ -42,31 +32,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             document.removeEventListener('keydown', handleKeyDown);
         };
     });
-
-    useEffect(() => {
-        const shouldBlockNavigation = messages.length > 0 && !hasShownReview;
-
-        if (!shouldBlockNavigation) {
-            return;
-        }
-
-        function handlePopState(event: PopStateEvent) {
-            // Block the navigation and show review card
-            event.preventDefault();
-            window.history.pushState(null, '', window.location.href);
-            setShowReviewCard(true);
-        }
-
-        window.history.pushState(null, '', window.location.href);
-        window.addEventListener('popstate', handlePopState);
-
-        return () => {
-            window.removeEventListener('popstate', handlePopState);
-            if (hasShownReview && window.history.state === null) {
-                window.history.back();
-            }
-        };
-    }, [messages.length, hasShownReview]);
 
     useEffect(() => {
         if (loading || !session || !session.user || !session.user.token) return;
@@ -83,22 +48,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
         };
     }, [contractId]);
 
-    function handleReviewSubmit(data: { rating: number; liked: string; disliked: string }) {
-        localStorage.setItem(`${REVIEW_STORAGE_KEY}${contractId}`, 'true');
-        setShowReviewCard(false);
-        setHasShownReview(true);
-        navigationAttemptedRef.current = false;
-
-        router.back();
-    }
-
-    function handleReviewClose() {
-        localStorage.setItem(`${REVIEW_STORAGE_KEY}${contractId}`, 'true');
-        setShowReviewCard(false);
-        setHasShownReview(true);
-        navigationAttemptedRef.current = false;
-        router.back();
-    }
     return (
         <div className="h-screen w-screen flex flex-col overflow-hidden">
             <BuilderNavbar />
@@ -107,9 +56,9 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             </div>
             <ContractReviewCard
                 contractId={use(params).contractId}
-                open={showReviewCard}
-                onClose={handleReviewClose}
-                onSubmit={handleReviewSubmit}
+                open={open}
+                onClose={hide}
+                onSubmit={() => hide()}
             />
         </div>
     );

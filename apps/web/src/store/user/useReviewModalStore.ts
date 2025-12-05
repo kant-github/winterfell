@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface ReviewModalData {
     open: boolean;
@@ -11,5 +11,5 @@ export const useReviewModalStore = create<ReviewModalData>((set) => ({
     open: false,
     contractId: null,
     show: (contractId) => set({ open: true, contractId }),
-    hide: () => set({ open: false, contractId: null })
-}))
+    hide: () => set({ open: false, contractId: null }),
+}));

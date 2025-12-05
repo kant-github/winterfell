@@ -1,7 +1,7 @@
 import { cn } from '@/src/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Terminal } from 'lucide-react';
-import { useState, KeyboardEvent, useRef } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
@@ -62,7 +62,6 @@ export default function DashboardTextAreaComponent() {
             handleSubmit();
         }
     }
-
 
     return (
         <>
@@ -140,10 +139,7 @@ export default function DashboardTextAreaComponent() {
                         )}
                     </div>
 
-                    <DashboardTextAreaBottom
-                        inputValue={inputValue}
-                        handleSubmit={handleSubmit}
-                    />
+                    <DashboardTextAreaBottom inputValue={inputValue} handleSubmit={handleSubmit} />
                 </div>
 
                 <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-50" />

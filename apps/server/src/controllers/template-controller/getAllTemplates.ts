@@ -18,8 +18,6 @@ export default async function getAllTemplates(req: Request, res: Response) {
             },
         });
 
-        console.log('templates fetched:', templates);
-
         ResponseWriter.success(res, templates, 'Fetched templates successfully');
         return;
     } catch (error) {

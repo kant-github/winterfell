@@ -10,7 +10,6 @@ import Faq from '@/src/components/base/Faq';
 import ReviewsSection from '@/src/components/utility/ReviewsSection';
 
 export default function Page() {
-
     return (
         <LenisProvider>
             <div className="min-h-screen w-full flex flex-col bg-dark relative select-none">

@@ -15,7 +15,6 @@ import { IncomingPayload, TerminalSocketData, WSServerIncomingPayload } from '@w
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import FileTree from '../code/Filetree';
 import GithubPanel from '../code/GithubPanel';
-import PlanExecutorPanel from '../code/PlanExecutorPanel';
 import PlanPanel from '../code/PlanPanel';
 
 export default function BuilderDashboard(): JSX.Element {

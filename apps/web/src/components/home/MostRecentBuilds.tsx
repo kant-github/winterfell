@@ -1,10 +1,8 @@
 'use client';
 import timeParser from '@/src/lib/home_utils';
 import { useAllContractStore } from '@/src/store/user/useAllContractStore';
-import { useState } from 'react';
 
 export default function MostRecentBuilds() {
-    const [upvoted, setUpvoted] = useState<boolean>(false);
     const { allContracts } = useAllContractStore();
 
     return (
