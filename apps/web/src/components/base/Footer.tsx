@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Bruno_Ace } from 'next/font/google';
 import { cn } from '@/src/lib/utils';
 import { doto } from './FeatureOne';
+import PublicReviewCard from './PublicReviewCard';
 
 const bruno = Bruno_Ace({
     subsets: ['latin'],
@@ -51,10 +52,11 @@ export default function Footer() {
                     <div className="max-w-lg md:text-5xl text-3xl font-semibold tracking-wide leading-tight">
                         Build Solana Smart Contracts in Minutes, Not Days.
                     </div>
-                    <p className="text-neutral-400 md:text-lg text-base mt-6 max-w-md">
+                    <p className="text-neutral-400 md:text-lg text-base mt-4 max-w-md">
                         AI-powered Anchor contract generation, deployment, and client SDK
                         creation—all in one platform.
                     </p>
+                    <PublicReviewCard />
                 </div>
                 <div className="md:w-[50%] w-full h-full flex flex-col md:flex-row">
                     {footerLinks.map((section, index) => (

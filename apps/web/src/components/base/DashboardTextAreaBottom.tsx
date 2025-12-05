@@ -3,8 +3,6 @@ import { Button } from '../ui/button';
 import { FileCode, ArrowRight } from 'lucide-react';
 import ExecutorSelect from './ExecutorSelect';
 import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
-import { EXECUTOR } from '@winterfell/types';
-import { IoAddSharp } from 'react-icons/io5';
 import React, { useRef, useState } from 'react';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
@@ -15,8 +13,10 @@ interface DashboardTextAreaBottomProps {
     handleSubmit: () => void;
 }
 
-export default function DashboardTextAreaBottom({ inputValue, handleSubmit }: DashboardTextAreaBottomProps) {
-    const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+export default function DashboardTextAreaBottom({
+    inputValue,
+    handleSubmit,
+}: DashboardTextAreaBottomProps) {
     const { activeTemplate } = useTemplateStore();
     const { executor, setExecutor } = useExecutorStore();
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -25,9 +25,7 @@ export default function DashboardTextAreaBottom({ inputValue, handleSubmit }: Da
 
     useHandleClickOutside([templateButtonRef, templatePanelRef], setShowTemplatePanel);
 
-
     const isDisabled = !inputValue.trim() && !activeTemplate;
-
 
     return (
         <>
@@ -76,7 +74,7 @@ export default function DashboardTextAreaBottom({ inputValue, handleSubmit }: Da
                         className={cn(
                             'md:w-3 md:h-3 w-1 h-1 transition-transform',
                             (inputValue.trim() || activeTemplate) &&
-                            'group-hover/submit:translate-x-0.5 duration-200',
+                                'group-hover/submit:translate-x-0.5 duration-200',
                         )}
                     />
                 </Button>

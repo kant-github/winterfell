@@ -20,6 +20,7 @@ import getAllContracts from '../controllers/contract-controller/getAllContracts'
 import getAllTemplates from '../controllers/template-controller/getAllTemplates';
 import plan_executor_controller from '../controllers/chat-controller/plan_executor_controller';
 import generate_contract_using_template from '../controllers/template-controller/generate_contract_using_template';
+import public_review_controller from '../controllers/review/public_review_controller';
 
 const router: Router = Router();
 
@@ -60,7 +61,8 @@ router.post(
 );
 
 // reviews
-router.post('/review', authMiddleware, createContractReview);
+router.post('/contract-review', authMiddleware, createContractReview);
+router.post('/public-review', authMiddleware, public_review_controller);
 
 // templates
 router.post('/templates/sync-templates', syncTemplate);

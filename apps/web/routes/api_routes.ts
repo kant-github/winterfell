@@ -22,7 +22,10 @@ export const CHECK_REPO_NAME = API_URL + '/github/validate-repo-name';
 export const DOWNLOAD_ZIP_FILE = API_URL + '/github/get-zip-file';
 
 export const LINK_ACCOUNT = API_URL + '/link-account';
-export const REVIEW_URL = API_URL + '/review';
+
+// reviews
+export const CONTRACT_REVIEW_URL = API_URL + '/contract-review';
+export const PUBLIC_REVIEW_URL = API_URL + '/public-review';
 
 // contracts
 export const GET_USER_CONTRACTS = API_URL + '/contracts/get-user-contracts';

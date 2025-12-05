@@ -29,7 +29,9 @@ export default async function signInController(req: Request, res: Response) {
             const isValid = await verifyTurnstileToken(turnstileToken, clientIp);
 
             if (!isValid) {
-                return res.status(403).json({ success: false, message: 'Turnstile verification failed' });
+                return res
+                    .status(403)
+                    .json({ success: false, message: 'Turnstile verification failed' });
             }
         }
 
@@ -55,7 +57,9 @@ export default async function signInController(req: Request, res: Response) {
             });
 
             if (!existingUser) {
-                return res.status(404).json({ success: false, message: 'User not found for linking' });
+                return res
+                    .status(404)
+                    .json({ success: false, message: 'User not found for linking' });
             }
         }
 
@@ -132,7 +136,7 @@ export default async function signInController(req: Request, res: Response) {
         ResponseWriter.server_error(
             res,
             'Failed to signin',
-            error instanceof Error ? error.message : undefined
+            error instanceof Error ? error.message : undefined,
         );
         return;
     }
@@ -146,7 +150,7 @@ async function verifyTurnstileToken(token: string, ip?: string): Promise<boolean
                 secret: env.SERVER_TURNSTILE_SERVER_KEY,
                 response: token,
                 remoteip: ip,
-            }
+            },
         );
         return response.data.success === true;
     } catch {

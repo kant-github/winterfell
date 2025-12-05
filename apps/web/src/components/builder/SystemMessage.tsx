@@ -9,12 +9,13 @@ import {
     STAGE,
 } from '@/src/types/stream_event_types';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FaListUl } from 'react-icons/fa6';
 import { BsCheck2All } from 'react-icons/bs';
 import { Check } from 'lucide-react';
 
 import { CircleDotDashed } from '../ui/animated/circle-dot-dashed';
+import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
 
 interface StageItem {
     stage: STAGE;
@@ -38,11 +39,35 @@ interface SystemMessageProps {
 
 export default function SystemMessage({ message, currentPhase, currentFile }: SystemMessageProps) {
     const [currentStage, setCurrentStage] = useState<STAGE>(STAGE.PLANNING);
+    const initialStageRef = useRef<STAGE | null>(null);
+    const lastReviewedContractRef = useRef<string | null>(null);
+    const { show } = useReviewModalStore();
+
+    useEffect(() => {
+        if (initialStageRef.current === null && message?.stage) {
+            initialStageRef.current = message.stage;
+        }
+    }, [message?.stage]);
 
     useEffect(() => {
         if (!message?.stage) return;
         setCurrentStage(message.stage);
     }, [message?.stage]);
+
+    useEffect(() => {
+        if (!message?.stage || !message.contractId) return;
+
+        if (currentStage === STAGE.END) {
+            if (lastReviewedContractRef.current === message.contractId) return;
+
+            const timer = setTimeout(() => {
+                show(message.contractId);
+                lastReviewedContractRef.current = message.contractId;
+            }, 6000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [currentStage, message?.contractId, show]);
 
     const currentStageIndex = useMemo(() => {
         const index = stages.findIndex((s) => s.stage === currentStage);

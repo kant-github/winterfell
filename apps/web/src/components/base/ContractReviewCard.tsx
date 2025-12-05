@@ -15,7 +15,7 @@ import OpacityBackground from '../utility/OpacityBackground';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { contractReviewSchema } from '@winterfell/types';
-import { REVIEW_URL } from '@/routes/api_routes';
+import { CONTRACT_REVIEW_URL } from '@/routes/api_routes';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 
 interface ContractReviewCardProps {
@@ -78,7 +78,7 @@ export default function ContractReviewCard({
                 return;
             }
 
-            const response = await axios.post(REVIEW_URL, validatedData.data, {
+            const response = await axios.post(CONTRACT_REVIEW_URL, validatedData.data, {
                 headers: {
                     Authorization: `Bearer ${session.user.token}`,
                 },
@@ -130,7 +130,7 @@ export default function ContractReviewCard({
                                         'transition-colors border-none',
                                         'border',
                                         isSelected
-                                            ? 'text-primary'
+                                            ? 'text-primary-light'
                                             : 'text-light/40 hover:border-primary/40',
                                     )}
                                 >
