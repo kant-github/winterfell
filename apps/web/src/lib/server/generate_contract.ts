@@ -13,13 +13,10 @@ import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 
 export default class GenerateContract {
-
     static async start_planner_executor(
         token: string,
         contract_id: string,
         instruction: string,
-        setHasContext: (hasContext: boolean) => void,
-        onError?: (error: Error) => void,
     ): Promise<{
         data: unknown | null;
         message: string;
@@ -45,7 +42,6 @@ export default class GenerateContract {
                     },
                 },
             );
-            console.log('data came in frontend is : ', data.data);
             setMessage(data.data);
             return {
                 data: data.data,
@@ -63,10 +59,8 @@ export default class GenerateContract {
     static async start_agentic_executor(
         token: string,
         contractId: string,
-        setHasContext: (hasContext: boolean) => void,
         instruction?: string,
         template_id?: string,
-        onError?: (error: Error) => void,
     ): Promise<void> {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
             useBuilderChatStore.getState();
@@ -89,19 +83,15 @@ export default class GenerateContract {
                 }),
             });
 
+            // contract limit, do not remove
             if (response.status === 423) {
-                const data = await response.json();
-                if (data.goBack && onError) {
-                    onError(new Error(data.message));
-                }
                 return;
             }
 
             if (!response.ok) {
                 throw new Error('Failed to start chat');
             }
-            
-            
+
             const reader = response.body?.getReader();
             const decoder = new TextDecoder();
 
@@ -138,7 +128,6 @@ export default class GenerateContract {
 
                             case STAGE.CONTEXT:
                                 if ('llmMessage' in event.data) {
-                                    setHasContext(true);
                                     upsertMessage(event.data.llmMessage as Message);
                                 }
                                 break;
@@ -204,9 +193,6 @@ export default class GenerateContract {
             setCollapseFileTree(true);
         } catch (error) {
             console.error('Chat stream error:', error);
-            if (onError) {
-                onError(error as Error);
-            }
         } finally {
             setLoading(false);
         }
