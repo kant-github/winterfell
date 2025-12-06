@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import DocsHeading from '../../ui/DocsHeading';
 import { OverviewSubContent } from '@/src/types/docs-types';
 import ClientE2BBento from './ClientE2BBento';
+import { useRouter } from 'next/navigation';
+import { v4 as uuid } from "uuid";
 
 const overviewPoints = [
     {
@@ -31,6 +33,7 @@ const overviewPoints = [
 
 export default function ClientOverview() {
     const [activeImage, setActiveImage] = useState<string | null>('/images/demo-2.jpg');
+    const router = useRouter();
 
     return (
         <div className="w-full h-full flex flex-col gap-y-10 items-start text-left tracking-wide text-light/90 max-w-[80%] mx-auto">
@@ -60,12 +63,16 @@ export default function ClientOverview() {
                 </div>
 
                 <div className="flex items-center justify-center gap-x-5 mt-6">
-                    <Button size={'lg'}>
+                    <Button
+                        size={'lg'}
+                        onClick={() => router.push(`/playground/${uuid()}`)}
+                    >
                         <span className="font-semibold">Start generating</span>
                     </Button>
                     <Button
                         size={'lg'}
                         className="flex items-center justify-center gap-x-2 bg-light hover:bg-light/70 text-dark"
+                        onClick={() => router.push('/')}
                     >
                         <span className="font-semibold">Sign in</span>
                         <FaChevronRight strokeWidth={0.1} />

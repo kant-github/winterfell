@@ -11,7 +11,7 @@ const tabs = [
         content: {
             title: 'Winterfell Sandbox',
             description:
-                'Our E2B-powered sandbox environment provides a secure, isolated space for building and testing Anchor smart contracts. No local setup required—just write, compile, and deploy directly from your browser.',
+                'Our E2B-powered sandbox environment provides a secure, isolated space for building and testing Anchor smart contracts. No local setup required, just write, compile, and deploy directly from your browser.',
         },
     },
     {
@@ -41,7 +41,7 @@ const tabs = [
         content: {
             title: 'One-Click Deployment',
             description:
-                'Seamlessly transition from development to deployment. Test on devnet, validate on testnet, and deploy to mainnet—all from the same interface. Winterfell handles the complexity so you can focus on building.',
+                'Seamlessly transition from development to deployment. Test on devnet, validate on testnet, and deploy to mainnet, all from the same interface. Winterfell handles the complexity so you can focus on building.',
         },
     },
 ];

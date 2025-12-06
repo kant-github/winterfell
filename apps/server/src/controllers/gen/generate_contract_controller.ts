@@ -3,7 +3,7 @@ import ResponseWriter from '../../class/response_writer';
 import { generate_contract } from '../../schemas/generate_contract_schema';
 import { PlanType, prisma } from '@winterfell/database';
 import { MODEL } from '@winterfell/types';
-import Contract from './contract';
+import Contract from '../../class/contract';
 
 export default async function generate_contract_controller(req: Request, res: Response) {
     try {

@@ -8,6 +8,8 @@ import { Input } from '../../ui/input';
 import { HiMiniMagnifyingGlass } from 'react-icons/hi2';
 import { useActiveContentStore } from '@/src/store/docs/useActiveContentStore';
 import { IoMdArrowForward } from 'react-icons/io';
+import { useRouter } from 'next/navigation';
+import { v4 as uuid } from 'uuid';
 
 interface ClientDocsSidebarProps {
     switchPanel: (index: number, panel: ClientDocsPanel) => void;
@@ -17,6 +19,7 @@ export default function ClientDocsLeftSidebar({ switchPanel }: ClientDocsSidebar
     const [_activeIndex, setActiveIndex] = useState<number>(1);
     const { activeContent, setActiveContent } = useActiveContentStore();
     const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
+    const router = useRouter();
 
     function toggleSection(index: number): void {
         const newExpanded = new Set(expandedSections);
@@ -49,8 +52,7 @@ export default function ClientDocsLeftSidebar({ switchPanel }: ClientDocsSidebar
                 </div>
                 <div className="flex flex-col gap-y-1 text-left tracking-wide text-light/70 mt-8 w-full relative">
                     {contents.map((content, index) => {
-                        const hasChildren = content.children && content.children.length > 0;
-                        const isExpanded = expandedSections.has(index);
+                        // for using sandbox's children go for commit's before 6 dec 2025
                         const isActive = activeContent === content.type;
                         const Icon = content.icon;
 
@@ -92,66 +94,17 @@ export default function ClientDocsLeftSidebar({ switchPanel }: ClientDocsSidebar
                                             {content.title}
                                         </span>
                                     </div>
-                                    {hasChildren && (
-                                        <div
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleSection(index);
-                                            }}
-                                            className="cursor-pointer text-white/50 hover:text-white transition-colors p-0 bg-transparent border-0"
-                                        >
-                                            {isExpanded ? (
-                                                <ChevronDown size={14} />
-                                            ) : (
-                                                <ChevronRight size={14} />
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
-
-                                {hasChildren && isExpanded && content.children ? (
-                                    <div className="ml-2 mt-2 flex flex-col gap-y-2">
-                                        {content.children.map((child) => {
-                                            const isChildActive = activeContent === child.type;
-                                            const ChildIcon = child.icon;
-                                            return (
-                                                <div
-                                                    key={child.type}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handlePanelSwitch(index, child.type);
-                                                    }}
-                                                    className={cn(
-                                                        'tracking-wider select-none transition-colors duration-300 cursor-pointer px-4 py-2.5 rounded-[4px] flex items-center gap-2 text-[13px]',
-                                                        isChildActive
-                                                            ? 'text-white bg-black/20'
-                                                            : 'hover:text-white text-white/70',
-                                                    )}
-                                                >
-                                                    {ChildIcon && (
-                                                        <ChildIcon
-                                                            className={cn(
-                                                                'transition-colors duration-300',
-                                                                isChildActive
-                                                                    ? 'text-white'
-                                                                    : 'text-white/50',
-                                                            )}
-                                                            size={14}
-                                                        />
-                                                    )}
-                                                    <span>{child.title}</span>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : null}
                             </div>
                         );
                     })}
                 </div>
             </div>
             <div className="border-t border-neutral-800 px-4 py-3 space-y-1.5">
-                <button className="flex items-center gap-x-2 cursor-pointer group">
+                <button
+                    className="flex items-center gap-x-2 cursor-pointer group"
+                    onClick={() => router.push(`/playground/${uuid()}`)}
+                >
                     <span className="text-light group-hover:text-primary transition-colors">
                         Explore playground
                     </span>
