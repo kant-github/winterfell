@@ -11,5 +11,5 @@ function proxy(request: NextRequest) {
 export { proxy as middleware };
 
 export const config = {
-    matcher: ['/playground/:path*'],
+    matcher: ['/playground/:path*', '/home'],
 };

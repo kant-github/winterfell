@@ -229,12 +229,6 @@ function ReviewColumn({ reviews, duration }: { reviews: Review[]; duration: numb
                     <ReviewCard key={`${review.id}-${index}`} review={review} />
                 ))}
             </motion.div>
-            <style jsx>{`
-                .mask-gradient {
-                    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
-                    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
-                }
-            `}</style>
         </div>
     );
 }
@@ -258,7 +252,6 @@ export default function ReviewsSection() {
                 <ArchitectureTitleComponent
                     firstText="Winter tales"
                     secondText="from the Wall"
-                    bordercolor="border-light/40"
                     bgcolor="bg-none"
                 />
 
@@ -285,15 +278,6 @@ export default function ReviewsSection() {
                     </motion.div>
                 )}
             </div>
-
-            <style jsx>{`
-                .bg-grid {
-                    background-size: 50px 50px;
-                    background-image: 
-                        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-                }
-            `}</style>
         </section>
     );
 }
