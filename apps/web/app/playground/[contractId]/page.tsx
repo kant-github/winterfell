@@ -31,7 +31,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             if (!session?.user?.token) return;
             if (stopped) return;
 
-            setLoading(true);
+            // setLoading(true);
             await Playground.get_chat(session.user.token, contractId);
 
             const { messages } = useBuilderChatStore.getState();
@@ -56,6 +56,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             stopped = true;
             if (interval) clearInterval(interval);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session?.user?.token]);
 
     useEffect(() => {
