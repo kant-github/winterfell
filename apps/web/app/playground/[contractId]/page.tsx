@@ -32,10 +32,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             if (stopped) return;
 
             setLoading(true);
-            await Playground.get_chat(
-                session.user.token,
-                contractId
-            );
+            await Playground.get_chat(session.user.token, contractId);
 
             const { messages } = useBuilderChatStore.getState();
             if (messages.length === 0) return;
@@ -60,8 +57,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             if (interval) clearInterval(interval);
         };
     }, [contractId, session?.user?.token]);
-
-
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {

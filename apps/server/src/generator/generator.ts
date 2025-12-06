@@ -78,7 +78,7 @@ export default class Generator {
 
             // this check represents that chain is created without any errors
             const chain = this.get_chains(chat, model);
-            if(!chain) {
+            if (!chain) {
                 throw new Error('chains not created');
             }
             const { planner_chain, coder_chain, finalizer_chain } = chain;
@@ -526,13 +526,14 @@ export default class Generator {
         deleting_files_path: string[],
     ) {
         try {
-
             const contract = await objectStore.get_resource_files(contract_id);
 
             let remaining_files: FileContent[] = contract;
             // delete the given files from the contract
             if (deleting_files_path.length > 0) {
-                remaining_files = contract.filter((file) => !deleting_files_path.includes(file.path));
+                remaining_files = contract.filter(
+                    (file) => !deleting_files_path.includes(file.path),
+                );
             }
 
             // const gen_file_map = new Map(generated_files.map(file => [file.path, file.content]));
@@ -568,7 +569,6 @@ export default class Generator {
         deleting_files_path: string[],
     ) {
         try {
-
             const contract = await prisma.contract.findUnique({
                 where: {
                     id: contract_id,
@@ -592,7 +592,9 @@ export default class Generator {
 
             const idl = JSON.parse(contract.summarisedObject);
 
-            const remainingIdl = idl.filter((item: any) => !deleting_files_path.includes(item.path));
+            const remainingIdl = idl.filter(
+                (item: any) => !deleting_files_path.includes(item.path),
+            );
 
             const existingIdlMap = new Map(remainingIdl.map((item: any) => [item.path, item]));
             const newIdlParts: any[] = [];

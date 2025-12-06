@@ -1,5 +1,4 @@
 import { Request, Response, Router } from 'express';
-
 // controllers
 import signInController from '../controllers/user-controller/signInController';
 import getFilesController from '../controllers/chat-controller/getFilesController';
@@ -24,57 +23,117 @@ import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
 import public_review_controller from '../controllers/review-controller/public_review_controller';
 import createContractReview from '../controllers/review-controller/create_contract_review';
+import RateLimit from '../class/rate_limit';
 
 const router: Router = Router();
 
 // sign-in
-router.post('/sign-in', signInController);
+router.post('/sign-in', RateLimit.sign_in_rate_limit, signInController);
 
 // health
-router.get('/health', async (_req: Request, res: Response) => {
+router.get('/health', RateLimit.health_check_rate_limit, async (_req: Request, res: Response) => {
     await new Promise((t) => setTimeout(t, 5000));
     res.status(200).json({ message: 'Server is running' });
 });
 
 // contract generation and chat fetch
-router.post('/generate', authMiddleware, generate_contract_controller);
-router.post('/contract/get-chat', authMiddleware, get_chat_controller);
-router.post('/plan', authMiddleware, plan_executor_controller);
+router.post(
+    '/generate',
+    RateLimit.generate_contract_rate_limit,
+    authMiddleware,
+    generate_contract_controller,
+);
+router.post(
+    '/contract/get-chat',
+    RateLimit.get_chat_rate_limit,
+    authMiddleware,
+    get_chat_controller,
+);
+router.post('/plan', RateLimit.plan_executor_rate_limit, authMiddleware, plan_executor_controller);
 
 // github controllers
-router.post('/github/export-code', authMiddleware, githubMiddleware, githubCodePushController);
-router.post('/github/get-zip-file', authMiddleware, githubMiddleware, githubProjectZipController);
+router.post(
+    '/github/export-code',
+    RateLimit.github_export_rate_limit,
+    authMiddleware,
+    githubMiddleware,
+    githubCodePushController,
+);
+router.post(
+    '/github/get-zip-file',
+    RateLimit.github_zip_rate_limit,
+    authMiddleware,
+    githubMiddleware,
+    githubProjectZipController,
+);
 router.post(
     '/github/validate-repo-name',
+    RateLimit.github_validate_rate_limit,
     authMiddleware,
     githubMiddleware,
     githubRepoNameValidatorController,
 );
 
 // subscription controllers
-router.post('/subscription/create-order', authMiddleware, createOrderController);
-router.get('/subscription/get-plan', authMiddleware, getUserPlanController);
+router.post(
+    '/subscription/create-order',
+    RateLimit.create_order_rate_limit,
+    authMiddleware,
+    createOrderController,
+);
+router.get(
+    '/subscription/get-plan',
+    RateLimit.get_user_plan_rate_limit,
+    authMiddleware,
+    getUserPlanController,
+);
 router.post(
     '/subscription/update',
+    RateLimit.update_subscription_rate_limit,
     authMiddleware,
     subscriptionMiddleware,
     updateSubscriptionController,
 );
 
 // review controllers
-router.post('/contract-review', authMiddleware, createContractReview);
-router.post('/public-review', authMiddleware, public_review_controller);
+router.post(
+    '/contract-review',
+    RateLimit.create_review_rate_limit,
+    authMiddleware,
+    createContractReview,
+);
+router.post(
+    '/public-review',
+    RateLimit.public_review_rate_limit,
+    authMiddleware,
+    public_review_controller,
+);
 
 // template controllers
-router.post('/templates/sync-templates', syncTemplate);
-router.get('/template/get-templates', getAllTemplates);
+router.post('/templates/sync-templates', RateLimit.sync_templates_rate_limit, syncTemplate);
+router.get('/template/get-templates', RateLimit.get_templates_rate_limit, getAllTemplates);
 
 // marketplace controllers
-router.get('/contracts/get-user-contracts', authMiddleware, getUserContracts);
-router.get('/contracts/get-all-contracts', authMiddleware, getAllContracts);
+router.get(
+    '/contracts/get-user-contracts',
+    RateLimit.get_user_contracts_rate_limit,
+    authMiddleware,
+    getUserContracts,
+);
+router.get(
+    '/contracts/get-all-contracts',
+    RateLimit.get_all_contracts_rate_limit,
+    authMiddleware,
+    getAllContracts,
+);
 
 // file-routes [this was made for syncing files updating in web IDE to the pod]
-router.get('/files/:contractId', authMiddleware, getFilesController);
-router.get('/files/sync', authMiddleware, syncFilesController); // use this or write a ws layer to share directly to kubernetes
+router.get(
+    '/files/:contractId',
+    RateLimit.get_files_rate_limit,
+    authMiddleware,
+    getFilesController,
+);
+router.get('/files/sync', RateLimit.sync_files_rate_limit, authMiddleware, syncFilesController); // use this or write a ws layer to share directly to kubernetes
 
 export default router;

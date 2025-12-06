@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
-import ResponseWriter from "../../class/response_writer";
-import { prisma } from "@winterfell/database";
-import { objectStore } from "../../services/init";
-
+import { Request, Response } from 'express';
+import ResponseWriter from '../../class/response_writer';
+import { prisma } from '@winterfell/database';
+import { objectStore } from '../../services/init';
 
 export default async function get_chat_controller(req: Request, res: Response) {
     try {
@@ -55,11 +54,11 @@ export default async function get_chat_controller(req: Request, res: Response) {
         }
 
         let contract_files: string = '';
-        if(contract.summarisedObject) {
+        if (contract.summarisedObject) {
             const fetched_contract = await objectStore.get_resource_files(contractId);
             contract_files = JSON.stringify(fetched_contract);
         }
-        
+
         ResponseWriter.success(
             res,
             {

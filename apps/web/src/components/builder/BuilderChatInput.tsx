@@ -50,9 +50,9 @@ export default function BuilderChatInput() {
                 createdAt: new Date(),
             });
 
-            if(useBuilderChatStore.getState().messages.length < 2) return;
+            if (useBuilderChatStore.getState().messages.length < 2) return;
 
-            // call the agentic 
+            // call the agentic
             await GenerateContract.start_agentic_executor(
                 session.user.token || '',
                 contractId,
