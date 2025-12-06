@@ -120,24 +120,22 @@ export default function BuilderMessage({
             )}
 
             {/* for rendering ai loader */}
-            {message.role === 'USER' &&
-                loading &&
-                !messages.some((m) => m.role === 'AI') && (
-                    <div className="flex justify-start w-full mt-2 ">
-                        <div className="flex items-start gap-x-2 max-w-[70%]">
-                            <AppLogo showLogoText={false} size={22} />
-                            <div className="px-4 py-2 rounded-[4px] text-sm font-normal bg-dark text-light text-left tracking-wider text-[13px] italic">
-                                <div className="flex items-center gap-x-1">
-                                    <div className="flex space-x-1">
-                                        <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                                        <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                                        <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce"></div>
-                                    </div>
+            {message.role === 'USER' && loading && !messages.some((m) => m.role === 'AI') && (
+                <div className="flex justify-start w-full mt-2 ">
+                    <div className="flex items-start gap-x-2 max-w-[70%]">
+                        <AppLogo showLogoText={false} size={22} />
+                        <div className="px-4 py-2 rounded-[4px] text-sm font-normal bg-dark text-light text-left tracking-wider text-[13px] italic">
+                            <div className="flex items-center gap-x-1">
+                                <div className="flex space-x-1">
+                                    <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                    <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                    <div className="w-1.5 h-1.5 bg-neutral-500 rounded-full animate-bounce"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                )}
+                </div>
+            )}
 
             {message.role === 'AI' && (
                 <div className="flex justify-start w-full">

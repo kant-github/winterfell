@@ -63,7 +63,7 @@ export default function SystemMessage({ message, currentPhase, currentFile }: Sy
             const timer = setTimeout(() => {
                 show(message.contractId);
                 lastReviewedContractRef.current = message.contractId;
-            }, 6000);
+            }, 3000);
 
             return () => clearTimeout(timer);
         }
