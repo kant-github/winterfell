@@ -46,7 +46,7 @@ export const exportingSteps: Step[] = [
                         id="repo-name"
                         type="text"
                         placeholder="my-smart-contract"
-                        className="bg-dark-base border border-light/20 rounded-[4px] px-3 py-2 text-light text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                        className="bg-darkest border border-light/20 rounded-[4px] px-3 py-2 text-light text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                     />
                     <p className="text-xs text-light/50">
                         Great repository names are short and memorable.

@@ -1,8 +1,9 @@
 @theme {
     --color-primary: #6c44fc;
+    --color-darkest: #0e0f10;
+    --color-darker: #121314;
+    --color-dark: #171819;
     --color-light: #fdf9f0;
-    --color-dark-base: #141517;
-    --color-dark: #1c1d20;
     --color-primary-light: #9679ffea;
     --breakpoint-xs: 375px;
     --breakpoint-md2: 896px;

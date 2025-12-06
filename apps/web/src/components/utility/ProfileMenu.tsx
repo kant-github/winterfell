@@ -24,18 +24,18 @@ export default function ProfileMenu({ setOpenProfleMenu }: ProfileMenuProps) {
     return (
         <div
             ref={profileMenuRef}
-            className="w-[9rem] bg-dark-base border border-neutral-800 shadow-lg rounded-[4px] overflow-hidden"
+            className="w-[9rem] bg-darker border border-neutral-800 shadow-lg rounded-[4px] overflow-hidden"
         >
             <Card className="p-0 bg-transparent border-0 shadow-none font-semibold">
                 <div>
                     <div
                         onClick={() => router.push('/docs')}
-                        className="px-4 py-[11px] text-xs text-light hover:bg-dark/30 dark:text-light-base border-b border-neutral-800 flex justify-between cursor-pointer tracking-wide"
+                        className="px-4 py-[11px] text-xs text-light hover:bg-dark/30 dark:text-light-base border-neutral-800 flex justify-between cursor-pointer tracking-wide"
                     >
                         Docs
                         <SlDocs />
                     </div>
-                    <div className="px-4 py-[11px] text-xs text-light hover:bg-dark/30 dark:text-light-base border-b border-neutral-800 flex justify-between cursor-pointer tracking-wide">
+                    <div className="px-4 py-[11px] text-xs text-light hover:bg-dark/30 dark:text-light-base border-neutral-800 flex justify-between cursor-pointer tracking-wide">
                         Settings
                         <TbSettings2 size={14} />
                     </div>

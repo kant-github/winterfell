@@ -15,7 +15,7 @@ export default function ClientExpandableSteps({ title, steps, id }: ExpandableSt
         <div className="bg-[#111111] border-b last:border-0 border-neutral-800 overflow-hidden">
             <Button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full flex items-center justify-between p-4 py-7 bg-dark-base/90 hover:bg-dark-base/50 transition-colors"
+                className="w-full flex items-center justify-between p-4 py-7 bg-darkest/90 hover:bg-darkest/50 transition-colors"
             >
                 <div className="flex items-center gap-2">
                     {isExpanded ? (
@@ -38,7 +38,7 @@ export default function ClientExpandableSteps({ title, steps, id }: ExpandableSt
                                 <div className="absolute left-4 top-8 bottom-0 w-px border-l-2 border-dotted border-neutral-700" />
                             )}
 
-                            <div className="shrink-0 w-8 h-8 rounded-full bg-dark-base border border-neutral-800 flex items-center justify-center text-light text-sm font-medium z-10 relative">
+                            <div className="shrink-0 w-8 h-8 rounded-full bg-darkest border border-neutral-800 flex items-center justify-center text-light text-sm font-medium z-10 relative">
                                 {step.number}
                             </div>
 

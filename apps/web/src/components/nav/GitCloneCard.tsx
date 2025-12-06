@@ -137,8 +137,8 @@ export default function GitCloneCard() {
     const borderColor = inputError
         ? 'border-red-500'
         : isRepoValid
-          ? 'border-emerald-500'
-          : 'border-neutral-800';
+            ? 'border-emerald-500'
+            : 'border-neutral-800';
 
     const isSendDisabled = isPushing || isEditing || isRepoValid !== true;
 
@@ -254,6 +254,7 @@ export default function GitCloneCard() {
                                 >
                                     <ToolTipComponent content="Edit repo name">
                                         <button
+                                            aria-label='pencil'
                                             type="button"
                                             onClick={() => {
                                                 setInputError(false);

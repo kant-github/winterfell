@@ -14,6 +14,7 @@ import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { SidePanelValues } from '../code/EditorSidePanel';
 import { useEditPlanStore } from '@/src/store/code/useEditPlanStore';
 import SystemMessage from './SystemMessage';
+import { FiCopy, FiCheck, FiClock } from "react-icons/fi";
 
 interface BuilderMessageProps {
     message: Message;
@@ -34,19 +35,50 @@ export default function BuilderMessage({
     const { setCurrentState } = useSidePanelStore();
     const { setMessage } = useEditPlanStore();
 
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+
+    async function handleCopy(text: string, id: string) {
+        await navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    function TimeDisplay({ date }: { date: Date }) {
+        return (
+            <div className="flex items-center gap-1 text-xs text-neutral-500">
+                <FiClock size={12} />
+                <span>{formatChatTime(new Date(date))}</span>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full shrink-0">
+
             {message.role === 'USER' && (
                 <div className="flex justify-end items-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[70%]">
                         <div>
-                            <span className="text-right flex justify-end text-xs font-semibold mb-1 mr-1">
-                                {formatChatTime(message.createdAt)}
-                            </span>
-                            <div className="px-4 py-2 rounded-b-[8px] rounded-tl-[8px] text-sm font-semibold bg-primary text-light text-right">
+                            <div className="px-4 py-2 rounded-b-[8px] rounded-tl-[8px] text-sm font-normal bg-linear-to-b from-[#7b56ff] to-[#6236ff] border-[#7b56ff] border text-light text-right">
                                 {message.content}
                             </div>
+
+                            <div className="flex justify-end items-center gap-2 mt-1">
+                                <TimeDisplay date={message.createdAt} />
+                                <button
+                                    type="button"
+                                    className="text-xs cursor-pointer"
+                                    onClick={() => handleCopy(message.content, message.id)}
+                                >
+                                    {copiedId === message.id ? (
+                                        <FiCheck strokeWidth={2.5} size={12} color="#6c44fc" />
+                                    ) : (
+                                        <FiCopy size={12} />
+                                    )}
+                                </button>
+                            </div>
                         </div>
+
                         {session?.user.image && (
                             <Image
                                 className="rounded-full shrink-0"
@@ -64,11 +96,6 @@ export default function BuilderMessage({
                 <div className="flex justify-end items-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[70%]">
                         <div className="flex flex-col gap-y-2">
-                            <div>
-                                <span className="text-right flex justify-end text-xs font-semibold mb-1 mr-1">
-                                    {formatChatTime(message.createdAt)}
-                                </span>
-                            </div>
                             <div className="relative w-full h-34 aspect-[4/3] rounded-b-[8px] rounded-tl-[8px] overflow-hidden flex items-center justify-end">
                                 <Image
                                     src={'/templates/contract-2.jpg'}
@@ -78,7 +105,23 @@ export default function BuilderMessage({
                                     unoptimized
                                 />
                             </div>
+
+                            <div className="flex justify-end items-center gap-2">
+                                <TimeDisplay date={message.createdAt} />
+                                <button
+                                    type="button"
+                                    className="text-xs"
+                                    onClick={() => handleCopy("Template", message.id)}
+                                >
+                                    {copiedId === message.id ? (
+                                        <FiCheck strokeWidth={2.5} size={12} color="#6c44fc" />
+                                    ) : (
+                                        <FiCopy size={12} />
+                                    )}
+                                </button>
+                            </div>
                         </div>
+
                         {session?.user.image && (
                             <Image
                                 className="rounded-full shrink-0"
@@ -96,9 +139,7 @@ export default function BuilderMessage({
                 <PlanExecutorPanel
                     plan={JSON.parse(String(message.plannerContext))}
                     editExeutorPlanPanel={editExeutorPlanPanel}
-                    onCollapse={() => {
-                        setCollapsePanel((prev) => !prev);
-                    }}
+                    onCollapse={() => setCollapsePanel((prev) => !prev)}
                     onEdit={() => {
                         setMessage(JSON.parse(String(message.plannerContext)));
                         setEditExeutorPlanPanel(true);
@@ -119,7 +160,6 @@ export default function BuilderMessage({
                 />
             )}
 
-            {/* for rendering ai loader */}
             {message.role === 'USER' && loading && !messages.some((m) => m.role === 'AI') && (
                 <div className="flex justify-start w-full mt-2 ">
                     <div className="flex items-start gap-x-2 max-w-[70%]">
@@ -141,8 +181,25 @@ export default function BuilderMessage({
                 <div className="flex justify-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[70%]">
                         <AppLogo showLogoText={false} size={22} />
-                        <div className="px-4 py-2 rounded-tr-[8px] rounded-b-[8px] text-sm font-normal bg-[#1b1d20] border border-neutral-800 text-light text-left tracking-wider text-[13px] italic">
-                            {returnParsedData(message.content)}
+                        <div className="flex flex-col">
+                            <div className="px-4 py-2 rounded-tr-[8px] rounded-b-[8px] text-sm font-normal bg-linear-to-b from-[#111212]  to-[#121313] border border-neutral-800 text-light/80 text-left tracking-wider">
+                                {returnParsedData(message.content)}
+                            </div>
+
+                            <div className="flex items-center gap-2 mt-1">
+                                <TimeDisplay date={message.createdAt} />
+                                <button
+                                    type="button"
+                                    className="text-xs cursor-pointer"
+                                    onClick={() => handleCopy(message.content, message.id)}
+                                >
+                                    {copiedId === message.id ? (
+                                        <FiCheck size={12} color="#6c44fc" />
+                                    ) : (
+                                        <FiCopy size={12} />
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -48,7 +48,7 @@ export default function BuilderSettingsPanel({
                             </SelectTrigger>
                             <SelectContent
                                 container={settingsRef.current}
-                                className="bg-dark-base border-neutral-800 text-light"
+                                className="bg-darkest border-neutral-800 text-light"
                             >
                                 <SelectItem value="CUSTOM">Custom</SelectItem>
                                 <SelectItem value="TOKEN">Token</SelectItem>
@@ -74,7 +74,7 @@ export default function BuilderSettingsPanel({
                             </SelectTrigger>
                             <SelectContent
                                 container={settingsRef.current}
-                                className="bg-dark-base border-neutral-800 text-light"
+                                className="bg-darkest border-neutral-800 text-light"
                             >
                                 <SelectItem value="DEVNET">Devnet</SelectItem>
                                 <SelectItem value="TESTNET">Testnet</SelectItem>
@@ -115,7 +115,7 @@ export default function BuilderSettingsPanel({
                             </SelectTrigger>
                             <SelectContent
                                 container={settingsRef.current}
-                                className="bg-dark-base border-neutral-800 text-light"
+                                className="bg-darkest border-neutral-800 text-light"
                             >
                                 <SelectItem value="0.30.0">0.30.0 (Latest)</SelectItem>
                                 <SelectItem value="0.29.0">0.29.0</SelectItem>

@@ -8,7 +8,7 @@ import DocsHeading from '../../ui/DocsHeading';
 import { OverviewSubContent } from '@/src/types/docs-types';
 import ClientE2BBento from './ClientE2BBento';
 import { useRouter } from 'next/navigation';
-import { v4 as uuid } from "uuid";
+import { v4 as uuid } from 'uuid';
 
 const overviewPoints = [
     {
@@ -63,10 +63,7 @@ export default function ClientOverview() {
                 </div>
 
                 <div className="flex items-center justify-center gap-x-5 mt-6">
-                    <Button
-                        size={'lg'}
-                        onClick={() => router.push(`/playground/${uuid()}`)}
-                    >
+                    <Button size={'lg'} onClick={() => router.push(`/playground/${uuid()}`)}>
                         <span className="font-semibold">Start generating</span>
                     </Button>
                     <Button

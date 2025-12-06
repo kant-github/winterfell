@@ -118,7 +118,7 @@ export default function PlanExecutorPanel({
                 <ToolTipComponent content="edit your planning context">
                     <div
                         onClick={onEdit}
-                        className="size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 select-none"
+                        className="size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 p-0.5 rounded-[4px] border border-light/10  hover:bg-neutral-600/10 flex items-center justify-start gap-x-1 w-fit px-2 py-2.5 select-none"
                     >
                         <span className="text-[12px] tex-light/90">edit</span>
                         <AiFillEdit />
@@ -129,7 +129,7 @@ export default function PlanExecutorPanel({
                     <ToolTipComponent content="expand">
                         <IoMdExpand
                             onClick={onExpand}
-                            className="size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1"
+                            className="size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1"
                         />
                     </ToolTipComponent>
                 )}
@@ -139,7 +139,7 @@ export default function PlanExecutorPanel({
                         <MdKeyboardArrowDown
                             onClick={onCollapse}
                             className={cn(
-                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-dark-base/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1',
+                                'size-4.5 text-light cursor-pointer transition-transform duration-300 bg-darkest/70 rounded-[4px] border border-light/10 hover:bg-neutral-600/10 w-fit h-5.5 p-1',
                                 collapse && 'rotate-180',
                             )}
                         />
@@ -196,7 +196,7 @@ export default function PlanExecutorPanel({
                     'w-full border rounded-[6px] px-3 pb-3 pt-2 mt-1 relative',
                     editExeutorPlanPanel
                         ? 'border-[#80a1c260] bg-[#80a1c210]'
-                        : 'border-neutral-800 bg-dark-base',
+                        : 'border-neutral-800 bg-darkest',
                 )}
             >
                 <div className="text-xs text-light/70 flex items-center justify-start gap-x-2">

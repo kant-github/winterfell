@@ -16,7 +16,7 @@ export default function BaseContractTemplatesPanel({ closePanel }: BaseContractT
             className={cn(
                 'w-full max-w-md max-h-54 flex flex-col',
                 'absolute left-23 z-50 bottom-12',
-                'bg-dark-base border border-neutral-800 shadow-md',
+                'bg-darkest border border-neutral-800 shadow-md',
                 'rounded-[4px] rounded-bl-none overflow-visible overflow-y-auto',
             )}
         >
@@ -52,7 +52,7 @@ function TemplateListItem({ title, description, image, onClick }: TemplateListIt
                 'mb-1 p-2 px-3 last:mb-0',
                 'rounded-[4px]',
                 'hover:bg-dark',
-                'border border-dark-base/40',
+                'border border-darkest/40',
                 'cursor-pointer transition-all z-40',
                 'group/item',
             )}

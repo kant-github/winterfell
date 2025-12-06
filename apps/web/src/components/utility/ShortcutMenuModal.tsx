@@ -21,7 +21,7 @@ export default function ShortcutMenu() {
 
     return (
         <OpacityBackground onBackgroundClick={() => setOpen((prev) => !prev)}>
-            <div className="bg-dark-base border border-neutral-800 rounded-[8px] w-full max-w-md overflow-hidden px-6 py-4">
+            <div className="bg-darkest border border-neutral-800 rounded-[8px] w-full max-w-md overflow-hidden px-6 py-4">
                 <h1 className="text-xl font-semibold text-white text-left mb-3">
                     Keyboard shortcuts
                 </h1>

@@ -41,7 +41,7 @@ export const stepsCreateYourAccount: Step[] = [
                     skipped.
                 </p>
                 <div className="flex flex-col gap-y-2.5 w-full max-w-sm">
-                    <Button className="bg-white hover:bg-light/95 text-dark-base px-4 py-2.5 rounded-[4px] font-semibold text-sm flex items-center justify-center gap-x-2.5 w-full transition-all hover:-translate-y-0.5 border border-light/20 shadow-sm">
+                    <Button className="bg-white hover:bg-light/95 text-darkest px-4 py-2.5 rounded-[4px] font-semibold text-sm flex items-center justify-center gap-x-2.5 w-full transition-all hover:-translate-y-0.5 border border-light/20 shadow-sm">
                         <FaGoogle className="w-4 h-4" />
                         <span>Continue with Google</span>
                     </Button>

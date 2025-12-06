@@ -12,7 +12,7 @@ export default function PricingPlanToggleNavbar() {
                 className={cn(
                     `relative w-full max-w-fit z-100 flex items-center justify-between mt-4`,
                     'px-1 py-1 rounded-[4px] transition-all duration-500 ease-in-out gap-x-1',
-                    'text-[18px] tracking-wide bg-dark-base border border-neutral-800',
+                    'text-[18px] tracking-wide bg-darkest border border-neutral-800',
                 )}
             >
                 <div
@@ -33,7 +33,7 @@ export default function PricingPlanToggleNavbar() {
                         'px-5 py-2 rounded-[2px] cursor-pointer transition-all duration-300 relative',
                         pricingPlan === PricingPlanEnum.MONTHLY
                             ? 'bg-neutral-800 text-light'
-                            : 'bg-transparent text-light/40 hover:bg-linear-to-r hover:from-dark/40 hover:via-dark/20 hover:to-dark-base transition-all transform duration-200',
+                            : 'bg-transparent text-light/40 hover:bg-linear-to-r hover:from-dark/40 hover:via-dark/20 hover:to-darkest transition-all transform duration-200',
                     )}
                 >
                     Monthly
@@ -47,7 +47,7 @@ export default function PricingPlanToggleNavbar() {
                         'px-5 py-2 rounded-[2px] cursor-pointer transition-all duration-300 relative',
                         pricingPlan === PricingPlanEnum.YEARLY
                             ? 'bg-neutral-800 text-light'
-                            : 'bg-transparent text-light/40 hover:bg-linear-to-l hover:from-dark/40 hover:via-dark/20 hover:to-dark-base transition-all transform duration-200',
+                            : 'bg-transparent text-light/40 hover:bg-linear-to-l hover:from-dark/40 hover:via-dark/20 hover:to-darkest transition-all transform duration-200',
                     )}
                 >
                     Yearly

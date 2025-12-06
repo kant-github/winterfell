@@ -46,7 +46,7 @@ export default function ClientDocsLeftSidebar({ switchPanel }: ClientDocsSidebar
                 <div className="relative mt-4">
                     <HiMiniMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-light/70" />
                     <Input
-                        className="border border-neutral-800 bg-dark-base/60 py-4.5 pl-9  focus:border-transparent focus:ring-0 focus:outline-none"
+                        className="border border-neutral-800 bg-darkest/60 py-4.5 pl-9  focus:border-transparent focus:ring-0 focus:outline-none"
                         placeholder="Search..."
                     />
                 </div>
