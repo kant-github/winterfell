@@ -13,7 +13,7 @@ import { v4 as uuid } from "uuid";
 const overviewPoints = [
     {
         id: OverviewSubContent.AI_CONTRACTS,
-        title: 'AI Contracts',
+        title: 'Prompt to Code',
         description: 'Generate and optimize Rust smart contracts instantly.',
         image: '/images/demo-1.jpg',
     },
@@ -93,7 +93,7 @@ export default function ClientOverview() {
                 </div>
             </div>
 
-            <SafariBrowser className="" url="winterfell.dev/client" imageSrc={activeImage!} />
+            <SafariBrowser className="" url="winterfell.dev/docs" imageSrc={activeImage!} />
             <ClientE2BBento />
         </div>
     );

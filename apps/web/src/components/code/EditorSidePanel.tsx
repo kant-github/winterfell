@@ -7,6 +7,7 @@ import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { cn } from '@/src/lib/utils';
 import { RiChat4Fill } from 'react-icons/ri';
 import { FaTelegramPlane } from 'react-icons/fa';
+import WinterfellChat from '../ui/svg/winterfell-chat';
 
 export enum SidePanelValues {
     FILE = 'FILE',
@@ -39,7 +40,7 @@ export default function EditorSidePanel() {
             tooltip: 'GitHub Repository',
         },
         {
-            icon: <RiChat4Fill size={19} />,
+            icon: <WinterfellChat size={30} />,
             value: SidePanelValues.CHAT,
             onClick: () => setCollapsechat(!collapseChat),
             tooltip: 'Agent Sessions',
@@ -50,7 +51,7 @@ export default function EditorSidePanel() {
             onClick: () => {
                 handleToggleSidebar(SidePanelValues.PLAN);
             },
-            tooltip: 'Agent Sessions',
+            tooltip: 'Plans',
         },
     ];
 
