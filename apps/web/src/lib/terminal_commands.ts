@@ -56,8 +56,8 @@ export const CommandResponse: Record<COMMAND_WRITER, string> = {
     [COMMAND_WRITER.HOT_KEYS]: hotKeysResponse,
     [COMMAND_WRITER.PLATFORM]: platformResponse,
     [COMMAND_WRITER.COMMANDS]: commandsResponse,
-    [COMMAND_WRITER.WINTERFELL_BUILD]: `winter is processing your request...`,
-    [COMMAND_WRITER.WINTERFELL_TEST]: `winter is processing your request...`,
-    [COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET]: `sure I'll start deploying your contract to devnet...`,
-    [COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET]: `sure I'll start deploying you contract to mainnet...`,
+    [COMMAND_WRITER.WINTERFELL_BUILD]: `this feature is forging in the Winterfell labs, arriving in an upcoming release...`,
+    [COMMAND_WRITER.WINTERFELL_TEST]: `this feature is forging in the Winterfell labs, arriving in an upcoming release...`,
+    [COMMAND_WRITER.WINTERFELL_DEPLOY_DEVNET]: `this feature is forging in the Winterfell labs, arriving in an upcoming release...`,
+    [COMMAND_WRITER.WINTERFELL_DEPLOY_MAINNET]: `this feature is forging in the Winterfell labs, arriving in an upcoming release...`,
 };

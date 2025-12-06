@@ -112,7 +112,7 @@ export default function ContractReviewCard({
     }
 
     return (
-        <OpacityBackground className="bg-dark/30">
+        <OpacityBackground className="bg-darkest/30">
             <Card className="bg-darkest border border-neutral-800 rounded-[8px] w-full max-w-sm overflow-hidden px-6 py-4 absolute bottom-20 right-20">
                 <div className="flex flex-col gap-4">
                     <h3 className="text-center text-2xl font-medium">How was your experience?</h3>
