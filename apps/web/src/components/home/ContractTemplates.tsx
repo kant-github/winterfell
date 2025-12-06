@@ -22,6 +22,8 @@ export default function ContractTemplates() {
         router.push(`/playground/${contractId}`);
     }
 
+    console.log(templates);
+
     return (
         <div className="w-full h-full flex flex-col px-2 tracking-wider">
             <div className="w-full flex justify-between py-1 text-sm px-1">

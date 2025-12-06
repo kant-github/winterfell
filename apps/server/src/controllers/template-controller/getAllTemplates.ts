@@ -12,6 +12,7 @@ export default async function getAllTemplates(req: Request, res: Response) {
                 category: true,
                 tags: true,
                 s3_prefix: true,
+                imageUrl: true,
                 solanaVersion: true,
                 anchorVersion: true,
                 createdAt: true,
