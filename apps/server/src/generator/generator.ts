@@ -76,8 +76,12 @@ export default class Generator {
         try {
             this.create_stream(res);
 
-            console.log('gen.generator is called');
-            const { planner_chain, coder_chain, finalizer_chain } = this.get_chains(chat, model);
+            // this check represents that chain is created without any errors
+            const chain = this.get_chains(chat, model);
+            if(!chain) {
+                throw new Error('chains not created');
+            }
+            const { planner_chain, coder_chain, finalizer_chain } = chain;
 
             switch (chat) {
                 case 'new': {
@@ -312,6 +316,7 @@ export default class Generator {
             });
         } catch (error) {
             console.error('Error while finalizing: ', error);
+        } finally {
             parser.reset();
             this.delete_parser(contract_id);
             ResponseWriter.stream.end(res);
@@ -418,7 +423,7 @@ export default class Generator {
             this.send_sse(res, STAGE.BUILDING, { stage: 'Building' }, system_message);
 
             const gen_files = parser.getGeneratedFiles();
-            // await this.update_contract_2(contract_id, gen_files, delete_files);
+            await this.update_contract(contract_id, gen_files, delete_files);
 
             system_message = await prisma.message.update({
                 where: {
@@ -508,66 +513,11 @@ export default class Generator {
             this.update_idl(contract_id, finalizer_data.idl, delete_files);
         } catch (error) {
             console.error('Error while finalizing: ', error);
+        } finally {
             parser.reset();
             this.delete_parser(contract_id);
             ResponseWriter.stream.end(res);
         }
-    }
-
-    protected async update_contract_2(
-        contract_id: string,
-        generated_files: FileContent[],
-        deleting_files_path: string[],
-    ) {
-        console.log(chalk.bgBlueBright('------------------ updation starts here'));
-
-        console.log(
-            chalk.bgRed('---------------------------- files which are generated / updated now'),
-        );
-        console.log(generated_files.forEach((file) => console.log(file.path)));
-
-        console.log(chalk.bgRed('---------------------------- files to be deleted'));
-        console.log(deleting_files_path);
-
-        const contract = await objectStore.get_resource_files(contract_id);
-
-        console.log(chalk.bgRed('---------------------------- current contract'));
-        console.log(contract.map((file) => console.log(file.path)));
-
-        let remaining_files: FileContent[] = contract;
-        // delete the given files from the contract
-        if (deleting_files_path.length > 0) {
-            console.log('removing the deleting files');
-            remaining_files = contract.filter((file) => !deleting_files_path.includes(file.path));
-        }
-
-        // const gen_file_map = new Map(generated_files.map(file => [file.path, file.content]));
-        const remaining_files_map = new Map(remaining_files.map((file) => [file.path, file]));
-        const new_files: FileContent[] = [];
-
-        // update old + add new
-        generated_files.forEach((file) => {
-            if (remaining_files_map.has(file.path)) {
-                remaining_files_map.set(file.path, file);
-            } else {
-                new_files.push(file);
-            }
-        });
-
-        const updated_contract: FileContent[] = [
-            ...Array.from(remaining_files_map.values()),
-            ...new_files,
-        ];
-
-        console.log(chalk.bgRed('---------------------------- final updated contract'));
-        console.log(updated_contract.forEach((file) => console.log(file.path)));
-
-        console.log(chalk.yellowBright('updating contract in s3...'));
-        await objectStore.updateContractFiles(contract_id, updated_contract);
-
-        const fetched_contract = await objectStore.get_resource_files(contract_id);
-        console.log(chalk.bgRed('---------------------------- again fetched contract'));
-        console.log(fetched_contract);
     }
 
     protected async update_contract(
@@ -575,29 +525,59 @@ export default class Generator {
         generated_files: FileContent[],
         deleting_files_path: string[],
     ) {
-        // fetch the complete contract from s3
-        const contract = await objectStore.get_resource_files(contract_id);
+        try {
+            console.log(chalk.bgBlueBright('------------------ updation starts here'));
 
-        const remainingFiles = contract.filter((file) => !deleting_files_path.includes(file.path));
+            console.log(
+                chalk.bgRed('---------------------------- files which are generated / updated now'),
+            );
+            console.log(generated_files.forEach((file) => console.log(file.path)));
 
-        const existingFilesMap = new Map(remainingFiles.map((file) => [file.path, file]));
-        const newFiles: FileContent[] = [];
+            console.log(chalk.bgRed('---------------------------- files to be deleted'));
+            console.log(deleting_files_path);
 
-        for (const gen_file of generated_files) {
-            const existingFile = existingFilesMap.get(gen_file.path);
+            const contract = await objectStore.get_resource_files(contract_id);
 
-            if (existingFile) {
-                existingFile.content = gen_file.content;
-            } else {
-                newFiles.push(gen_file);
+            console.log(chalk.bgRed('---------------------------- current contract'));
+            console.log(contract.map((file) => console.log(file.path)));
+
+            let remaining_files: FileContent[] = contract;
+            // delete the given files from the contract
+            if (deleting_files_path.length > 0) {
+                console.log('removing the deleting files');
+                remaining_files = contract.filter((file) => !deleting_files_path.includes(file.path));
             }
+
+            // const gen_file_map = new Map(generated_files.map(file => [file.path, file.content]));
+            const remaining_files_map = new Map(remaining_files.map((file) => [file.path, file]));
+            const new_files: FileContent[] = [];
+
+            // update old + add new
+            generated_files.forEach((file) => {
+                if (remaining_files_map.has(file.path)) {
+                    remaining_files_map.set(file.path, file);
+                } else {
+                    new_files.push(file);
+                }
+            });
+
+            const updated_contract: FileContent[] = [
+                ...Array.from(remaining_files_map.values()),
+                ...new_files,
+            ];
+
+            console.log(chalk.bgRed('---------------------------- final updated contract'));
+            console.log(updated_contract.forEach((file) => console.log(file.path)));
+
+            console.log(chalk.yellowBright('updating contract in s3...'));
+            await objectStore.updateContractFiles(contract_id, updated_contract);
+
+            const fetched_contract = await objectStore.get_resource_files(contract_id);
+            console.log(chalk.bgRed('---------------------------- again fetched contract'));
+            console.log(fetched_contract);
+        } catch (error) {
+            console.error('Error while updating contract to s3: ', error);
         }
-
-        const updatedContract = [...remainingFiles, ...newFiles];
-
-        console.log(updatedContract);
-
-        await objectStore.updateContractFiles(contract_id, updatedContract);
     }
 
     protected async update_idl(
@@ -605,122 +585,132 @@ export default class Generator {
         generated_idl_parts: any[],
         deleting_files_path: string[],
     ) {
-        const contract = await prisma.contract.findUnique({
-            where: {
-                id: contract_id,
-            },
-            select: {
-                summarisedObject: true,
-            },
-        });
+        try {
 
-        if (!contract?.summarisedObject) {
+            const contract = await prisma.contract.findUnique({
+                where: {
+                    id: contract_id,
+                },
+                select: {
+                    summarisedObject: true,
+                },
+            });
+
+            if (!contract?.summarisedObject) {
+                await prisma.contract.update({
+                    where: {
+                        id: contract_id,
+                    },
+                    data: {
+                        summarisedObject: JSON.stringify(generated_idl_parts),
+                    },
+                });
+                return;
+            }
+
+            const idl = JSON.parse(contract.summarisedObject);
+
+            const remainingIdl = idl.filter((item: any) => !deleting_files_path.includes(item.path));
+
+            const existingIdlMap = new Map(remainingIdl.map((item: any) => [item.path, item]));
+            const newIdlParts: any[] = [];
+
+            for (const gen_i of generated_idl_parts) {
+                const existingIdl = existingIdlMap.get(gen_i.path);
+
+                if (existingIdl) {
+                    Object.assign(existingIdl, gen_i);
+                } else {
+                    newIdlParts.push(gen_i);
+                }
+            }
+
+            const updatedIdl = [...remainingIdl, ...newIdlParts];
+
             await prisma.contract.update({
                 where: {
                     id: contract_id,
                 },
                 data: {
-                    summarisedObject: JSON.stringify(generated_idl_parts),
+                    summarisedObject: JSON.stringify(updatedIdl),
                 },
             });
-            return;
+        } catch (error) {
+            console.error('Error while updating idl: ', error);
         }
-
-        const idl = JSON.parse(contract.summarisedObject);
-
-        const remainingIdl = idl.filter((item: any) => !deleting_files_path.includes(item.path));
-
-        const existingIdlMap = new Map(remainingIdl.map((item: any) => [item.path, item]));
-        const newIdlParts: any[] = [];
-
-        for (const gen_i of generated_idl_parts) {
-            const existingIdl = existingIdlMap.get(gen_i.path);
-
-            if (existingIdl) {
-                Object.assign(existingIdl, gen_i);
-            } else {
-                newIdlParts.push(gen_i);
-            }
-        }
-
-        const updatedIdl = [...remainingIdl, ...newIdlParts];
-
-        await prisma.contract.update({
-            where: {
-                id: contract_id,
-            },
-            data: {
-                summarisedObject: JSON.stringify(updatedIdl),
-            },
-        });
     }
 
     protected get_chains(
         chat: 'new' | 'old',
         model: MODEL,
-    ): { planner_chain: any; coder_chain: any; finalizer_chain: any } {
-        let planner_chain;
-        let coder_chain;
-        let finalizer_chain;
+    ): { planner_chain: any; coder_chain: any; finalizer_chain: any } | null {
+        try {
+            let planner_chain;
+            let coder_chain;
+            let finalizer_chain;
 
-        const coder = model === MODEL.CLAUDE ? this.claude_coder : this.gemini_coder;
+            const coder = model === MODEL.CLAUDE ? this.claude_coder : this.gemini_coder;
 
-        switch (chat) {
-            case 'new': {
-                planner_chain = RunnableSequence.from([
-                    new_chat_planner_prompt,
-                    this.gemini_planner.withStructuredOutput(new_planner_output_schema),
-                ]);
+            switch (chat) {
+                case 'new': {
+                    planner_chain = RunnableSequence.from([
+                        new_chat_planner_prompt,
+                        this.gemini_planner.withStructuredOutput(new_planner_output_schema),
+                    ]);
 
-                coder_chain = new_chat_coder_prompt.pipe(coder);
+                    coder_chain = new_chat_coder_prompt.pipe(coder);
 
-                finalizer_chain = RunnableSequence.from([
-                    finalizer_prompt,
-                    this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
-                ]);
+                    finalizer_chain = RunnableSequence.from([
+                        finalizer_prompt,
+                        this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
+                    ]);
 
-                return {
-                    planner_chain: planner_chain,
-                    coder_chain: coder_chain,
-                    finalizer_chain: finalizer_chain,
-                };
+                    return {
+                        planner_chain: planner_chain,
+                        coder_chain: coder_chain,
+                        finalizer_chain: finalizer_chain,
+                    };
+                }
+
+                case 'old': {
+                    planner_chain = RunnableSequence.from([
+                        old_chat_planner_prompt,
+                        this.gemini_planner.withStructuredOutput(old_planner_output_schema),
+                    ]);
+
+                    const coder_chain = old_chat_coder_prompt
+                        .pipe(coder.bindTools([Tool.get_file]))
+                        .pipe(Tool.runner)
+                        .pipe(Tool.convert)
+                        .pipe(
+                            new RunnableLambda({
+                                func: ({ messages }: { messages: any }) => [
+                                    ...messages,
+                                    {
+                                        role: 'user',
+                                        content:
+                                            'Use the fetched file contents to implement the planned changes.',
+                                    },
+                                ],
+                            }),
+                        )
+                        .pipe(coder);
+
+                    finalizer_chain = RunnableSequence.from([
+                        finalizer_prompt,
+                        this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
+                    ]);
+
+                    return {
+                        planner_chain: planner_chain,
+                        coder_chain: coder_chain,
+                        finalizer_chain,
+                    };
+                }
             }
-
-            case 'old': {
-                planner_chain = RunnableSequence.from([
-                    old_chat_planner_prompt,
-                    this.gemini_planner.withStructuredOutput(old_planner_output_schema),
-                ]);
-
-                const coder_chain = old_chat_coder_prompt
-                    .pipe(coder.bindTools([Tool.get_file]))
-                    .pipe(Tool.runner)
-                    .pipe(Tool.convert)
-                    .pipe(
-                        new RunnableLambda({
-                            func: ({ messages }: { messages: any }) => [
-                                ...messages,
-                                {
-                                    role: 'user',
-                                    content:
-                                        'Use the fetched file contents to implement the planned changes.',
-                                },
-                            ],
-                        }),
-                    )
-                    .pipe(coder);
-
-                finalizer_chain = RunnableSequence.from([
-                    finalizer_prompt,
-                    this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
-                ]);
-
-                return {
-                    planner_chain: planner_chain,
-                    coder_chain: coder_chain,
-                    finalizer_chain,
-                };
-            }
+        } catch (error) {
+            console.error('Error while getting chains: ', error);
+            return null;
         }
     }
 
