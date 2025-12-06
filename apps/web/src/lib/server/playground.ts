@@ -3,7 +3,7 @@ import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import axios from 'axios';
 
-export default class Playyground {
+export default class Playground {
     static async get_chat(token: string, contractId: string) {
         const { upsertMessage } = useBuilderChatStore.getState();
         const { parseFileStructure, setCollapseFileTree } = useCodeEditor.getState();

@@ -8,17 +8,60 @@ import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useChatStore } from '@/src/store/user/useChatStore';
 import React, { useEffect, use } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
-import Playyground from '@/src/lib/server/playground';
+import Playground from '@/src/lib/server/playground';
 import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
+import { ChatRole } from '@/src/types/prisma-types';
 
 export default function Page({ params }: { params: Promise<{ contractId: string }> }) {
-    const { cleanStore, loading } = useBuilderChatStore();
+    const { cleanStore, loading, setLoading } = useBuilderChatStore();
     const { reset, collapseFileTree, setCollapseFileTree } = useCodeEditor();
     const unwrappedParams = React.use(params);
     const { contractId } = unwrappedParams;
     const { resetContractId } = useChatStore();
     const { session } = useUserSessionStore();
     const { open, hide } = useReviewModalStore();
+
+    useEffect(() => {
+        if (!session?.user?.token) return;
+
+        let interval: NodeJS.Timeout | null = null;
+        let stopped = false;
+
+        const poll = async () => {
+            if (!session?.user?.token) return;
+            if (stopped) return;
+
+            setLoading(true);
+            await Playground.get_chat(
+                session.user.token,
+                contractId
+            );
+
+            const { messages } = useBuilderChatStore.getState();
+            if (messages.length === 0) return;
+
+            const last = messages[messages.length - 1];
+
+            const shouldContinue = last.role === ChatRole.SYSTEM || last.role === ChatRole.USER;
+
+            if (!shouldContinue) {
+                if (interval) clearInterval(interval);
+                stopped = true;
+                setLoading(false);
+            }
+        };
+
+        poll();
+
+        interval = setInterval(poll, 2000);
+
+        return () => {
+            stopped = true;
+            if (interval) clearInterval(interval);
+        };
+    }, [contractId, session?.user?.token]);
+
+
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
@@ -32,12 +75,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             document.removeEventListener('keydown', handleKeyDown);
         };
     });
-
-    useEffect(() => {
-        if (loading || !session || !session.user || !session.user.token) return;
-        Playyground.get_chat(session.user.token, contractId);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [contractId, session]);
 
     useEffect(() => {
         return () => {
