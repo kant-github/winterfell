@@ -166,7 +166,7 @@ export function ConnectedWalletInfoCard() {
     );
 }
 
-const color = 'bg-dark-base border border-neutral-800 text-light';
+const color = 'bg-darkest border border-neutral-800 text-light';
 
 interface AccountInfoProps {
     onClick: () => void;

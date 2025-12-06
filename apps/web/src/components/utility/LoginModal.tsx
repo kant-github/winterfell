@@ -162,7 +162,7 @@ function LoginModalRight({ opensignInModal, setOpenSignInModal }: LoginModalProp
 
                 <div className="w-full flex justify-center py-2">
                     <Turnstile
-                        className="bg-dark-base border-0 rounded-full"
+                        className="bg-darkest border-0 rounded-full"
                         sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                         onVerify={(token) => setTurnstileToken(token)}
                         onError={() => setTurnstileToken(null)}
@@ -194,13 +194,13 @@ export default function LoginModal({ opensignInModal, setOpenSignInModal }: Logi
 
     return (
         <OpacityBackground
-            className="bg-dark-base/70"
+            className="bg-darkest/70"
             onBackgroundClick={() => setOpenSignInModal(false)}
         >
             <div
                 className={cn(
                     'max-w-[800px] w-full h-[500px]',
-                    'bg-linear-to-b from-[#0a0a0a] via-dark-base to-[#0d0d0d]',
+                    'bg-linear-to-b from-[#0a0a0a] via-darkest to-[#0d0d0d]',
                     'rounded-[8px] grid grid-cols-2',
                     'overflow-hidden shadow-2xl',
                 )}

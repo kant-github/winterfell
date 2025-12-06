@@ -46,7 +46,7 @@ export default function BuilderDashboard(): JSX.Element {
     }, [isConnected]);
 
     return (
-        <div className="w-full h-full flex flex-row bg-dark-base z-0 overflow-hidden">
+        <div className="w-full h-full flex flex-row bg-darkest z-0 overflow-hidden">
             <AnimatePresence mode="wait">
                 {!collapseChat && (
                     <motion.div

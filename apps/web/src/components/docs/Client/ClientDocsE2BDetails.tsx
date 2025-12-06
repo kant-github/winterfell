@@ -62,7 +62,7 @@ export default function ClientDocsE2BDetails() {
                                 variant={'ghost'}
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-all duration-300 relative hover:bg-dark-base hover:text-light ${
+                                className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-all duration-300 relative hover:bg-darkest hover:text-light ${
                                     activeTab === tab.id ? 'text-primary' : 'text-light'
                                 }`}
                             >

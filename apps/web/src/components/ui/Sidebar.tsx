@@ -31,7 +31,7 @@ export default function SideBar({ open, setOpen, content, bottomLogo, blob }: Ut
         <>
             <div
                 ref={ref}
-                className={`fixed top-0 right-0 h-screen bg-dark-base px-6 py-5 w-[24rem] border-l-[1px] border-neutral-800 shadow-xl z-50 rounded-[8px] transform transition-transform ease-in-out duration-300 ${open ? 'translate-x-0' : 'translate-x-full'} overflow-hidden flex flex-col`}
+                className={`fixed top-0 right-0 h-screen bg-darkest px-6 py-5 w-[24rem] border-l-[1px] border-neutral-800 shadow-xl z-50 rounded-[8px] transform transition-transform ease-in-out duration-300 ${open ? 'translate-x-0' : 'translate-x-full'} overflow-hidden flex flex-col`}
             >
                 {blob && (
                     <div className="absolute right-0 pointer-events-none w-full h-full">

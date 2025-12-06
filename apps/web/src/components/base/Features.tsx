@@ -94,7 +94,7 @@ export default function Features() {
                     className="mt-40 flex flex-col w-full space-y-3 pointer-events-none z-30"
                     style={{ opacity: subtitleOpacity }}
                 >
-                    <div className="mt-4 w-full flex justify-center text-[7px] sm:text-sm md:text-2xl tracking-widest text-dark-base font-semibold text-center px-4">
+                    <div className="mt-4 w-full flex justify-center text-[7px] sm:text-sm md:text-2xl tracking-widest text-darkest font-semibold text-center px-4">
                         Transform your blockchain ideas into&nbsp;
                         <Highlighter action="underline" color="#6C44FC">
                             production-ready
@@ -241,7 +241,7 @@ export const AnimatedFeatureCard = React.memo(
                             <Icon className="text-xl sm:text-3xl md:text-5xl" style={{ color }} />
                         </div>
                         <div className="text-center space-y-0.5 md:space-y-1">
-                            <h3 className="text-[8px] sm:text-sm md:text-xl font-bold text-dark-base tracking-wide">
+                            <h3 className="text-[8px] sm:text-sm md:text-xl font-bold text-darkest tracking-wide">
                                 {centerTitle}
                             </h3>
                             <p className="hidden md:block text-[8px] sm:text-[10px] md:text-xs tracking-wide text-neutral-600 font-medium hidden md:block px-2 leading-tight">
@@ -251,7 +251,7 @@ export const AnimatedFeatureCard = React.memo(
                     </div>
 
                     <div className="relative z-10 flex items-center justify-center">
-                        <div className="text-[7px] sm:text-[9px] md:text-xs font-semibold text-dark-base bg-white/70 backdrop-blur-sm px-1.5 py-px md:px-3 md:py-1.5 rounded-full border border-neutral-200/70 shadow-sm">
+                        <div className="text-[7px] sm:text-[9px] md:text-xs font-semibold text-darkest bg-white/70 backdrop-blur-sm px-1.5 py-px md:px-3 md:py-1.5 rounded-full border border-neutral-200/70 shadow-sm">
                             {bottomTitle}
                         </div>
                     </div>

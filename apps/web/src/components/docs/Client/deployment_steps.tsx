@@ -26,7 +26,7 @@ export const stepsContextDeployment: Step[] = [
                     See the deploy button at the top right, click on the
                     <Button
                         size="mini"
-                        className="bg-light text-dark-base hover:bg-light hover:text-dark-base tracking-wider cursor-auto transition-transform hover:-translate-y-0.5 duration-300 font-semibold rounded-[4px]"
+                        className="bg-light text-darkest hover:bg-light hover:text-darkest tracking-wider cursor-auto transition-transform hover:-translate-y-0.5 duration-300 font-semibold rounded-[4px]"
                     >
                         <IoIosPaperPlane className="size-3.5" />
                         <span className="text-[11px]">Deploy</span>

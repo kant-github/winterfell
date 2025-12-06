@@ -107,7 +107,7 @@ export const WalletPanel = ({ close }: WalletPanelProps) => {
                     <div className="absolute top-5 right-5">
                         <RxCross2
                             onClick={close}
-                            className="size-5 cursor-pointer bg-dark p-1 rounded-full hover:bg-dark-base transition-colors duration-200 ease-in-out"
+                            className="size-5 cursor-pointer bg-dark p-1 rounded-full hover:bg-darkest transition-colors duration-200 ease-in-out"
                         />
                     </div>
                     {/* right content of wallet panel */}

@@ -80,7 +80,7 @@ export default function UserContracts() {
                                 key={contract.id}
                                 className="h-full border border-neutral-800 bg-[#0A0C0D70] min-w-[calc(25%-12px)] rounded-[4px] grid grid-rows-[78%_22%] overflow-hidden group shadow-sm"
                             >
-                                <div className="bg-gradient-to-br from-dark-base via-neutral-800/80 to-dark-base p-3 flex flex-col rounded-b-[4px]">
+                                <div className="bg-gradient-to-br from-darkest via-neutral-800/80 to-darkest p-3 flex flex-col rounded-b-[4px]">
                                     <div className="flex justify-between h-fit items-center">
                                         <DeployedTicker isDeployed={contract.deployed} />
                                         <div className="text-xs text-light/60 tracking-wide flex gap-x-1.5">

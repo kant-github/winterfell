@@ -79,7 +79,7 @@ export default function SystemMessage({ message, currentPhase, currentFile }: Sy
     const completedStage = stages[stages.length - 1];
 
     return (
-        <div className="relative w-[80%] overflow-hidden rounded-[4px] border border-neutral-800 bg-[#0e0e0f] text-neutral-300 select-none">
+        <div className="relative w-[80%] overflow-hidden rounded-[4px] border border-neutral-800 bg-linear-to-br from-[#0d0e0e] via-[#111212]  to-[#0d0e0e] text-neutral-300 select-none">
             <div className="px-5 pt-4 flex items-center gap-x-1.5 text-light/90">
                 <FaListUl />
                 <div>Execution strategy</div>

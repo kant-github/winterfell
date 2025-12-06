@@ -78,8 +78,8 @@ export default function BuilderChatInput() {
     return (
         <>
             <div className="relative group w-full">
-                <div className="relative rounded-[8px] border border-neutral-800 overflow-hidden">
-                    <div className="relative bg-[#0e0f10]">
+                <div className="relative rounded-[8px] border border-neutral-800/80 overflow-hidden bg-[#0e0f10]">
+                    <div className="relative">
                         <div className="absolute left-4 top-5 text-neutral-600 font-mono text-sm select-none">
                             &gt;
                         </div>
@@ -91,8 +91,8 @@ export default function BuilderChatInput() {
                             onKeyDown={handleKeyDown}
                             placeholder="create a counter program..."
                             className={cn(
-                                'w-full focus:h-28 h-15 bg-transparent pl-10 pr-4 py-5 text-neutral-200 border-0',
-                                'placeholder:text-neutral-800 placeholder:font-mono placeholder:text-sm resize-none',
+                                'w-full focus:h-28 h-15 bg-transparent pl-10 pr-4 py-5 text-neutral-200 border-0 shadow-none',
+                                'placeholder:text-neutral-800  placeholder:text-sm resize-none',
                                 'focus:outline-none transition-all duration-200',
                                 'text-md tracking-wider',
                                 'caret-[#e6e0d4]',
@@ -101,7 +101,7 @@ export default function BuilderChatInput() {
                         />
                     </div>
 
-                    <div className="flex items-center justify-between px-4 py-2.5 border-t border-neutral-800/50 bg-[#101114]">
+                    <div className="flex items-center justify-between px-4 py-2.5 ">
                         <div className="flex items-center gap-x-1">
                             <ExecutorSelect value={executor} onChange={setExecutor} />
                             <Button
@@ -110,7 +110,7 @@ export default function BuilderChatInput() {
                                 onClick={() => router.push('/home')}
                             >
                                 <FileCode className="w-3.5 h-3.5 mb-0.5" />
-                                <span className="font-mono">templates</span>
+                                <span>templates</span>
                             </Button>
                             <div className="flex items-center gap-1.5 text-xs text-neutral-600 font-mono">
                                 <span className={cn(inputValue.length > 200 && 'text-red-500')}>

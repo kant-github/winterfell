@@ -197,7 +197,7 @@ export default function Terminal() {
         <>
             {showTerminal && (
                 <div
-                    className="absolute bottom-6 left-0 right-0 bg-dark-base border-t border-neutral-800 text-neutral-200 font-mono flex flex-col z-999999 text-[12px]"
+                    className="absolute bottom-6 left-0 right-0 bg-darkest border-t border-neutral-800 text-neutral-200 font-mono flex flex-col z-999999 text-[12px]"
                     style={{
                         height: `min(${height}px, calc(100% - 6rem))`,
                         maxHeight: 'calc(100% - 6rem)',
@@ -211,7 +211,7 @@ export default function Terminal() {
                         className="h-0.5 w-full cursor-ns-resize bg-neutral-800"
                     />
 
-                    <div className="text-light/50 py-1 px-4 flex justify-between items-center select-none bg-dark-base">
+                    <div className="text-light/50 py-1 px-4 flex justify-between items-center select-none bg-darkest">
                         <Button disabled className="tracking-[2px] p-0 text-[11px] bg-transparent">
                             TERMINAL
                         </Button>
@@ -288,7 +288,7 @@ export default function Terminal() {
                 </div>
             )}
 
-            <div className="absolute bottom-0 left-0 right-0 h-6 flex justify-between items-center px-3 text-[11px] text-light/70 bg-dark-base border-t border-neutral-800 z-20">
+            <div className="absolute bottom-0 left-0 right-0 h-6 flex justify-between items-center px-3 text-[11px] text-light/70 bg-darkest border-t border-neutral-800 z-20">
                 <div
                     className="flex items-center space-x-1.5 hover:bg-neutral-800/50 px-2 py-0.5 rounded-md cursor-pointer transition text-[11px]"
                     onClick={function () {

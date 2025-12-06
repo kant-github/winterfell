@@ -556,8 +556,6 @@ export default class Generator {
 
             console.log(chalk.yellowBright('updating contract in s3...'));
             await objectStore.updateContractFiles(contract_id, updated_contract);
-
-            const fetched_contract = await objectStore.get_resource_files(contract_id);
         } catch (error) {
             console.error('Error while updating contract to s3: ', error);
         }

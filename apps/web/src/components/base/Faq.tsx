@@ -54,7 +54,7 @@ const FaqItem = memo<FaqItemProps>(({ faq, index, isOpen, onToggle }) => {
                 }`}
             >
                 <div className="pb-6 pt-1">
-                    <p className="text-dark-base/70 leading-relaxed text-left">{faq.answer}</p>
+                    <p className="text-darkest/70 leading-relaxed text-left">{faq.answer}</p>
                 </div>
             </div>
         </motion.div>
@@ -121,7 +121,7 @@ export default function Faq() {
                     <div className="flex flex-col items-start justify-start gap-8 lg:gap-12">
                         <h1
                             className={cn(
-                                'text-6xl lg:text-[12rem] font-black text-dark-base leading-tight text-left bg-light z-10 select-none',
+                                'text-6xl lg:text-[12rem] font-black text-darkest leading-tight text-left bg-light z-10 select-none',
                                 doto.className,
                             )}
                         >

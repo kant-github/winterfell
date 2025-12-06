@@ -68,7 +68,7 @@ export default function BuilderNavbarRightSection() {
                 <Button
                     onClick={() => setOpenWalletPanel(true)}
                     size="xs"
-                    className="bg-light text-dark-base hover:bg-light hover:text-dark-base tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 duration-300 font-semibold rounded-[4px] exec-button-light"
+                    className="bg-light text-darkest hover:bg-light hover:text-darkest tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 duration-300 font-semibold rounded-[4px] exec-button-light"
                 >
                     <IoIosPaperPlane className="size-3.5" />
                     <span className="text-[11px]">Deploy</span>

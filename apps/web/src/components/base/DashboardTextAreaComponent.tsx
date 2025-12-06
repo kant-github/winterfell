@@ -92,7 +92,7 @@ export default function DashboardTextAreaComponent() {
                                 <div className="h-25 w-25 relative rounded-sm overflow-hidden shadow-lg">
                                     <div
                                         onClick={() => resetTemplate()}
-                                        className="absolute rounded-full h-4.5 w-4.5 flex justify-center items-center right-1 top-1 text-[13px] z-10 bg-light text-dark-base transition-colors transform duration-100 cursor-pointer shadow-sm"
+                                        className="absolute rounded-full h-4.5 w-4.5 flex justify-center items-center right-1 top-1 text-[13px] z-10 bg-light text-darkest transition-colors transform duration-100 cursor-pointer shadow-sm"
                                     >
                                         <RxCross2 />
                                     </div>
@@ -103,7 +103,7 @@ export default function DashboardTextAreaComponent() {
                                         className="object-cover"
                                         unoptimized
                                     />
-                                    <div className="absolute bottom-0 text-[13px] text-dark-base w-full bg-light px-1 py-px lowercase truncate shadow-lg font-semibold tracking-wide">
+                                    <div className="absolute bottom-0 text-[13px] text-darkest w-full bg-light px-1 py-px lowercase truncate shadow-lg font-semibold tracking-wide">
                                         {activeTemplate.title}
                                     </div>
                                 </div>

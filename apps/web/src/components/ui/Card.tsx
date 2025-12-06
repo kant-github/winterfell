@@ -19,7 +19,7 @@ export default function Card({ children, className, ref, onClick }: UtilityCardP
             style={{ pointerEvents: 'auto' }}
             className={cn(
                 'border border-neutral-800 shadow-lg rounded-[4px] px-4 py-2.5',
-                'bg-light-base dark:bg-dark-base z-80',
+                'bg-light-base dark:bg-darkest z-80',
                 className,
             )}
         >
