@@ -72,6 +72,22 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     });
 
     useEffect(() => {
+        function handleHideContractReviewCard(e: KeyboardEvent) {
+            if (e.key === 'Escape') {
+                hide();
+            }
+        }
+        document.addEventListener('keydown', handleHideContractReviewCard);
+        return () => document.removeEventListener('keydown', handleHideContractReviewCard);
+    });
+
+    useEffect(() => {
+        if (loading || !session || !session.user || !session.user.token) return;
+        Playyground.get_chat(session.user.token, contractId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [contractId, session]);
+
+    useEffect(() => {
         return () => {
             cleanStore();
             resetContractId();
