@@ -33,7 +33,7 @@ export default function WinterfellChat({ size = 95 }: WinterfellChatProps) {
             </svg>
 
             <LiaServicestack
-                size={size * 0.55}
+                size={size * 0.80}
                 style={{
                     position: "absolute",
                     top: "24%",

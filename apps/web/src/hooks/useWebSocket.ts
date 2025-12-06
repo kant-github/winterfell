@@ -20,7 +20,7 @@ export const useWebSocket = () => {
         let interval: NodeJS.Timeout | null = null;
 
         try {
-            socket.current = getWebSocketClient(token, contractId);
+            // socket.current = getWebSocketClient(token, contractId);
 
             interval = setInterval(() => {
                 if (socket.current) {

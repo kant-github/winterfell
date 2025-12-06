@@ -25,7 +25,7 @@ export default function BaseContractTemplatesPanel({ closePanel }: BaseContractT
                     key={template.id}
                     title={template.title}
                     description={template.description}
-                    image={template.image || '/templates/contract-2.jpg'}
+                    image={template.imageUrl || '/templates/contract-2.jpg'}
                     onClick={() => {
                         setActiveTemplate(template);
                         closePanel();

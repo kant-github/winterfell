@@ -97,7 +97,7 @@ export default function DashboardTextAreaComponent() {
                                         <RxCross2 />
                                     </div>
                                     <Image
-                                        src={'/templates/contract-2.jpg'}
+                                        src={activeTemplate.imageUrl}
                                         alt=""
                                         fill
                                         className="object-cover"
