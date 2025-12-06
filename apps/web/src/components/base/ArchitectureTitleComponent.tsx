@@ -6,6 +6,7 @@ interface ArchitectureTitleComponentProps {
     secondText?: string;
     bgcolor?: string;
     bordercolor?: string;
+    className?: string;
 }
 
 export default function ArchitectureTitleComponent({
@@ -13,6 +14,7 @@ export default function ArchitectureTitleComponent({
     secondText = 'SECOND',
     bgcolor = 'bg-[#0a0c0d]',
     bordercolor = 'border-[#6c44fc]',
+    className,
 }: ArchitectureTitleComponentProps) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: false, margin: '-100px' });
@@ -61,7 +63,11 @@ export default function ArchitectureTitleComponent({
         <section
             id="about"
             ref={ref}
-            className={cn('w-screen flex flex-col justify-center text-light gap-y-5 z-10', bgcolor)}
+            className={cn(
+                'w-screen flex flex-col justify-center text-light gap-y-5 z-10',
+                bgcolor,
+                className,
+            )}
         >
             <AnimatePresence>
                 <motion.div

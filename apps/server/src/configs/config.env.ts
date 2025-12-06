@@ -31,6 +31,7 @@ const envScehma = z.object({
     SERVER_TURNSTILE_SERVER_KEY: z.string().transform((val) => val.trim()),
     SERVER_CLOUDFRONT_DOMAIN_TEMPLATES: z.string().transform((val) => val.trim()),
     SERVER_ADMIN_SECRET: z.string().transform((val) => val.trim()),
+    SERVER_CLOUDFRONT_DISTRIBUTION_ID: z.string().transform((val) => val.trim()),
 });
 
 function parseScehma() {

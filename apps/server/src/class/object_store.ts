@@ -2,11 +2,14 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import env from '../configs/config.env';
 import { FileContent } from '../types/content_types';
+import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import axios from 'axios';
 
 export default class ObjectStore {
     private s3: S3Client;
     private bucket: string;
+    private cloudfront: CloudFrontClient;
+    private distribution_id: string;
 
     constructor() {
         this.s3 = new S3Client({
@@ -16,26 +19,58 @@ export default class ObjectStore {
                 secretAccessKey: env.SERVER_AWS_SECRET_ACCESS_KEY,
             },
         });
+
+        // cdn client for cache clean
+        this.cloudfront = new CloudFrontClient({
+            region: 'us-east-1',
+            credentials: {
+                accessKeyId: env.SERVER_AWS_ACCESS_KEY_ID,
+                secretAccessKey: env.SERVER_AWS_SECRET_ACCESS_KEY,
+            },
+        });
+
         this.bucket = env.SERVER_AWS_BUCKET_NAME;
+        this.distribution_id = env.SERVER_CLOUDFRONT_DISTRIBUTION_ID;
+    }
+
+    private async cleanCache(path: string) {
+        await this.cloudfront.send(
+            new CreateInvalidationCommand({
+                DistributionId: this.distribution_id,
+                InvalidationBatch: {
+                    CallerReference: Date.now().toString(),
+                    Paths: {
+                        Quantity: 1,
+                        Items: [path],
+                    },
+                },
+            }),
+        );
     }
 
     public async updateContractFiles(
         contractId: string,
         updatedFiles: FileContent[],
     ): Promise<void> {
-        const key = `${contractId}/resource`;
+        try {
+            const key = `${contractId}/resource`;
 
-        const upload = new Upload({
-            client: this.s3,
-            params: {
-                Bucket: this.bucket,
-                Key: key, // Same key = overwrites existing file
-                Body: JSON.stringify(updatedFiles),
-                ContentType: 'application/json',
-            },
-        });
+            const upload = new Upload({
+                client: this.s3,
+                params: {
+                    Bucket: this.bucket,
+                    Key: key, // Same key = overwrites existing file
+                    Body: JSON.stringify(updatedFiles),
+                    ContentType: 'application/json',
+                },
+            });
 
-        await upload.done();
+            await upload.done();
+            await this.cleanCache(`/${key}`);
+        } catch (error) {
+            console.error('Failed to update contract files: ', error);
+            return;
+        }
     }
 
     public async updateContractFilesWithRaw(
@@ -43,11 +78,50 @@ export default class ObjectStore {
         updatedFiles: FileContent[],
         rawLlmResponse?: string,
     ): Promise<void> {
-        // Update the resource files
-        await this.updateContractFiles(contractId, updatedFiles);
+        try {
+            // Update the resource files
+            await this.updateContractFiles(contractId, updatedFiles);
 
-        // Optionally update the raw LLM response
-        if (rawLlmResponse) {
+            // Optionally update the raw LLM response
+            if (rawLlmResponse) {
+                const rawKey = `${contractId}/raw/llm-response.txt`;
+                const rawUpload = new Upload({
+                    client: this.s3,
+                    params: {
+                        Bucket: this.bucket,
+                        Key: rawKey,
+                        Body: rawLlmResponse,
+                        ContentType: 'text/plain',
+                    },
+                });
+                await rawUpload.done();
+                await this.cleanCache(`/${rawKey}`);
+            }
+        } catch (error) {
+            console.error('Failed to update raw contract files: ', error);
+            return;
+        }
+    }
+
+    public async uploadContractFiles(
+        contractId: string,
+        files: FileContent[],
+        rawLlmResponse: string,
+    ) {
+        try {
+            const key = `${contractId}/resource`;
+            const upload = new Upload({
+                client: this.s3,
+                params: {
+                    Bucket: this.bucket,
+                    Key: key,
+                    Body: JSON.stringify(files),
+                    ContentType: 'application/json',
+                },
+            });
+            await upload.done();
+            await this.cleanCache(`/${key}`);
+
             const rawKey = `${contractId}/raw/llm-response.txt`;
             const rawUpload = new Upload({
                 client: this.s3,
@@ -59,53 +133,32 @@ export default class ObjectStore {
                 },
             });
             await rawUpload.done();
+            await this.cleanCache(`/${rawKey}`);
+        } catch (error) {
+            console.error('Failed to upload contract files: ', error);
+            return;
         }
     }
 
-    public async uploadContractFiles(
-        contractId: string,
-        files: FileContent[],
-        rawLlmResponse: string,
-    ) {
-        const key = `${contractId}/resource`;
-        const upload = new Upload({
-            client: this.s3,
-            params: {
-                Bucket: this.bucket,
-                Key: key,
-                Body: JSON.stringify(files),
-                ContentType: 'application/json',
-            },
-        });
-        await upload.done();
-
-        const rawKey = `${contractId}/raw/llm-response.txt`;
-        const rawUpload = new Upload({
-            client: this.s3,
-            params: {
-                Bucket: this.bucket,
-                Key: rawKey,
-                Body: rawLlmResponse,
-                ContentType: 'text/plain',
-            },
-        });
-        await rawUpload.done();
-    }
-
     public async uploadFile(contractId: string, path: string, content: string | Buffer) {
-        const key = `${contractId}/${path}`;
+        try {
+            const key = `${contractId}/${path}`;
 
-        const upload = new Upload({
-            client: this.s3,
-            params: {
-                Bucket: this.bucket,
-                Key: key,
-                Body: content,
-            },
-        });
+            const upload = new Upload({
+                client: this.s3,
+                params: {
+                    Bucket: this.bucket,
+                    Key: key,
+                    Body: content,
+                },
+            });
 
-        await upload.done();
-        return key;
+            await upload.done();
+            return key;
+        } catch (error) {
+            console.error('Failed to upload files: ', error);
+            return;
+        }
     }
 
     public async get_template_files(templateId: string): Promise<FileContent[]> {

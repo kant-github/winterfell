@@ -9,7 +9,6 @@ import getUserPlanController from '../controllers/payment-controller/getUserPlan
 import syncFilesController from '../controllers/files/syncFilesController';
 import githubCodePushController from '../controllers/github-deploy-controller/githubCodePushController';
 import getChatController from '../controllers/chat-controller/getChatController';
-import createContractReview from '../controllers/review/create_contract_review';
 import githubRepoNameValidatorController from '../controllers/github-deploy-controller/githubRepoNameValidatorController';
 import syncTemplate from '../controllers/template-controller/syncTemplates';
 import githubProjectZipController from '../controllers/github-deploy-controller/githubProjectZipController';
@@ -17,13 +16,14 @@ import getUserContracts from '../controllers/contract-controller/getUserContract
 import getAllContracts from '../controllers/contract-controller/getAllContracts';
 import getAllTemplates from '../controllers/template-controller/getAllTemplates';
 import plan_executor_controller from '../controllers/chat-controller/plan_executor_controller';
-import public_review_controller from '../controllers/review/public_review_controller';
 import generate_contract_controller from '../controllers/gen/generate_contract_controller';
 
 // middlewares
 import authMiddleware from '../middlewares/middleware.auth';
 import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
+import public_review_controller from '../controllers/review-controller/public_review_controller';
+import createContractReview from '../controllers/review-controller/create_contract_review';
 
 const router: Router = Router();
 

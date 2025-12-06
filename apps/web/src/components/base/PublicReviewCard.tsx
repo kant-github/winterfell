@@ -1,13 +1,7 @@
 'use client';
 import { cn } from '@/src/lib/utils';
 import Card from '../ui/Card';
-import {
-    PiSmileyAngryThin,
-    PiSmileySadThin,
-    PiSmileyMehThin,
-    PiSmileyThin,
-    PiSmileyWinkThin,
-} from 'react-icons/pi';
+import { PiStar, PiStarFill } from 'react-icons/pi';
 import { useState } from 'react';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
@@ -16,16 +10,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { public_review_schema } from '@winterfell/types';
 import axios from 'axios';
 import { PUBLIC_REVIEW_URL } from '@/routes/api_routes';
-import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { toast } from 'sonner';
-
-const emotions = [
-    { icon: PiSmileyAngryThin, value: 1 },
-    { icon: PiSmileySadThin, value: 2 },
-    { icon: PiSmileyMehThin, value: 3 },
-    { icon: PiSmileyThin, value: 4 },
-    { icon: PiSmileyWinkThin, value: 5 },
-];
+import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
+import Image from 'next/image';
 
 interface ReviewForm {
     rating: number;
@@ -34,102 +21,162 @@ interface ReviewForm {
 
 export default function PublicReviewCard() {
     const { session } = useUserSessionStore();
+
     const [form, setForm] = useState<ReviewForm>({
         rating: 0,
         content: '',
     });
 
-    const updateForm = (updates: Partial<ReviewForm>) => {
+    const hasRating = form.rating > 0;
+
+    const updateForm = (updates: Partial<ReviewForm>) =>
         setForm((prev) => ({ ...prev, ...updates }));
-    };
 
     async function handleSubmit() {
-        if (!session || !session.user || !session.user.token) {
+        if (!session?.user?.token) {
             toast.info('Ghosts cant leave reviews, Log in to continue!');
             return;
         }
-        const payload = {
-            rating: form.rating,
-            content: form.content,
-        };
+        const validation = public_review_schema.safeParse(form);
+        if (!validation.success) return;
+
         try {
-            const validateData = public_review_schema.safeParse({
-                rating: payload.rating,
-                content: payload.content,
-            });
-            if (!validateData.success) return;
-
-            const response = await axios.post(PUBLIC_REVIEW_URL, payload, {
-                headers: {
-                    Authorization: `Bearer ${session.user.token}`,
-                },
+            const res = await axios.post(PUBLIC_REVIEW_URL, form, {
+                headers: { Authorization: `Bearer ${session.user.token}` },
             });
 
-            if (response.data.success) {
-                toast.success('Thanks for the feedback. We promise to read it... probably');
-                form.rating = 0;
-                form.content = '';
+            if (res.data.success) {
+                toast.success('Thanks for the feedback!');
+                setForm({ rating: 0, content: '' });
             }
         } catch {
             toast.error('Failed to submit the review');
         }
     }
 
+    const handleStarClick = (value: number) => {
+        if (value === form.rating) {
+            updateForm({ rating: 0, content: '' });
+        } else {
+            updateForm({ rating: value });
+        }
+    };
+
     return (
-        <Card className="max-w-md flex flex-col gap-y-3 mt-5 items-center px-3 py-4 rounded-[4px] shadow-xl">
-            <div className="flex justify-between w-full">
-                <div className="text-light/60 tracking-wider">leave your feedback here...</div>
-
-                <div className="flex gap-x-4 justify-center">
-                    {emotions.map((emotion) => {
-                        const Icon = emotion.icon;
-                        const isSelected = form.rating === emotion.value;
-                        return (
-                            <button
-                                aria-label="smiley"
-                                type="button"
-                                key={emotion.value}
-                                onClick={() => updateForm({ rating: emotion.value })}
-                                className={cn(
-                                    'transition-colors border-none',
-                                    'border hover:text-primary-light cursor-pointer',
-                                    isSelected
-                                        ? 'text-primary hover:text-primary'
-                                        : 'text-light/40 hover:border-primary/40',
-                                )}
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+        >
+            <Card
+                className={cn(
+                    'relative w-full max-w-sm rounded-lg p-5 overflow-hidden mt-4',
+                    'bg-neutral-950/60 backdrop-blur-xl border border-neutral-800/80',
+                    'shadow-[inset_1px_10px_15px_-10px_rgba(50,50,50,0.9)]',
+                    'flex flex-col gap-3',
+                )}
+            >
+                {session?.user && (
+                    <div className="flex justify-between">
+                        <div className="flex items-center gap-x-3">
+                            <div className="flex items-center gap-3 relative h-7 w-7 rounded-full overflow-hidden">
+                                <Image
+                                    src={session.user.image || '/default.png'}
+                                    alt=""
+                                    fill
+                                    unoptimized
+                                    className="rounded-full object-cover"
+                                />
+                            </div>
+                            <div className="text-neutral-300 text-md tracking-wide">
+                                Hey, {session.user.name?.split(' ')[0]}
+                            </div>
+                        </div>
+                        {form.rating > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="flex justify-end"
                             >
-                                <Icon size={27} />
-                            </button>
-                        );
-                    })}
+                                <Button
+                                    onClick={handleSubmit}
+                                    size="sm"
+                                    className={cn(
+                                        'px-4 py-2 rounded-[4px] text-sm',
+                                        'text-neutral-200 border border-neutral-900 exec-button-dark',
+                                    )}
+                                >
+                                    <SiMinutemailer className="size-4 mr-1" />
+                                </Button>
+                            </motion.div>
+                        )}
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                    <div className="text-md text-light/60 tracking-wide">Rate your experience</div>
+
+                    <div className="flex gap-1.5 group">
+                        {[1, 2, 3, 4, 5].map((value) => {
+                            const active = value <= form.rating;
+                            const Icon = active ? PiStarFill : PiStar;
+
+                            return (
+                                <motion.button
+                                    key={value}
+                                    whileHover={{ scale: 1.12 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => handleStarClick(value)}
+                                    className="p-[5px] rounded-md"
+                                >
+                                    <motion.div
+                                        animate={active ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+                                        transition={{ duration: 0.22 }}
+                                    >
+                                        <Icon
+                                            size={20}
+                                            className={cn(
+                                                active
+                                                    ? 'text-neutral-100'
+                                                    : 'text-neutral-500 group-hover:text-neutral-300',
+                                                'transition-all transform cursor-pointer duration-300',
+                                            )}
+                                        />
+                                    </motion.div>
+                                </motion.button>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
 
-            <div className="w-full relative">
-                <Textarea
-                    value={form.content}
-                    onChange={(e) => updateForm({ content: e.target.value })}
-                    placeholder="What did you like?"
-                    className="w-full border border-neutral-800 rounded-[4px]"
-                />
-
-                <AnimatePresence>
-                    {form.content.trim().length > 0 && (
+                <AnimatePresence initial={false}>
+                    {hasRating && (
                         <motion.div
-                            key="send-btn"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute bottom-[14px] right-3"
+                            key="expanded"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.28 }}
+                            className="flex flex-col gap-3 overflow-hidden"
                         >
-                            <Button size="sm" onClick={handleSubmit} className="exec-button-dark">
-                                <SiMinutemailer className="size-4" />
-                            </Button>
+                            <Textarea
+                                value={form.content}
+                                placeholder="What do you like?"
+                                onChange={(e) => updateForm({ content: e.target.value })}
+                                className={cn(
+                                    'w-full min-h-[60px] resize-none px-3 py-3 rounded-lg text-sm',
+                                    'bg-neutral-900/40 border border-neutral-800 text-neutral-300',
+                                    'focus:ring-1 focus:ring-neutral-700 focus:border-neutral-700 tracking-wide placeholder:text-sm',
+                                    'transition-all duration-150',
+                                )}
+                            />
+
+                            {/* BUTTON BELOW, CLEAN + MINIMAL */}
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
-        </Card>
+            </Card>
+        </motion.div>
     );
 }

@@ -1,149 +1,124 @@
 'use client';
+
+import Image from 'next/image';
+import { PiStarFill } from 'react-icons/pi';
 import ArchitectureTitleComponent from '../base/ArchitectureTitleComponent';
-import { InfiniteMovingCards } from '../ui/infinite-moving-cards';
+import Card from '../ui/Card';
 
-interface Review {
-    name: string;
-    role: string;
-    review: string;
-    rating: number;
-}
-
-const reviews: Review[] = [
+const publicReviews = [
     {
-        name: 'Ser Brienne of Tarth',
-        role: 'Smart Contract Knight',
-        review: "Finally, a platform that doesn't make me want to throw my laptop out the window. Deployed my first Solana program without sacrificing a goat.",
+        id: 'clu1a01aa0001xyz123',
+        username: 'Ser Brienne of Tarth',
+        userimage: '/images/google.png',
         rating: 5,
+        content:
+            "Finally, a platform that doesn't make me want to throw my laptop out the window. Deployed my first Solana program without sacrificing a goat.",
+        createdAt: new Date('2025-01-10T10:00:00Z'),
     },
     {
-        name: 'Tyrion Lannister',
-        role: 'DeFi Architect',
-        review: "I drink and I know things. Mostly about Rust now, thanks to Winterfell's AI. 10/10 would recommend while drunk.",
+        id: 'clu1a01aa0002xyz123',
+        username: 'Tyrion Lannister',
+        userimage: '/avatars/tyrion.jpg',
         rating: 5,
+        content:
+            "I drink and I know things. Mostly about Rust now, thanks to Winterfell's AI. 10/10 would recommend while drunk.",
+        createdAt: new Date('2025-01-11T16:30:00Z'),
     },
     {
-        name: 'Arya Stark',
-        role: 'No-Code Assassin',
-        review: 'A girl has no name, but her smart contracts have perfect IDLs. Valar Morghulis to manual coding.',
+        id: 'clu1a01aa0003xyz123',
+        username: 'Arya Stark',
+        userimage: '/avatars/arya.jpg',
         rating: 5,
+        content:
+            'A girl has no name, but her smart contracts have perfect IDLs. Valar Morghulis to manual coding.',
+        createdAt: new Date('2025-01-12T09:12:00Z'),
     },
     {
-        name: 'Jon Snow',
-        role: 'Blockchain Bastard',
-        review: 'I knew nothing about Anchor. Now I know something. Character development arc complete.',
+        id: 'clu1a01aa0004xyz123',
+        username: 'Jon Snow',
+        userimage: '/avatars/jon.jpg',
         rating: 5,
+        content:
+            'I knew nothing about Anchor. Now I know something. Character development arc complete.',
+        createdAt: new Date('2025-01-13T13:55:00Z'),
     },
     {
-        name: 'Daenerys Targaryen',
-        role: 'Mother of Contracts',
-        review: "I will take what is mine with fire and blood... or just use Winterfell's one-click deploy. Way easier.",
+        id: 'clu1a01aa0004xyz123',
+        username: 'Jon Snow',
+        userimage: '/avatars/jon.jpg',
         rating: 5,
-    },
-    {
-        name: 'Hodor',
-        role: 'Backend Developer',
-        review: 'Hodor hodor hodor hodor. Hodor hodor hodor! (Translation: Best dev tool ever. Seriously.)',
-        rating: 5,
-    },
-    {
-        name: 'Cersei Lannister',
-        role: 'Frontend Queen',
-        review: 'When you play the game of smart contracts, you win or you debug. With Winterfell, you win. Every. Single. Time.',
-        rating: 5,
-    },
-    {
-        name: 'The Night King',
-        role: 'Security Auditor',
-        review: 'Been dead for centuries, came back just to use this. AI caught vulnerabilities even I missed. Spooky good.',
-        rating: 5,
-    },
-    {
-        name: 'Samwell Tarly',
-        role: 'Documentation Writer',
-        review: 'Auto-generated docs better than what I could write in the Citadel library. My maester chain feels inadequate now.',
-        rating: 5,
-    },
-    {
-        name: 'Sansa Stark',
-        role: 'Product Manager',
-        review: 'Survived Ramsay Bolton and managed enterprise deployments. Winterfell is easier than both.',
-        rating: 5,
-    },
-    {
-        name: 'Jaime Lannister',
-        role: 'Full-Stack Swordsman',
-        review: 'Lost my right hand, gained AI-powered contract generation. Fair trade tbh.',
-        rating: 5,
-    },
-    {
-        name: 'Bran Stark',
-        role: 'Three-Eyed Developer',
-        review: 'I can see the past, present, and future. In all timelines, Winterfell is the best platform.',
-        rating: 5,
-    },
-    {
-        name: 'Melisandre',
-        role: 'Token Priestess',
-        review: 'The night is dark and full of bugs. Winterfell is the light that brings the dawn. For the watch!',
-        rating: 5,
-    },
-    {
-        name: 'Tormund Giantsbane',
-        role: 'Wildling Engineer',
-        review: "I've wrestled bears and giants. Deploying smart contracts was harder. Was. Past tense.",
-        rating: 5,
-    },
-    {
-        name: 'Varys',
-        role: 'Network Spy',
-        review: 'I have little birds everywhere. They all whisper the same thing: Winterfell slaps harder than Joffrey.',
-        rating: 5,
-    },
-    {
-        name: 'Theon Greyjoy',
-        role: 'Redemption Arc Dev',
-        review: 'What is dead may never die. What is deployed on Winterfell never breaks. Probably.',
-        rating: 5,
+        content:
+            'I knew nothing about Anchor. Now I know something. Character development arc complete.',
+        createdAt: new Date('2025-01-13T13:55:00Z'),
     },
 ];
 
+function timeAgo(date: Date) {
+    const diff = (Date.now() - date.getTime()) / 1000;
+    const days = Math.floor(diff / 86400);
+    if (days === 0) return 'today';
+    if (days === 1) return '1 day ago';
+    return `${days} days ago`;
+}
+
 export default function ReviewsSection() {
-    const firstRow = reviews.slice(0, 8).map((r) => ({
-        quote: r.review,
-        name: r.name,
-        title: r.role,
-    }));
-
-    const secondRow = reviews.slice(8, 16).map((r) => ({
-        quote: r.review,
-        name: r.name,
-        title: r.role,
-    }));
-
     return (
-        <div className="min-h-screen bg-primary z-90">
+        <div className="min-h-screen z-90 relative">
             <ArchitectureTitleComponent
                 firstText="Winter tales"
                 secondText="from the Wall"
-                bordercolor="border-[#141517]"
-                bgcolor="bg-[#6c44fc]"
+                bordercolor="primary"
+                bgcolor=""
             />
 
-            <div className="mt-16 space-y-8">
-                <InfiniteMovingCards
-                    items={firstRow}
-                    direction="left"
-                    speed="slow"
-                    pauseOnHover={false}
-                />
+            <div className="mt-16 flex space-y-8 w-full">
+                {publicReviews.map((review) => (
+                    <Card
+                        key={review.id}
+                        className="h-40 w-full max-w-70 ml-10 flex flex-col items-start tracking-wider bg-[#11111190] relative px-3.5"
+                    >
+                        <div className="flex flex-col justify-evenly h-full w-full">
+                            <div className="flex justify-between items-center w-full">
+                                <div className="flex text-yellow-400 gap-1">
+                                    {Array.from({ length: review.rating }).map((_, i) => (
+                                        <PiStarFill key={i} className="w-4 h-4" />
+                                    ))}
+                                </div>
 
-                <InfiniteMovingCards
-                    items={secondRow}
-                    direction="right"
-                    speed="slow"
-                    pauseOnHover={false}
-                />
+                                <div className="flex gap-x-1.5">
+                                    <div className="h-2 w-2 bg-[#e9524aa8] rounded-full" />
+                                    <div className="h-2 w-2 bg-[#f1ad1bc5] rounded-full" />
+                                    <div className="h-2 w-2 bg-[#59c837a9] rounded-full" />
+                                </div>
+                            </div>
+
+                            <div className="max-w-40 text-left leading-snug text-xs text-light/60 line-clamp-3 mb-3">
+                                {review.content}
+                            </div>
+
+                            <div className="flex justify-between items-end w-full">
+                                <div className="flex gap-x-2 items-center">
+                                    <div className="relative h-5 w-5 overflow-hidden rounded-full">
+                                        <Image
+                                            src={review.userimage}
+                                            alt={review.username}
+                                            fill
+                                            unoptimized
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                    <div className="text-sm leading-0 tracking-wider text-light/80 uppercase pt-1">
+                                        {review.username.split(' ')[0]}
+                                    </div>
+                                </div>
+
+                                <div className="text-xs text-light/60">
+                                    {timeAgo(review.createdAt)}
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                ))}
             </div>
         </div>
     );
