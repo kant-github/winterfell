@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { ArrowRight, FileCode } from 'lucide-react';
 import React, { useState, KeyboardEvent } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
@@ -23,6 +23,7 @@ export default function BuilderChatInput() {
     const { messages, setMessage } = useBuilderChatStore();
     const params = useParams();
     const contractId = params.contractId as string;
+    const router = useRouter();
 
     async function handleSubmit() {
         try {
@@ -49,19 +50,13 @@ export default function BuilderChatInput() {
                 createdAt: new Date(),
             });
 
-            // Call the continue_chat method from GenerateContract class
-            await GenerateContract.continue_chat(
+            if(useBuilderChatStore.getState().messages.length < 2) return;
+
+            // call the agentic 
+            await GenerateContract.start_agentic_executor(
                 session.user.token || '',
                 contractId,
                 messageContent,
-                (error) => {
-                    // Handle errors
-                    console.error('Chat error:', error);
-                    toast.error(error.message || 'Failed to send message');
-
-                    // Optionally restore the input value on error
-                    setInputValue(messageContent);
-                },
             );
         } catch (error) {
             console.error('Chat stream error:', error);
@@ -112,6 +107,7 @@ export default function BuilderChatInput() {
                             <Button
                                 type="button"
                                 className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+                                onClick={() => router.push('/home')}
                             >
                                 <FileCode className="w-3.5 h-3.5 mb-0.5" />
                                 <span className="font-mono">templates</span>

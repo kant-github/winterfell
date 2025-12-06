@@ -16,6 +16,8 @@ export default async function generate_contract_controller(req: Request, res: Re
             return;
         }
 
+        console.log('body: ', req.body);
+
         // checking for valid data
         const parsed_data = generate_contract.safeParse(req.body);
         if (!parsed_data.success) {

@@ -526,25 +526,12 @@ export default class Generator {
         deleting_files_path: string[],
     ) {
         try {
-            console.log(chalk.bgBlueBright('------------------ updation starts here'));
-
-            console.log(
-                chalk.bgRed('---------------------------- files which are generated / updated now'),
-            );
-            console.log(generated_files.forEach((file) => console.log(file.path)));
-
-            console.log(chalk.bgRed('---------------------------- files to be deleted'));
-            console.log(deleting_files_path);
 
             const contract = await objectStore.get_resource_files(contract_id);
-
-            console.log(chalk.bgRed('---------------------------- current contract'));
-            console.log(contract.map((file) => console.log(file.path)));
 
             let remaining_files: FileContent[] = contract;
             // delete the given files from the contract
             if (deleting_files_path.length > 0) {
-                console.log('removing the deleting files');
                 remaining_files = contract.filter((file) => !deleting_files_path.includes(file.path));
             }
 
@@ -566,15 +553,10 @@ export default class Generator {
                 ...new_files,
             ];
 
-            console.log(chalk.bgRed('---------------------------- final updated contract'));
-            console.log(updated_contract.forEach((file) => console.log(file.path)));
-
             console.log(chalk.yellowBright('updating contract in s3...'));
             await objectStore.updateContractFiles(contract_id, updated_contract);
 
             const fetched_contract = await objectStore.get_resource_files(contract_id);
-            console.log(chalk.bgRed('---------------------------- again fetched contract'));
-            console.log(fetched_contract);
         } catch (error) {
             console.error('Error while updating contract to s3: ', error);
         }

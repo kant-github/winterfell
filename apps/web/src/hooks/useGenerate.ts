@@ -6,12 +6,11 @@ import { v4 as uuid } from 'uuid';
 import { ChatRole } from '../types/prisma-types';
 import { STAGE } from '../types/stream_event_types';
 import GenerateContract from '../lib/server/generate_contract';
-import { toast } from 'sonner';
 
 export default function useGenerate() {
     const { session } = useUserSessionStore();
     const { activeTemplate } = useTemplateStore();
-    const { setMessage } = useBuilderChatStore();
+    const { setMessage } = useBuilderChatStore.getState();
     const router = useRouter();
 
     function set_states(contractId: string, instruction?: string, templateId?: string) {
@@ -26,30 +25,18 @@ export default function useGenerate() {
                     isPlanExecuted: false,
                     createdAt: new Date(),
                 });
-                setMessage({
-                    id: uuid(),
-                    contractId: contractId,
-                    role: ChatRole.TEMPLATE,
-                    content: '',
-                    templateId: templateId,
-                    template: activeTemplate,
-                    stage: STAGE.START,
-                    isPlanExecuted: false,
-                    createdAt: new Date(),
-                });
-            } else {
-                setMessage({
-                    id: uuid(),
-                    contractId: contractId,
-                    role: ChatRole.TEMPLATE,
-                    content: '',
-                    templateId: templateId,
-                    template: activeTemplate,
-                    stage: STAGE.START,
-                    isPlanExecuted: false,
-                    createdAt: new Date(),
-                });
             }
+            setMessage({
+                id: uuid(),
+                contractId: contractId,
+                role: ChatRole.TEMPLATE,
+                content: '',
+                templateId: templateId,
+                template: activeTemplate,
+                stage: STAGE.START,
+                isPlanExecuted: false,
+                createdAt: new Date(),
+            });
         } else if (instruction) {
             setMessage({
                 id: uuid(),
