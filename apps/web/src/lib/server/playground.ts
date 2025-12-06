@@ -22,14 +22,14 @@ export default class Playyground {
                 },
             );
 
-            const sortedMessages = [...data.messages].sort((a, b) => {
+            const sortedMessages = [...data.data.messages].sort((a, b) => {
                 return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
             });
 
             for (let i = 0; i < sortedMessages.length; i++) {
                 upsertMessage(sortedMessages[i]);
             }
-            const parsedFiles = JSON.parse(data.contractFiles || data.templateFiles);
+            const parsedFiles = JSON.parse(data.data.contractFiles || data.data.templateFiles);
             if (parsedFiles) {
                 parseFileStructure(parsedFiles);
             }

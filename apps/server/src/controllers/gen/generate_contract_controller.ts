@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import ResponseWriter from '../../class/response_writer';
 import { generate_contract } from '../../schemas/generate_contract_schema';
-import { PlanType, prisma } from '@winterfell/database';
+import { ChatRole, PlanType, prisma } from '@winterfell/database';
 import { MODEL } from '@winterfell/types';
 import Contract from '../../class/contract';
+import { generator } from '../../services/init';
 
 export default async function generate_contract_controller(req: Request, res: Response) {
     try {
@@ -86,7 +87,32 @@ export default async function generate_contract_controller(req: Request, res: Re
                     return;
                 }
             }
-        } else {
+        
+        } else if(existing_contract && !existing_contract.summarisedObject) {
+            // if the user has sent some other msgs before, so the contract doesn't exist
+
+            // only start if instrution is provided
+            if(instruction) {
+                // create user message
+                await prisma.message.create({
+                    data: {
+                        contractId: existing_contract.id,
+                        role: ChatRole.USER,
+                        content: instruction,              
+                    },
+                });
+
+                generator.generate(
+                    res,
+                    'new',
+                    instruction,
+                    model || MODEL.GEMINI,
+                    existing_contract.id,
+                );
+
+            }
+
+        } else if(existing_contract && existing_contract.summarisedObject) {
             // start generation if and only if the instruction is provided
             if (instruction) {
                 console.log('old contract gen');

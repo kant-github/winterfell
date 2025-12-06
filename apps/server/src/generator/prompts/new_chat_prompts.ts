@@ -39,7 +39,7 @@ package.json
 tsconfig.json
 
 Create a plan and list affected files.
-If the instruction is not Anchor-related, return should_continue as false.`,
+If the instruction is not Anchor solana related, return should_continue as false.`,
     inputVariables: ['user_instruction'],
 });
 

@@ -3,6 +3,8 @@ import { PromptTemplate } from '@langchain/core/prompts';
 export const old_chat_planner_prompt = new PromptTemplate({
     template: `
         You're a senior anchor solana contract planning agent
+        you will reject any other request which is not related to anchor solana contract
+        and which is not related to this contract too, then return should_continue to be false
 
         and based on user instruction:
         {user_instruction}

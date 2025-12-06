@@ -8,7 +8,6 @@ import updateSubscriptionController from '../controllers/payment-controller/upda
 import getUserPlanController from '../controllers/payment-controller/getUserPlanController';
 import syncFilesController from '../controllers/files/syncFilesController';
 import githubCodePushController from '../controllers/github-deploy-controller/githubCodePushController';
-import getChatController from '../controllers/chat-controller/getChatController';
 import githubRepoNameValidatorController from '../controllers/github-deploy-controller/githubRepoNameValidatorController';
 import syncTemplate from '../controllers/template-controller/syncTemplates';
 import githubProjectZipController from '../controllers/github-deploy-controller/githubProjectZipController';
@@ -17,6 +16,7 @@ import getAllContracts from '../controllers/contract-controller/getAllContracts'
 import getAllTemplates from '../controllers/template-controller/getAllTemplates';
 import plan_executor_controller from '../controllers/chat-controller/plan_executor_controller';
 import generate_contract_controller from '../controllers/gen/generate_contract_controller';
+import get_chat_controller from '../controllers/chat-controller/get_chat_controller';
 
 // middlewares
 import authMiddleware from '../middlewares/middleware.auth';
@@ -38,7 +38,7 @@ router.get('/health', async (_req: Request, res: Response) => {
 
 // contract generation and chat fetch
 router.post('/generate', authMiddleware, generate_contract_controller);
-router.post('/contract/get-chat', authMiddleware, getChatController);
+router.post('/contract/get-chat', authMiddleware, get_chat_controller);
 router.post('/plan', authMiddleware, plan_executor_controller);
 
 // github controllers
