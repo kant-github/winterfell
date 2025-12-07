@@ -13,6 +13,14 @@ export default class RateLimit {
         legacyHeaders: false,
     });
 
+    static delete_contract_rate_limit = rateLimit({
+        windowMs: 15 * RateLimit.MINUTE,
+        max: 15,
+        message: 'Too many contract deletion requests, please try again later.',
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+
     static plan_executor_rate_limit = rateLimit({
         windowMs: 15 * RateLimit.MINUTE,
         max: 15,

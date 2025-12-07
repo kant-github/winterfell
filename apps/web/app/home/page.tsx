@@ -17,7 +17,7 @@ export default function Home() {
     const { setTemplates } = useTemplateStore();
 
     useEffect(() => {
-        const fetchData = async () => {
+        async function fetchData() {
             if (!session?.user?.token) return;
             const user_contracts = await Marketplace.getUserContracts(session.user.token);
             setUserContracts(user_contracts);
@@ -27,9 +27,10 @@ export default function Home() {
 
             const all_templates = await Marketplace.getTemplates();
             setTemplates(all_templates);
-        };
+        }
 
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session, setUserContracts, setAllContracts]);
 
     return (

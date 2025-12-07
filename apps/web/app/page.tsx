@@ -17,8 +17,8 @@ export default function Page() {
                 <Hero />
                 <Features />
                 <WhoWeAre />
-                <SubscriptionPlans />
                 <ReviewsSection />
+                <SubscriptionPlans />
                 <Faq />
                 <Footer />
             </div>

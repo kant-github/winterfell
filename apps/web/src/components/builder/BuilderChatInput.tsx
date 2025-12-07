@@ -78,7 +78,7 @@ export default function BuilderChatInput() {
     return (
         <>
             <div className="relative group w-full">
-                <div className="relative rounded-[8px] border border-neutral-800/80 overflow-hidden bg-[#0e0f10]">
+                <div className="relative rounded-[8px] border border-neutral-800/80 overflow-hidden bg-darkest">
                     <div className="relative">
                         <div className="absolute left-4 top-5 text-neutral-600 font-mono text-sm select-none">
                             &gt;

@@ -40,7 +40,7 @@ export default function EditorSidePanel() {
             tooltip: 'GitHub Repository',
         },
         {
-            icon: <WinterfellChat size={25} />,
+            icon: <WinterfellChat size={22} />,
             value: SidePanelValues.CHAT,
             onClick: () => setCollapsechat(!collapseChat),
             tooltip: 'Agent Sessions',

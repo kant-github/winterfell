@@ -1,5 +1,3 @@
-import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { new_planner_output_schema, old_planner_output_schema } from './schema/output_schema';
 import Tool from './tools/tool';
@@ -33,32 +31,53 @@ import {
 import { planning_context_prompt } from './prompts/planning_context_prompt';
 import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
+import { ChatOpenAI } from '@langchain/openai';
+import env from '../configs/config.env';
 
 export default class Generator {
-    protected gemini_planner: ChatGoogleGenerativeAI;
-    protected gemini_coder: ChatGoogleGenerativeAI;
-    protected claude_coder: ChatAnthropic;
-    protected gemini_finalizer: ChatGoogleGenerativeAI;
+    protected gpt_planner: ChatOpenAI;
+    protected gpt_coder: ChatOpenAI;
+    protected claude_coder: ChatOpenAI;
+    protected gpt_finalizer: ChatOpenAI;
 
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
-        this.gemini_planner = new ChatGoogleGenerativeAI({
-            model: 'gemini-2.5-flash',
+        this.gpt_planner = new ChatOpenAI({
+            model: 'openai/gpt-4o-mini',
             temperature: 0.2,
+            configuration: {
+                baseURL: 'https://openrouter.ai/api/v1',
+                apiKey: env.SERVER_OPENROUTER_KEY,
+            },
         });
-        this.gemini_coder = new ChatGoogleGenerativeAI({
-            model: 'gemini-2.5-flash',
-            streaming: false,
+
+        this.gpt_coder = new ChatOpenAI({
+            model: 'moonshotai/kimi-k2-thinking',
+            streaming: true,
             temperature: 0.2,
+            configuration: {
+                baseURL: 'https://openrouter.ai/api/v1',
+                apiKey: env.SERVER_OPENROUTER_KEY,
+            },
         });
-        this.claude_coder = new ChatAnthropic({
-            model: 'claude-sonnet-4-5-20250929',
-            streaming: false,
+
+        this.claude_coder = new ChatOpenAI({
+            model: 'moonshotai/kimi-k2-thinking',
+            streaming: true,
+            configuration: {
+                baseURL: 'https://openrouter.ai/api/v1',
+                apiKey: env.SERVER_OPENROUTER_KEY,
+            },
         });
-        this.gemini_finalizer = new ChatGoogleGenerativeAI({
-            model: 'gemini-2.5-flash',
+
+        this.gpt_finalizer = new ChatOpenAI({
+            model: 'openai/gpt-4o-mini',
             temperature: 0.2,
+            configuration: {
+                baseURL: 'https://openrouter.ai/api/v1',
+                apiKey: env.SERVER_OPENROUTER_KEY,
+            },
         });
 
         this.parsers = new Map<string, StreamParser>();
@@ -131,10 +150,11 @@ export default class Generator {
         parser: StreamParser,
     ) {
         try {
-            console.log('new contract planned going to be executed');
+            console.log('new contract planned going to be executed ---------------');
             const planner_data = await planner_chain.invoke({
                 user_instruction,
             });
+            console.log(chalk.blue(planner_data));
             let full_response: string = '';
 
             console.log(planner_data);
@@ -197,7 +217,7 @@ export default class Generator {
 
             for await (const chunk of code_stream) {
                 if (chunk.text) {
-                    // console.log(chunk.text);
+                    console.log(chalk.blue(chunk.text));
                     parser.feed(chunk.text, system_message);
                     full_response += chunk.text;
                 }
@@ -217,6 +237,7 @@ export default class Generator {
             this.send_sse(res, STAGE.BUILDING, { stage: 'Building' }, system_message);
 
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
+            console.log('llm generated files: ', llm_generated_files);
             const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
             const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
 
@@ -388,14 +409,14 @@ export default class Generator {
 
             const initialMessages = promptValue.toChatMessages();
 
-            const toolStepResult = await this.gemini_coder
+            const toolStepResult = await this.gpt_coder
                 .bindTools([Tool.get_file])
                 .invoke(initialMessages);
 
             const { toolResults } = await Tool.runner.invoke(toolStepResult);
             const { messages: toolMessages } = await Tool.convert.invoke({ toolResults });
 
-            const code_stream = await this.gemini_coder.stream([
+            const code_stream = await this.gpt_coder.stream([
                 ...initialMessages,
                 toolStepResult,
                 ...toolMessages,
@@ -633,20 +654,20 @@ export default class Generator {
             let coder_chain;
             let finalizer_chain;
 
-            const coder = model === MODEL.CLAUDE ? this.claude_coder : this.gemini_coder;
+            const coder = model === MODEL.CLAUDE ? this.claude_coder : this.gpt_coder;
 
             switch (chat) {
                 case 'new': {
                     planner_chain = RunnableSequence.from([
                         new_chat_planner_prompt,
-                        this.gemini_planner.withStructuredOutput(new_planner_output_schema),
+                        this.gpt_planner.withStructuredOutput(new_planner_output_schema),
                     ]);
 
                     coder_chain = new_chat_coder_prompt.pipe(coder);
 
                     finalizer_chain = RunnableSequence.from([
                         finalizer_prompt,
-                        this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
+                        this.gpt_finalizer.withStructuredOutput(finalizer_output_schema),
                     ]);
 
                     return {
@@ -659,7 +680,7 @@ export default class Generator {
                 case 'old': {
                     planner_chain = RunnableSequence.from([
                         old_chat_planner_prompt,
-                        this.gemini_planner.withStructuredOutput(old_planner_output_schema),
+                        this.gpt_planner.withStructuredOutput(old_planner_output_schema),
                     ]);
 
                     const coder_chain = old_chat_coder_prompt
@@ -682,7 +703,7 @@ export default class Generator {
 
                     finalizer_chain = RunnableSequence.from([
                         finalizer_prompt,
-                        this.gemini_finalizer.withStructuredOutput(finalizer_output_schema),
+                        this.gpt_finalizer.withStructuredOutput(finalizer_output_schema),
                     ]);
 
                     return {
@@ -709,7 +730,7 @@ export default class Generator {
         try {
             const planner_chain = RunnableSequence.from([
                 planning_context_prompt,
-                this.gemini_planner.withStructuredOutput(plan_context_schema),
+                this.gpt_planner.withStructuredOutput(plan_context_schema),
             ]);
 
             const planner_data = await planner_chain.invoke({ user_instruction });
