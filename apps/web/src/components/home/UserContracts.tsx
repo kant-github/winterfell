@@ -53,7 +53,10 @@ export default function UserContracts() {
 
     async function handleContractDelete(contractId: string) {
         if (!session?.user.token) return;
-        const { success, contractId: deletedContractId } = await Marketplace.deleteContract(session.user.token, contractId);
+        const { success, contractId: deletedContractId } = await Marketplace.deleteContract(
+            session.user.token,
+            contractId,
+        );
         if (success) {
             toast.success('Contract deleted successfully');
             removeContract(deletedContractId);
@@ -101,10 +104,13 @@ export default function UserContracts() {
                                 <div className="bg-darkest p-3 flex flex-col border-b border-neutral-800">
                                     <div className="flex justify-between h-fit items-center">
                                         <DeployedTicker isDeployed={contract.deployed} />
-                                        <div onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleContractDelete(contract.id);
-                                        }} className="bg-light/10 p-1 aspect-square rounded-[4px] cursor-pointer hover:bg-light/20 transition">
+                                        <div
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleContractDelete(contract.id);
+                                            }}
+                                            className="bg-light/10 p-1 aspect-square rounded-[4px] cursor-pointer hover:bg-light/20 transition"
+                                        >
                                             <FaTrash className="text-light size-2.5" />
                                         </div>
                                     </div>

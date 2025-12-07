@@ -67,7 +67,7 @@ export default function BuilderChats() {
                 ))}
                 <div ref={messageEndRef} />
             </div>
-            <div className="flex items-center justify-center w-full py-4 px-6 flex-shrink-0">
+            <div className="flex items-center justify-center w-full py-4 px-6 flex-shrink-0 relative">
                 <BuilderChatInput />
             </div>
         </div>

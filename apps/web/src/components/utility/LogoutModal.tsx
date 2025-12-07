@@ -17,7 +17,6 @@ interface LogoutModalProps {
 function LogoutLeftContent() {
     return (
         <div className="absolute inset-0 flex flex-col justify-end p-8">
-
             <div className="space-y-4 text-left">
                 <h3 className="text-2xl font-bold text-light tracking-wide leading-tight">
                     Secure Session Management
@@ -26,8 +25,8 @@ function LogoutLeftContent() {
                 </h3>
 
                 <p className="text-sm text-light/70 leading-relaxed max-w-[300px]">
-                    When you log out, all your session data is cleared from this device. 
-                    Your projects and settings remain safely stored in the cloud.
+                    When you log out, all your session data is cleared from this device. Your
+                    projects and settings remain safely stored in the cloud.
                 </p>
 
                 <div className="flex items-center gap-2 mb-2">
@@ -52,7 +51,11 @@ function LogoutLeftContent() {
     );
 }
 
-function LogoutRightContent({ setOpenLogoutModal }: { setOpenLogoutModal: Dispatch<SetStateAction<boolean>> }) {
+function LogoutRightContent({
+    setOpenLogoutModal,
+}: {
+    setOpenLogoutModal: Dispatch<SetStateAction<boolean>>;
+}) {
     async function LogoutHandler() {
         await signOut({
             callbackUrl: '/',
@@ -73,7 +76,8 @@ function LogoutRightContent({ setOpenLogoutModal }: { setOpenLogoutModal: Dispat
                     Sign Out?
                 </h2>
                 <p className="text-sm text-neutral-400 font-normal tracking-wide leading-relaxed">
-                    You&apos;ll be logged out of your current session and redirected to the sign-in page.
+                    You&apos;ll be logged out of your current session and redirected to the sign-in
+                    page.
                 </p>
             </div>
 
@@ -82,14 +86,18 @@ function LogoutRightContent({ setOpenLogoutModal }: { setOpenLogoutModal: Dispat
                     <IoShieldCheckmark className="text-green-500 mt-0.5 flex-shrink-0 text-lg" />
                     <div className="space-y-0.5">
                         <p className="text-xs font-medium text-neutral-300">Session cleared</p>
-                        <p className="text-xs text-neutral-500">Local data removed from this device</p>
+                        <p className="text-xs text-neutral-500">
+                            Local data removed from this device
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-start gap-3 p-3 bg-neutral-900/40 border border-neutral-800 rounded-[8px]">
                     <MdSecurity className="text-[#9e83ff] mt-0.5 flex-shrink-0 text-lg" />
                     <div className="space-y-0.5">
                         <p className="text-xs font-medium text-neutral-300">Data protected</p>
-                        <p className="text-xs text-neutral-500">Projects safely stored in the cloud</p>
+                        <p className="text-xs text-neutral-500">
+                            Projects safely stored in the cloud
+                        </p>
                     </div>
                 </div>
             </div>

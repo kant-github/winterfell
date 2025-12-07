@@ -35,7 +35,9 @@ export default function NotFoundPage() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
                             </span>
-                            <span className="text-[11px] font-medium text-primary tracking-wide uppercase">404 Error</span>
+                            <span className="text-[11px] font-medium text-primary tracking-wide uppercase">
+                                404 Error
+                            </span>
                         </div>
 
                         {/* Typography */}
@@ -44,12 +46,12 @@ export default function NotFoundPage() {
                         </h1>
 
                         <p className="text-neutral-500 text-sm md:text-base max-w-md mx-auto mb-10 leading-relaxed font-normal">
-                            The requested resource could not be found on this server. It might have been moved to a new URL or removed entirely.
+                            The requested resource could not be found on this server. It might have
+                            been moved to a new URL or removed entirely.
                         </p>
 
                         {/* Search & Actions */}
                         <div className="w-full max-w-sm flex flex-col gap-3">
-
                             <div className="grid grid-cols-2 gap-3 mt-2">
                                 <Button
                                     onClick={handleGoBack}
@@ -58,7 +60,10 @@ export default function NotFoundPage() {
                                     <ArrowLeft size={14} strokeWidth={1.5} />
                                     Go Back
                                 </Button>
-                                <Link href="/" className="flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-linear-to-b from-[#7b56ff] to-[#6236ff] border-[#7b56ff] hover:bg-[#5835d4] text-white text-xs font-medium transition-all shadow-[0_4px_20px_-8px_rgba(108,68,252,0.5)] border">
+                                <Link
+                                    href="/"
+                                    className="flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-linear-to-b from-[#7b56ff] to-[#6236ff] border-[#7b56ff] hover:bg-[#5835d4] text-white text-xs font-medium transition-all shadow-[0_4px_20px_-8px_rgba(108,68,252,0.5)] border"
+                                >
                                     <Home size={14} strokeWidth={1.5} />
                                     Home
                                 </Link>
@@ -69,4 +74,4 @@ export default function NotFoundPage() {
             </main>
         </div>
     );
-};
+}

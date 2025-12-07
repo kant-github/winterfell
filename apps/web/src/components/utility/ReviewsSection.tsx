@@ -90,7 +90,7 @@ function ReviewCard({ review }: { review: Review }) {
             <Quote className="w-8 h-8 fill-primary text-primary mb-2" />
             <div className="flex gap-x-1 text-light/80 mb-2">
                 {Array.from({ length: review.rating }).map((_, i) => (
-                    <PiStarFill className='text-primary' key={i} />
+                    <PiStarFill className="text-primary" key={i} />
                 ))}
             </div>
             <div className="mb-6">{review.content}</div>

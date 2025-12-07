@@ -94,9 +94,7 @@ function LoginRightContent() {
                 >
                     Welcome to WINTERFELL
                 </h2>
-                <p className="text-[13px] text-light/80 tracking-wide">
-                    Sign in to your account
-                </p>
+                <p className="text-[13px] text-light/80 tracking-wide">Sign in to your account</p>
             </div>
 
             <Button

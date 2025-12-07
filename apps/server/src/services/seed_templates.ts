@@ -272,7 +272,7 @@ export async function seedTemplates() {
             id: 'a2aba581-9376-4a7e-b872-635508e8a14f',
             title: 'Vault Contract',
             description:
-                'A secure Anchor-based vault program supporting vault initialization, deposits, and withdrawals using PDA-managed accounts.',
+                'Vault program supporting initialization, deposits, and withdrawals using PDA-managed accounts.',
             category: 'defi',
             tags: ['vault', 'anchor', 'solana', 'pda', 'defi'],
             anchorVersion: '0.32.1',
