@@ -2,18 +2,22 @@
 import { ArrowRight, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useRef, useState } from 'react';
 import DeployedTicker from '../tickers/DeployedTicket';
-import { FaCalendar } from 'react-icons/fa';
+import { FaCalendar, FaTrash } from 'react-icons/fa';
 import { Button } from '../ui/button';
 import { cn } from '@/src/lib/utils';
 import { useContractStore } from '@/src/store/user/useUserContractStore';
-import timeParser from '@/src/hooks/useTimeParser';
+import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import timeParser from '@/src/hooks/useTimeParser';
+import Marketplace from '@/src/lib/server/marketplace-server';
 
 export default function UserContracts() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [showLeftButton, setShowLeftButton] = useState<boolean>(false);
     const [showRightButton, setShowRightButton] = useState<boolean>(true);
-    const { userContracts } = useContractStore();
+    const { session } = useUserSessionStore();
+    const { userContracts, removeContract } = useContractStore();
     const router = useRouter();
 
     function scroll(direction: 'left' | 'right') {
@@ -44,6 +48,17 @@ export default function UserContracts() {
             } = scrollContainerRef.current;
             setShowLeftButton(scrollLeft > 0);
             setShowRightButton(scrollLeft < scrollWidth - clientWidth - 10);
+        }
+    }
+
+    async function handleContractDelete(contractId: string) {
+        if (!session?.user.token) return;
+        const { success, contractId: deletedContractId } = await Marketplace.deleteContract(session.user.token, contractId);
+        if (success) {
+            toast.success('Contract deleted successfully');
+            removeContract(deletedContractId);
+        } else {
+            toast.error('Failed to delete contract');
         }
     }
 
@@ -83,16 +98,19 @@ export default function UserContracts() {
                                 key={contract.id}
                                 className="h-full border border-neutral-800 bg-[#0A0C0D70] min-w-[calc(25%-12px)] rounded-[4px] grid grid-rows-[78%_22%] overflow-hidden group shadow-sm cursor-pointer"
                             >
-                                <div className="bg-gradient-to-br from-darkest via-neutral-800/80 to-darkest p-3 flex flex-col rounded-b-[4px]">
+                                <div className="bg-darkest p-3 flex flex-col border-b border-neutral-800">
                                     <div className="flex justify-between h-fit items-center">
                                         <DeployedTicker isDeployed={contract.deployed} />
-                                        <div className="text-xs text-light/60 tracking-wide flex gap-x-1.5">
-                                            <FaCalendar className="size-3" />
-                                            <span>{timeParser(contract.createdAt)}</span>
+                                        <div onClick={() => handleContractDelete(contract.id)} className="bg-light/10 p-1 aspect-square rounded-[4px] cursor-pointer hover:bg-light/20 transition">
+                                            <FaTrash className="text-light size-2.5" />
                                         </div>
                                     </div>
                                     <div className="flex-1 text-left flex items-end text-[13px] tracking-wider text-light/80">
                                         {contract.messages[0].content}
+                                    </div>
+                                    <div className="text-xs text-light/60 tracking-wide flex gap-x-1.5">
+                                        <FaCalendar className="size-3" />
+                                        <span>{timeParser(contract.createdAt)}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between px-3 text-[13px] tracking-wider bg-[#0A0C0D70]">

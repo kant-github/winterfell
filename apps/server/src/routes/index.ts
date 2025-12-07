@@ -25,6 +25,7 @@ import authMiddleware from '../middlewares/middleware.auth';
 import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
 import RateLimit from '../class/rate_limit';
+import delete_contract_controller from '../controllers/contract-controller/delete_contract_controller';
 
 const router: Router = Router();
 
@@ -127,6 +128,12 @@ router.get(
     RateLimit.get_all_contracts_rate_limit,
     authMiddleware,
     getAllContracts,
+);
+router.delete(
+    '/contracts/:contractId',
+    RateLimit.delete_contract_rate_limit,
+    authMiddleware,
+    delete_contract_controller,
 );
 
 // <------------------------- FILE-ROUTES ------------------------->
