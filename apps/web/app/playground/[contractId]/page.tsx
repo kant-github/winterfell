@@ -11,6 +11,8 @@ import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 import Playground from '@/src/lib/server/playground';
 import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
 import { ChatRole } from '@/src/types/prisma-types';
+import Marketplace from '@/src/lib/server/marketplace-server';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 
 export default function Page({ params }: { params: Promise<{ contractId: string }> }) {
     const { cleanStore, loading, setLoading } = useBuilderChatStore();
@@ -20,6 +22,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     const { resetContractId } = useChatStore();
     const { session } = useUserSessionStore();
     const { open, hide } = useReviewModalStore();
+    const { setTemplates } = useTemplateStore();
 
     useEffect(() => {
         if (!session?.user?.token) return;
@@ -58,6 +61,14 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session?.user?.token]);
+
+    useEffect(() => {
+        const get_templates = async () => {
+            const response = await Marketplace.getTemplates();
+            setTemplates(response);
+        };
+        get_templates();
+    }, []);
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {

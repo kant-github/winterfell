@@ -16,6 +16,7 @@ const envScehma = z.object({
     SERVER_JWT_SECRET: z.string().transform((val) => val.trim()),
     SERVER_ANTHROPIC_API_KEY: z.string().transform((val) => val.trim()),
     SERVER_GEMINI_API_KEY: z.string().transform((val) => val.trim()),
+    SERVER_OPENROUTER_KEY: z.string().transform((val => val.trim())),
     SERVER_AWS_ACCESS_KEY_ID: z.string().transform((val) => val.trim()),
     SERVER_AWS_SECRET_ACCESS_KEY: z.string().transform((val) => val.trim()),
     SERVER_AWS_REGION: z.string().transform((val) => val.trim()),

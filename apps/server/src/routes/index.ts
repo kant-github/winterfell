@@ -51,7 +51,12 @@ router.post(
     authMiddleware,
     get_chat_controller,
 );
-router.post('/plan', RateLimit.plan_executor_rate_limit, authMiddleware, plan_executor_controller);
+router.post(
+    '/plan',
+    // RateLimit.plan_executor_rate_limit,
+    authMiddleware,
+    plan_executor_controller
+);
 
 // <------------------------- GITHUB-ROUTES ------------------------->
 router.post(

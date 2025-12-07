@@ -5,9 +5,10 @@ import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 
 interface BaseContractTemplatePanelProps {
     closePanel: () => void;
+    className?: string;
 }
 
-export default function BaseContractTemplatesPanel({ closePanel }: BaseContractTemplatePanelProps) {
+export default function BaseContractTemplatesPanel({ closePanel, className }: BaseContractTemplatePanelProps) {
     const { templates, setActiveTemplate } = useTemplateStore();
 
     return (
@@ -18,14 +19,15 @@ export default function BaseContractTemplatesPanel({ closePanel }: BaseContractT
                 'absolute left-23 z-50 bottom-12',
                 'bg-darkest border border-neutral-800 shadow-md',
                 'rounded-[4px] rounded-bl-none overflow-visible overflow-y-auto',
+                className
             )}
         >
             {templates.map((template) => (
                 <TemplateListItem
                     key={template.id}
                     title={template.title}
-                    description={template.description}
-                    image={template.imageUrl || '/templates/contract-2.jpg'}
+                    description={template.description!}
+                    image={template.imageUrl}
                     onClick={() => {
                         setActiveTemplate(template);
                         closePanel();

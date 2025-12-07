@@ -2,7 +2,7 @@ import { cn } from '@/src/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { ArrowRight, FileCode } from 'lucide-react';
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent, useRef } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams, useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import GenerateContract from '@/src/lib/server/generate_contract';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { STAGE } from '@/src/types/stream_event_types';
+import BaseContractTemplatesPanel from '../base/BaseContractTemplatePanel';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -24,6 +25,9 @@ export default function BuilderChatInput() {
     const params = useParams();
     const contractId = params.contractId as string;
     const router = useRouter();
+    const templateButtonRef = useRef<HTMLButtonElement | null>(null);
+    const templatePanelRef = useRef<HTMLDivElement | null>(null);
+    const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
 
     async function handleSubmit() {
         try {
@@ -106,8 +110,9 @@ export default function BuilderChatInput() {
                             <ExecutorSelect value={executor} onChange={setExecutor} />
                             <Button
                                 type="button"
+                                ref={templateButtonRef}
                                 className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
-                                onClick={() => router.push('/home')}
+                                onClick={() => setShowTemplatePanel(prev => !prev)}
                             >
                                 <FileCode className="w-3.5 h-3.5 mb-0.5" />
                                 <span>templates</span>
@@ -139,6 +144,12 @@ export default function BuilderChatInput() {
                     </div>
                 </div>
             </div>
+
+            {showTemplatePanel && (
+                <div ref={templatePanelRef} className=''>
+                    <BaseContractTemplatesPanel closePanel={() => setShowTemplatePanel(false)} className='max-w-[21rem] bottom-16 left-28'/>
+                </div>
+            )}
 
             <LoginModal opensignInModal={openLoginModal} setOpenSignInModal={setOpenLoginModal} />
         </>
