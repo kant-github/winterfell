@@ -38,7 +38,7 @@ export default async function delete_contract_controller(req: Request, res: Resp
             { success: true, contractId: contract.id },
             'contract deleted successfully',
         );
-        console.log('------------------------------------')
+        console.log('------------------------------------');
     } catch (err) {
         ResponseWriter.server_error(res, 'Failed to delete contract');
         console.error('error while deleting contract:', err);
