@@ -10,7 +10,9 @@ interface CodeEditorState {
     editedFiles: Record<string, FileNode>;
     collapseFileTree: boolean;
     collapseChat: boolean;
+    currentCursorPosition: { ln: number, col: number };
 
+    setCurrentCursorPosition: ({ ln, col }: { ln: number, col: number }) => void;
     setCollapseFileTree: (collapse: boolean) => void;
     setCollapsechat: (collapse: boolean) => void;
     setCurrentCode: (code: string) => void;
@@ -30,7 +32,9 @@ export const useCodeEditor = create<CodeEditorState>((set, get) => {
         editedFiles: {},
         collapseFileTree: false,
         collapseChat: false,
+        currentCursorPosition: { ln: 0, col: 0 },
 
+        setCurrentCursorPosition: ({ ln, col }: { ln: number, col: number }) => set({ currentCursorPosition: { ln, col } }),
         setCollapseFileTree: (collapse: boolean) => set({ collapseFileTree: collapse }),
         setCollapsechat: (value: boolean) => set({ collapseChat: value }),
         setCurrentCode: (code: string) => {

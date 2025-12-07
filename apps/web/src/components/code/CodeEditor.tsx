@@ -6,7 +6,7 @@ import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { LiaServicestack } from 'react-icons/lia';
 
 export default function CodeEditor(): JSX.Element {
-    const { currentCode, currentFile, collapseFileTree } = useCodeEditor();
+    const { currentCode, currentFile, collapseFileTree, setCurrentCursorPosition } = useCodeEditor();
 
     const handleEditorWillMount = useCallback((monaco: Monaco) => {
         monaco.editor.defineTheme('clean-dark', {
@@ -99,10 +99,17 @@ export default function CodeEditor(): JSX.Element {
 
     const handleEditorDidMount = useCallback(
         (editorInstance: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+
             editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyP, () => {
                 const event = new CustomEvent('open-search-bar');
                 window.dispatchEvent(event);
             });
+
+            editorInstance.onDidChangeCursorPosition((e) => {
+                const { lineNumber, column } = e.position;
+                setCurrentCursorPosition({ ln: lineNumber, col: column });
+            });
+
         },
         [],
     );
