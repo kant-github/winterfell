@@ -24,7 +24,7 @@ export default function ProfileMenu({ setOpenProfleMenu }: ProfileMenuProps) {
     return (
         <div
             ref={profileMenuRef}
-            className="w-[9rem] bg-darker border border-neutral-800 shadow-lg rounded-[4px] overflow-hidden"
+            className="w-[9rem] bg-red-500 border border-neutral-800 shadow-lg rounded-[4px] overflow-hidden"
         >
             <Card className="p-0 bg-transparent border-0 shadow-none font-semibold">
                 <div>

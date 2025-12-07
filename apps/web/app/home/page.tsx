@@ -3,7 +3,7 @@ import ContractTemplates from '@/src/components/home/ContractTemplates';
 import MostRecentBuilds from '@/src/components/home/MostRecentBuilds';
 import UserContracts from '@/src/components/home/UserContracts';
 import HomeNavbar from '@/src/components/nav/HomeNavbar';
-import ContractServer from '@/src/lib/server/contract-server';
+import Marketplace from '@/src/lib/server/marketplace-server';
 import { useAllContractStore } from '@/src/store/user/useAllContractStore';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useContractStore } from '@/src/store/user/useUserContractStore';
@@ -19,13 +19,13 @@ export default function Home() {
     useEffect(() => {
         const fetchData = async () => {
             if (!session?.user?.token) return;
-            const user_contracts = await ContractServer.getUserContracts(session.user.token);
+            const user_contracts = await Marketplace.getUserContracts(session.user.token);
             setUserContracts(user_contracts);
 
-            const all_contracts = await ContractServer.getAllContracts(session.user.token);
+            const all_contracts = await Marketplace.getAllContracts(session.user.token);
             setAllContracts(all_contracts);
 
-            const all_templates = await ContractServer.getTemplates();
+            const all_templates = await Marketplace.getTemplates();
             setTemplates(all_templates);
         };
 

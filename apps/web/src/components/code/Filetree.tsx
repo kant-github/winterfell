@@ -65,7 +65,7 @@ export default function FileTree() {
     }));
 
     return (
-        <div className="h-full flex flex-col w-full">
+        <div className="h-full bg-darker flex flex-col w-full">
             <div className="p-3 border-b border-neutral-800 shrink-0">
                 <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
                     Project Files

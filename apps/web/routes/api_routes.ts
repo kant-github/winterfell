@@ -26,6 +26,7 @@ export const LINK_ACCOUNT = API_URL + '/link-account';
 // reviews
 export const CONTRACT_REVIEW_URL = API_URL + '/contract-review';
 export const PUBLIC_REVIEW_URL = API_URL + '/public-review';
+export const GET_REVIEWS = API_URL + '/get-reviews';
 
 // contracts
 export const GET_USER_CONTRACTS = API_URL + '/contracts/get-user-contracts';

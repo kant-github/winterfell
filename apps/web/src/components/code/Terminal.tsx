@@ -335,11 +335,13 @@ export default function Terminal() {
                     </ToolTipComponent>
 
                     <div className="hover:text-light/80 cursor-pointer tracking-wider">
-                        {currentFile ? (
-                            'Ln ' + currentCursorPosition.ln + ', ' + 'Col ' + currentCursorPosition.col
-                        ) : (
-                            'Ln 0, Col 0'
-                        )}
+                        {currentFile
+                            ? 'Ln ' +
+                              currentCursorPosition.ln +
+                              ', ' +
+                              'Col ' +
+                              currentCursorPosition.col
+                            : 'Ln 0, Col 0'}
                     </div>
                     <div className="hover:text-light/80 cursor-pointer tracking-wider">
                         {'{ } ' + handleCurrentFileExtension()}

@@ -6,13 +6,15 @@ import { FaCalendar } from 'react-icons/fa';
 import { Button } from '../ui/button';
 import { cn } from '@/src/lib/utils';
 import { useContractStore } from '@/src/store/user/useUserContractStore';
-import timeParser from '@/src/lib/home_utils';
+import timeParser from '@/src/hooks/useTimeParser';
+import { useRouter } from 'next/navigation';
 
 export default function UserContracts() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [showLeftButton, setShowLeftButton] = useState<boolean>(false);
     const [showRightButton, setShowRightButton] = useState<boolean>(true);
     const { userContracts } = useContractStore();
+    const router = useRouter();
 
     function scroll(direction: 'left' | 'right') {
         if (scrollContainerRef.current) {
@@ -77,8 +79,9 @@ export default function UserContracts() {
                     {userContracts.length > 0 ? (
                         userContracts.map((contract) => (
                             <div
+                                onClick={() => router.push(`/playgound/${contract.id}`)}
                                 key={contract.id}
-                                className="h-full border border-neutral-800 bg-[#0A0C0D70] min-w-[calc(25%-12px)] rounded-[4px] grid grid-rows-[78%_22%] overflow-hidden group shadow-sm"
+                                className="h-full border border-neutral-800 bg-[#0A0C0D70] min-w-[calc(25%-12px)] rounded-[4px] grid grid-rows-[78%_22%] overflow-hidden group shadow-sm cursor-pointer"
                             >
                                 <div className="bg-gradient-to-br from-darkest via-neutral-800/80 to-darkest p-3 flex flex-col rounded-b-[4px]">
                                     <div className="flex justify-between h-fit items-center">
@@ -88,8 +91,8 @@ export default function UserContracts() {
                                             <span>{timeParser(contract.createdAt)}</span>
                                         </div>
                                     </div>
-                                    <div className="flex-1 text-left flex items-end text-[12px] tracking-wider text-light/80">
-                                        {contract.description}
+                                    <div className="flex-1 text-left flex items-end text-[13px] tracking-wider text-light/80">
+                                        {contract.messages[0].content}
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between px-3 text-[13px] tracking-wider bg-[#0A0C0D70]">
@@ -107,10 +110,10 @@ export default function UserContracts() {
 
                 {showRightButton && (
                     <Button
-                        onClick={() => scroll('right')}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#0A0C0D] hover:bg-[#0c0e0f] rounded-full p-2 transition-all shadow-2xl h-6 w-6"
+                        onClick={() => scroll('left')}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-[#0A0C0D] hover:bg-[#0c0e0f] rounded-full p-2 transition-all shadow-2xl"
                     >
-                        <ChevronRight className=" text-light" />
+                        <ChevronRight className="size-4 text-light" />
                     </Button>
                 )}
             </div>

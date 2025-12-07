@@ -2,7 +2,7 @@
 import BuilderChatInput from './BuilderChatInput';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useChatStore } from '@/src/store/user/useChatStore';
 import BuilderMessage from './BuilderMessage';

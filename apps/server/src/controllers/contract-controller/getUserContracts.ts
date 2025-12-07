@@ -4,7 +4,10 @@ import { prisma } from '@winterfell/database';
 
 export default async function getUserContracts(req: Request, res: Response) {
     const user = req.user;
-    if (!user) return ResponseWriter.unauthorized(res, 'Unauthorized');
+    if (!user) {
+        ResponseWriter.unauthorized(res);
+        return;
+    }
 
     try {
         const user_record = await prisma.user.findUnique({
@@ -23,6 +26,15 @@ export default async function getUserContracts(req: Request, res: Response) {
                         clientSdk: true,
                         deployed: true,
                         createdAt: true,
+                        messages: {
+                            orderBy: {
+                                createdAt: 'asc',
+                            },
+                            take: 1,
+                            select: {
+                                content: true,
+                            },
+                        },
                     },
                 },
             },

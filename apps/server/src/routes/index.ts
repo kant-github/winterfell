@@ -16,27 +16,28 @@ import getAllTemplates from '../controllers/template-controller/getAllTemplates'
 import plan_executor_controller from '../controllers/chat-controller/plan_executor_controller';
 import generate_contract_controller from '../controllers/gen/generate_contract_controller';
 import get_chat_controller from '../controllers/chat-controller/get_chat_controller';
+import get_public_reviews_controller from '../controllers/review-controller/get_public_reviews_controller';
+import create_public_review_controller from '../controllers/review-controller/create_public_review_controller';
+import create_contract_review_controller from '../controllers/review-controller/create_contract_review_controller';
 
-// middlewares
+// <------------------------- MIDDLEWARES ------------------------->
 import authMiddleware from '../middlewares/middleware.auth';
 import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
-import public_review_controller from '../controllers/review-controller/public_review_controller';
-import createContractReview from '../controllers/review-controller/create_contract_review';
 import RateLimit from '../class/rate_limit';
 
 const router: Router = Router();
 
-// sign-in
+// <------------------------- SIGNIN-ROUTE ------------------------->
 router.post('/sign-in', RateLimit.sign_in_rate_limit, signInController);
 
-// health
+// <------------------------- HEALTH-CHECK-ROUTE ------------------------->
 router.get('/health', RateLimit.health_check_rate_limit, async (_req: Request, res: Response) => {
     await new Promise((t) => setTimeout(t, 5000));
     res.status(200).json({ message: 'Server is running' });
 });
 
-// contract generation and chat fetch
+// <------------------------- CONTRACT-ROUTES ------------------------->
 router.post(
     '/generate',
     // RateLimit.generate_contract_rate_limit,
@@ -51,7 +52,7 @@ router.post(
 );
 router.post('/plan', RateLimit.plan_executor_rate_limit, authMiddleware, plan_executor_controller);
 
-// github controllers
+// <------------------------- GITHUB-ROUTES ------------------------->
 router.post(
     '/github/export-code',
     RateLimit.github_export_rate_limit,
@@ -74,7 +75,7 @@ router.post(
     githubRepoNameValidatorController,
 );
 
-// subscription controllers
+// <------------------------- SUBSCRIPTION-ROUTES ------------------------->
 router.post(
     '/subscription/create-order',
     RateLimit.create_order_rate_limit,
@@ -95,25 +96,26 @@ router.post(
     updateSubscriptionController,
 );
 
-// review controllers
+// <------------------------- REVIEW-ROUTES ------------------------->
 router.post(
     '/contract-review',
     RateLimit.create_review_rate_limit,
     authMiddleware,
-    createContractReview,
+    create_contract_review_controller,
 );
 router.post(
     '/public-review',
     RateLimit.public_review_rate_limit,
     authMiddleware,
-    public_review_controller,
+    create_public_review_controller,
 );
+router.get('/get-reviews', get_public_reviews_controller);
 
-// template controllers
+// <------------------------- TEMPLATE-ROUTES ------------------------->
 router.post('/templates/sync-templates', RateLimit.sync_templates_rate_limit, syncTemplate);
 router.get('/template/get-templates', RateLimit.get_templates_rate_limit, getAllTemplates);
 
-// marketplace controllers
+// <------------------------- MARKETPLACE-ROUTES ------------------------->
 router.get(
     '/contracts/get-user-contracts',
     RateLimit.get_user_contracts_rate_limit,
@@ -127,7 +129,8 @@ router.get(
     getAllContracts,
 );
 
-// file-routes [this was made for syncing files updating in web IDE to the pod]
+// <------------------------- FILE-ROUTES ------------------------->
+// [this was made for syncing files updating in web IDE to the pod]
 router.get(
     '/files/:contractId',
     RateLimit.get_files_rate_limit,

@@ -3,7 +3,7 @@ import { contractReviewSchema } from '@winterfell/types';
 import ResponseWriter from '../../class/response_writer';
 import { Request, Response } from 'express';
 
-export default async function createContractReview(req: Request, res: Response) {
+export default async function create_contract_review_controller(req: Request, res: Response) {
     try {
         if (!req.user || !req.user.id) {
             ResponseWriter.unauthorized(res);

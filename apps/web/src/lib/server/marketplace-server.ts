@@ -1,43 +1,43 @@
 import { GET_ALL_CONTRACTS, GET_ALL_TEMPLATES, GET_USER_CONTRACTS } from '@/routes/api_routes';
-import { ContractData, ContractTemplateData } from '@winterfell/types';
+import { Contract, Template } from '@/src/types/prisma-types';
 import axios from 'axios';
 
 export default class Marketplace {
-    public static async getUserContracts(token: string): Promise<ContractData[]> {
+    public static async getUserContracts(token: string): Promise<Contract[]> {
         try {
-            const response = await axios.get(GET_USER_CONTRACTS, {
+            const { data } = await axios.get(GET_USER_CONTRACTS, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
 
-            return response.data.data;
+            return data.data;
         } catch (error) {
             console.error('Failed to fetch user contracts', error);
             return [];
         }
     }
 
-    public static async getAllContracts(token: string): Promise<ContractData[]> {
+    public static async getAllContracts(token: string): Promise<Contract[]> {
         try {
-            const response = await axios.get(GET_ALL_CONTRACTS, {
+            const { data } = await axios.get(GET_ALL_CONTRACTS, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
 
-            return response.data.data;
+            return data.data;
         } catch (error) {
             console.error('Failed to fetch all contracts', error);
             return [];
         }
     }
 
-    public static async getTemplates(): Promise<ContractTemplateData[]> {
+    public static async getTemplates(): Promise<Template[]> {
         try {
-            const response = await axios.get(GET_ALL_TEMPLATES);
+            const { data } = await axios.get(GET_ALL_TEMPLATES);
 
-            return response.data.data;
+            return data.data;
         } catch (error) {
             console.error('Failed to fetch templates', error);
             return [];
