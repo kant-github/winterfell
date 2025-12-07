@@ -8,7 +8,10 @@ interface BaseContractTemplatePanelProps {
     className?: string;
 }
 
-export default function BaseContractTemplatesPanel({ closePanel, className }: BaseContractTemplatePanelProps) {
+export default function BaseContractTemplatesPanel({
+    closePanel,
+    className,
+}: BaseContractTemplatePanelProps) {
     const { templates, setActiveTemplate } = useTemplateStore();
 
     return (
@@ -19,7 +22,7 @@ export default function BaseContractTemplatesPanel({ closePanel, className }: Ba
                 'absolute left-23 z-50 bottom-12',
                 'bg-darkest border border-neutral-800 shadow-md',
                 'rounded-[4px] rounded-bl-none overflow-visible overflow-y-auto',
-                className
+                className,
             )}
         >
             {templates.map((template) => (

@@ -2,9 +2,9 @@ import { cn } from '@/src/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { ArrowRight, FileCode } from 'lucide-react';
-import React, { useState, KeyboardEvent, useRef } from 'react';
+import React, { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
@@ -15,6 +15,8 @@ import GenerateContract from '@/src/lib/server/generate_contract';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { STAGE } from '@/src/types/stream_event_types';
 import BaseContractTemplatesPanel from '../base/BaseContractTemplatePanel';
+import axios from 'axios';
+import { GET_CURRENT_CONTRACT_DATA_URL } from '@/routes/api_routes';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -24,7 +26,6 @@ export default function BuilderChatInput() {
     const { messages, setMessage } = useBuilderChatStore();
     const params = useParams();
     const contractId = params.contractId as string;
-    const router = useRouter();
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
     const templatePanelRef = useRef<HTMLDivElement | null>(null);
     const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
@@ -79,6 +80,22 @@ export default function BuilderChatInput() {
         }
     }
 
+    async function handleClick() {
+        if (!session || !session.user.token) return;
+        const response = await axios.post(
+            GET_CURRENT_CONTRACT_DATA_URL,
+            {
+                contractId,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${session?.user.token}`,
+                },
+            },
+        );
+        console.log('response with: ', response.data);
+    }
+
     return (
         <>
             <div className="relative group w-full">
@@ -112,7 +129,10 @@ export default function BuilderChatInput() {
                                 type="button"
                                 ref={templateButtonRef}
                                 className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
-                                onClick={() => setShowTemplatePanel(prev => !prev)}
+                                onClick={() => {
+                                    setShowTemplatePanel((prev) => !prev);
+                                    handleClick();
+                                }}
                             >
                                 <FileCode className="w-3.5 h-3.5 mb-0.5" />
                                 <span>templates</span>
@@ -146,8 +166,11 @@ export default function BuilderChatInput() {
             </div>
 
             {showTemplatePanel && (
-                <div ref={templatePanelRef} className=''>
-                    <BaseContractTemplatesPanel closePanel={() => setShowTemplatePanel(false)} className='max-w-[21rem] bottom-16 left-28'/>
+                <div ref={templatePanelRef} className="">
+                    <BaseContractTemplatesPanel
+                        closePanel={() => setShowTemplatePanel(false)}
+                        className="max-w-[21rem] bottom-16 left-28"
+                    />
                 </div>
             )}
 

@@ -26,6 +26,7 @@ import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
 import RateLimit from '../class/rate_limit';
 import delete_contract_controller from '../controllers/contract-controller/delete_contract_controller';
+import get_current_chat_messages_controller from '../controllers/contract-controller/get_current_chat_messages_controller';
 
 const router: Router = Router();
 
@@ -55,8 +56,9 @@ router.post(
     '/plan',
     // RateLimit.plan_executor_rate_limit,
     authMiddleware,
-    plan_executor_controller
+    plan_executor_controller,
 );
+router.post('/get-contract-data', authMiddleware, get_current_chat_messages_controller);
 
 // <------------------------- GITHUB-ROUTES ------------------------->
 router.post(

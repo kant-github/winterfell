@@ -1,5 +1,5 @@
-import { cn } from "@/src/lib/utils";
-import Image from "next/image";
+import { cn } from '@/src/lib/utils';
+import Image from 'next/image';
 
 interface ShaderSplitPanelProps {
     imageSrc: string;
@@ -7,7 +7,11 @@ interface ShaderSplitPanelProps {
     leftChildren: React.ReactNode;
 }
 
-export default function ShaderSplitPanel({ imageSrc, rightChildren, leftChildren }: ShaderSplitPanelProps) {
+export default function ShaderSplitPanel({
+    imageSrc,
+    rightChildren,
+    leftChildren,
+}: ShaderSplitPanelProps) {
     return (
         <div
             className={cn(
@@ -41,5 +45,5 @@ export default function ShaderSplitPanel({ imageSrc, rightChildren, leftChildren
                 </div>
             </div>
         </div>
-    )
+    );
 }

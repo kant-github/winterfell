@@ -1,4 +1,9 @@
-import { DELETE_CONTRACT, GET_ALL_CONTRACTS, GET_ALL_TEMPLATES, GET_USER_CONTRACTS } from '@/routes/api_routes';
+import {
+    DELETE_CONTRACT,
+    GET_ALL_CONTRACTS,
+    GET_ALL_TEMPLATES,
+    GET_USER_CONTRACTS,
+} from '@/routes/api_routes';
 import { Contract, Template } from '@/src/types/prisma-types';
 import axios from 'axios';
 
@@ -44,7 +49,10 @@ export default class Marketplace {
         }
     }
 
-    public static async deleteContract(token: string, contractId: string): Promise<{
+    public static async deleteContract(
+        token: string,
+        contractId: string,
+    ): Promise<{
         success: boolean;
         contractId: string;
     }> {
