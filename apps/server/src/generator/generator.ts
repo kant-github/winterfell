@@ -131,6 +131,7 @@ export default class Generator {
         parser: StreamParser,
     ) {
         try {
+            console.log('new contract planned going to be executed');
             const planner_data = await planner_chain.invoke({
                 user_instruction,
             });
@@ -175,6 +176,7 @@ export default class Generator {
                     },
                     data: {
                         title: planner_data.contract_name,
+                        description: planner_data.context,
                     },
                 });
 

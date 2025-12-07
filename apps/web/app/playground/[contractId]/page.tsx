@@ -39,7 +39,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
 
             const last = messages[messages.length - 1];
 
-            const shouldContinue = last.role === ChatRole.SYSTEM || last.role === ChatRole.USER;
+            const shouldContinue = last.role === ChatRole.SYSTEM;
 
             if (!shouldContinue) {
                 if (interval) clearInterval(interval);
@@ -84,7 +84,20 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
 
     useEffect(() => {
         if (loading || !session || !session.user || !session.user.token) return;
-        Playyground.get_chat(session.user.token, contractId);
+        Playground.get_chat(session.user.token, contractId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [contractId, session]);
+
+    useEffect(() => {
+        if(!session || !session.user) return;
+
+        const { messages } = useBuilderChatStore.getState();
+        if (messages.length === 0) return;
+
+        const last = messages[messages.length - 1];
+
+        if(last.role === ChatRole.SYSTEM || last.role === ChatRole.USER) setLoading(true);
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session]);
 

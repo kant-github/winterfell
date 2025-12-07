@@ -20,7 +20,7 @@ export default function Terminal() {
     const [showTerminal, setShowTerminal] = useState<boolean>(false);
     const [currentInput, setCurrentInput] = useState<string>('');
     const [isValidCommand, setIsValidCommand] = useState<boolean>(false);
-    const { currentFile } = useCodeEditor();
+    const { currentFile, currentCursorPosition } = useCodeEditor();
     const outputRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const { moveUp, moveDown, resetIndex } = useCommandHistoryStore();
@@ -335,7 +335,11 @@ export default function Terminal() {
                     </ToolTipComponent>
 
                     <div className="hover:text-light/80 cursor-pointer tracking-wider">
-                        Ln 128, Col 14
+                        {currentFile ? (
+                            'Ln ' + currentCursorPosition.ln + ', ' + 'Col ' + currentCursorPosition.col
+                        ) : (
+                            'Ln 0, Col 0'
+                        )}
                     </div>
                     <div className="hover:text-light/80 cursor-pointer tracking-wider">
                         {'{ } ' + handleCurrentFileExtension()}

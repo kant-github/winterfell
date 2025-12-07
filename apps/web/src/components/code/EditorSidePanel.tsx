@@ -5,7 +5,6 @@ import { Dispatch, SetStateAction } from 'react';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import { cn } from '@/src/lib/utils';
-import { RiChat4Fill } from 'react-icons/ri';
 import { FaTelegramPlane } from 'react-icons/fa';
 import WinterfellChat from '../ui/svg/winterfell-chat';
 
@@ -18,12 +17,12 @@ export enum SidePanelValues {
 
 interface EditorSidePanel {
     setSidePanelRenderer:
-        | Dispatch<SetStateAction<SidePanelValues>>
-        | ((value: SidePanelValues | null) => void);
+    | Dispatch<SetStateAction<SidePanelValues>>
+    | ((value: SidePanelValues | null) => void);
 }
 
 export default function EditorSidePanel() {
-    const { setCollapseFileTree, setCollapsechat, collapseChat } = useCodeEditor();
+    const { collapseFileTree, setCollapseFileTree, setCollapsechat, collapseChat } = useCodeEditor();
     const { currentState, setCurrentState } = useSidePanelStore();
 
     const sidePanelData = [
@@ -40,7 +39,7 @@ export default function EditorSidePanel() {
             tooltip: 'GitHub Repository',
         },
         {
-            icon: <WinterfellChat size={23} />,
+            icon: <WinterfellChat size={25} />,
             value: SidePanelValues.CHAT,
             onClick: () => setCollapsechat(!collapseChat),
             tooltip: 'Agent Sessions',
@@ -55,6 +54,14 @@ export default function EditorSidePanel() {
         },
     ];
 
+    function handleConditionalToggle(settingValue: SidePanelValues) {
+        if(currentState === settingValue) {
+            setCollapseFileTree(!collapseFileTree);
+        } else {
+            if(!collapseFileTree) setCollapseFileTree(!collapseFileTree);
+        }
+    }
+
     function handleToggleSidebar(value: SidePanelValues) {
         setCurrentState(value);
         switch (value) {
@@ -63,7 +70,11 @@ export default function EditorSidePanel() {
                 break;
             }
             case SidePanelValues.FILE: {
-                setCollapseFileTree(true);
+                handleConditionalToggle(value);
+                break;
+            }
+            case SidePanelValues.GITHUB: {
+                handleConditionalToggle(value);
                 break;
             }
             default: {
@@ -73,7 +84,7 @@ export default function EditorSidePanel() {
     }
 
     return (
-        <div className="h-full min-w-14 bg-[#101112] border-neutral-800 border-r">
+        <div className="h-full min-w-14 bg-darkest border-neutral-800 border-r">
             <div className="flex flex-col gap-y-7 items-center py-5">
                 {sidePanelData.map((item, index) => (
                     <ToolTipComponent key={index} side="right" content={item.tooltip}>
