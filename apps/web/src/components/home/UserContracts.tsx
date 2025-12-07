@@ -110,7 +110,7 @@ export default function UserContracts() {
                                     </div>
                                     <div className="text-xs text-light/60 tracking-wide flex gap-x-1.5">
                                         <FaCalendar className="size-3" />
-                                        <span>{timeParser(contract.createdAt)}</span>
+                                        <span>{timeParser(new Date(contract.createdAt))}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between px-3 text-[13px] tracking-wider bg-[#0A0C0D70]">

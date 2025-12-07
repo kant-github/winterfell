@@ -112,12 +112,12 @@ function LogoutRightContent({ setOpenLogoutModal }: { setOpenLogoutModal: Dispat
                         onClick={LogoutHandler}
                         className={cn(
                             'flex-1 px-6 py-5 text-sm font-medium',
-                            'bg-red-500/10 hover:bg-red-500/20',
+                            'bg-red-500 hover:bg-red-500/90',
                             'border border-red-500/50 rounded-[8px]',
                             'cursor-pointer tracking-wide transition-all',
                         )}
                     >
-                        <span className="text-red-400">Sign Out</span>
+                        <span className="text-light">Sign Out</span>
                     </Button>
                 </div>
             </div>
