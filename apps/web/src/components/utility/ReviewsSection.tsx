@@ -87,10 +87,10 @@ function ReviewCard({ review }: { review: Review }) {
             animate={{ opacity: 1, y: 0 }}
             className="bg-gradient-to-br from-zinc-900/80 to-zinc-950/80 backdrop-blur-sm rounded-2xl p-6 mb-4 border border-zinc-800/50 hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-primary/10 gap-y-2 flex flex-col"
         >
-            <Quote className="w-8 h-8 text-primary/40 mb-2" />
+            <Quote className="w-8 h-8 fill-primary text-primary mb-2" />
             <div className="flex gap-x-1 text-light/80 mb-2">
                 {Array.from({ length: review.rating }).map((_, i) => (
-                    <PiStarFill key={i} />
+                    <PiStarFill className='text-primary' key={i} />
                 ))}
             </div>
             <div className="mb-6">{review.content}</div>

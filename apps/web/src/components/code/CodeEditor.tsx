@@ -1,12 +1,35 @@
 'use client';
-import { JSX, useCallback } from 'react';
+import { JSX, useCallback, useState } from 'react';
 import { Editor, Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { LiaServicestack } from 'react-icons/lia';
+import { FiCheck, FiCopy } from 'react-icons/fi';
+import { cn } from '@/src/lib/utils';
+
 export default function CodeEditor(): JSX.Element {
-    const { currentCode, currentFile, collapseFileTree, setCurrentCursorPosition } =
-        useCodeEditor();
+    const { currentCode, currentFile, collapseFileTree, setCurrentCursorPosition } = useCodeEditor();
+    const [isCopied, setIsCopied] = useState<boolean>(false);
+    const [copyCooldown, setCopyCooldown] = useState<boolean>(false);
+
+    function handleCopyFileContent() {
+        if (!currentCode || copyCooldown) return;
+
+        navigator.clipboard.writeText(currentCode);
+
+        setIsCopied(true);
+        setCopyCooldown(true);
+
+        setTimeout(() => {
+            setIsCopied(false);
+        }, 1200);
+
+        setTimeout(() => {
+            setCopyCooldown(false);
+        }, 1500);
+    };
+
+
     const handleEditorWillMount = useCallback((monaco: Monaco) => {
         monaco.editor.defineTheme('clean-dark', {
             base: 'vs-dark',
@@ -167,8 +190,34 @@ export default function CodeEditor(): JSX.Element {
             <div className="flex-1 min-w-0 h-full">
                 {currentFile ? (
                     <>
-                        <div className="w-full flex px-4 py-1 bg-[#0d0e10] text-gray-300 text-sm ">
-                            {filePathModifier(currentFile?.id)}
+                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#0d0e10] text-gray-300 text-sm ">
+                            <span>{filePathModifier(currentFile?.id)}</span>
+                            <div
+                                onClick={handleCopyFileContent}
+                                className={cn(
+                                    "cursor-pointer transition-all duration-200 ease-out bg-darkest/70 rounded-[4px] border border-light/10",
+                                    "hover:bg-neutral-600/10 flex items-center justify-center select-none px-1.5 py-1 group overflow-hidden",
+                                    "w-6 hover:w-[4.5rem]",
+                                    isCopied ? "text-[#6c44fc]" : "text-light"
+                                )}
+                            >
+                                <span
+                                    className={cn(
+                                        "text-[10px] whitespace-nowrap overflow-hidden w-0 transition-all duration-200 ease-out",
+                                        "group-hover:w-[2.5rem] group-hover:mr-1.5",
+                                        isCopied ? "text-[#6c44fc]/90" : "text-light/70"
+                                    )}
+                                >
+                                    {isCopied ? "copied" : "copy"}
+                                </span>
+
+                                {isCopied ? (
+                                    <FiCheck className="text-sm flex-shrink-0 transition-colors duration-200 ease-out" />
+                                ) : (
+                                    <FiCopy className="text-sm flex-shrink-0 transition-colors duration-200 ease-out" />
+                                )}
+                            </div>
+
                         </div>
                         <Editor
                             key={collapseFileTree ? 'tree-collapsed' : 'tree-expanded'}

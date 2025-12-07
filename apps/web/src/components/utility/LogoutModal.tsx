@@ -6,7 +6,6 @@ import { MdSecurity } from 'react-icons/md';
 import { HiOutlineLogout } from 'react-icons/hi';
 import OpacityBackground from '../utility/OpacityBackground';
 import { Button } from '../ui/button';
-import AppLogo from '../tickers/AppLogo';
 import { cn } from '@/src/lib/utils';
 import ShaderSplitPanel from './ShaderSplitPanel';
 
@@ -74,7 +73,7 @@ function LogoutRightContent({ setOpenLogoutModal }: { setOpenLogoutModal: Dispat
                     Sign Out?
                 </h2>
                 <p className="text-sm text-neutral-400 font-normal tracking-wide leading-relaxed">
-                    You'll be logged out of your current session and redirected to the sign-in page.
+                    You&apos;ll be logged out of your current session and redirected to the sign-in page.
                 </p>
             </div>
 

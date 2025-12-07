@@ -94,14 +94,17 @@ export default function UserContracts() {
                     {userContracts.length > 0 ? (
                         userContracts.map((contract) => (
                             <div
-                                onClick={() => router.push(`/playgound/${contract.id}`)}
+                                onClick={() => router.push(`/playground/${contract.id}`)}
                                 key={contract.id}
                                 className="h-full border border-neutral-800 bg-[#0A0C0D70] min-w-[calc(25%-12px)] rounded-[4px] grid grid-rows-[78%_22%] overflow-hidden group shadow-sm cursor-pointer"
                             >
                                 <div className="bg-darkest p-3 flex flex-col border-b border-neutral-800">
                                     <div className="flex justify-between h-fit items-center">
                                         <DeployedTicker isDeployed={contract.deployed} />
-                                        <div onClick={() => handleContractDelete(contract.id)} className="bg-light/10 p-1 aspect-square rounded-[4px] cursor-pointer hover:bg-light/20 transition">
+                                        <div onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleContractDelete(contract.id);
+                                        }} className="bg-light/10 p-1 aspect-square rounded-[4px] cursor-pointer hover:bg-light/20 transition">
                                             <FaTrash className="text-light size-2.5" />
                                         </div>
                                     </div>
