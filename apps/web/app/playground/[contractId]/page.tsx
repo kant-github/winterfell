@@ -89,6 +89,19 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     }, [contractId, session]);
 
     useEffect(() => {
+        if(!session || !session.user) return;
+
+        const { messages } = useBuilderChatStore.getState();
+        if (messages.length === 0) return;
+
+        const last = messages[messages.length - 1];
+
+        if(last.role === ChatRole.SYSTEM || last.role === ChatRole.USER) setLoading(true);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [contractId, session]);
+
+    useEffect(() => {
         return () => {
             cleanStore();
             resetContractId();
