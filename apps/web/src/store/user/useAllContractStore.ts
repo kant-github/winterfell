@@ -1,9 +1,9 @@
-import { ContractData } from '@winterfell/types';
+import { Contract } from '@/src/types/prisma-types';
 import { create } from 'zustand';
 
 interface AllContractStoreProps {
-    allContracts: ContractData[] | [];
-    setAllContracts: (contract: ContractData[]) => void;
+    allContracts: Contract[] | [];
+    setAllContracts: (contract: Contract[]) => void;
 }
 
 export const useAllContractStore = create<AllContractStoreProps>((set) => ({

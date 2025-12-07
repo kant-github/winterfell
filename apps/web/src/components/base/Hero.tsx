@@ -9,7 +9,7 @@ import DashboardTextAreaComponent from './DashboardTextAreaComponent';
 import HighlighterTicker from '../tickers/HighlighterTicker';
 import { useRouter } from 'next/navigation';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import Marketplace from '@/src/lib/server/contract-server';
+import Marketplace from '@/src/lib/server/marketplace-server';
 
 export default function Hero() {
     const heroRef = useRef<HTMLDivElement>(null);

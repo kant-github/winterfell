@@ -1,6 +1,7 @@
 'use client';
-import timeParser from '@/src/lib/home_utils';
+import timeParser from '@/src/hooks/useTimeParser';
 import { useAllContractStore } from '@/src/store/user/useAllContractStore';
+import { GoClockFill } from 'react-icons/go';
 
 export default function MostRecentBuilds() {
     const { allContracts } = useAllContractStore();
@@ -24,8 +25,9 @@ export default function MostRecentBuilds() {
                         <div className="text-light/40 h-full w-full flex items-center justify-between px-1">
                             <div className="text-sm">{contract.title}</div>
 
-                            <div className="flex gap-x-2.5 justify-center text-sm items-center h-full">
-                                {timeParser(contract.createdAt)}
+                            <div className="flex gap-x-1.5 justify-center text-[12px] items-center h-full">
+                                <GoClockFill className="mb-[1.3px]" />
+                                {timeParser(contract.createdAt)} ago
                             </div>
                         </div>
                     </div>

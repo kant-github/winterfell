@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { LiaServicestack } from 'react-icons/lia';
 import ExpandableSubscriptionCard from './ExpandableSubscriptionCard';
-import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 
 export type PlanType = 'FREE' | 'PREMIUM' | 'PREMIUM_PLUS';

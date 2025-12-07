@@ -1,8 +1,5 @@
 'use client';
-import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import { ChatRole } from '@/src/types/prisma-types';
-import { STAGE } from '@/src/types/stream_event_types';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaChevronRight, FaHeart } from 'react-icons/fa';

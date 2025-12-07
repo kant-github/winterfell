@@ -1,4 +1,4 @@
-export default function timeParser(timestamp: number | Date): string {
+export default function timeParser(timestamp: number | Date | string): string {
     const now = new Date();
     const then = new Date(timestamp);
     const diffMs = now.getTime() - then.getTime();

@@ -1,4 +1,4 @@
-import { LiaServicestack } from "react-icons/lia";
+import { LiaServicestack } from 'react-icons/lia';
 
 type WinterfellChatProps = {
     size?: number;
@@ -12,8 +12,8 @@ export default function WinterfellChat({ size = 95 }: WinterfellChatProps) {
             style={{
                 width: size,
                 height,
-                position: "relative",
-                color: "currentColor",
+                position: 'relative',
+                color: 'currentColor',
             }}
         >
             <svg
@@ -33,12 +33,12 @@ export default function WinterfellChat({ size = 95 }: WinterfellChatProps) {
             </svg>
 
             <LiaServicestack
-                size={size * 0.80}
+                size={size * 0.8}
                 style={{
-                    position: "absolute",
-                    top: "24%",
-                    left: "30%",
-                    transform: "translate(-50%, -50%)",
+                    position: 'absolute',
+                    top: '24%',
+                    left: '30%',
+                    transform: 'translate(-50%, -50%)',
                 }}
             />
         </div>

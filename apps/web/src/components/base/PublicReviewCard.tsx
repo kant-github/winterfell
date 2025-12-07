@@ -2,7 +2,7 @@
 import { cn } from '@/src/lib/utils';
 import Card from '../ui/Card';
 import { PiStar, PiStarFill } from 'react-icons/pi';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { SiMinutemailer } from 'react-icons/si';
@@ -21,14 +21,12 @@ interface ReviewForm {
 
 export default function PublicReviewCard() {
     const { session } = useUserSessionStore();
-
     const [form, setForm] = useState<ReviewForm>({
         rating: 0,
         content: '',
     });
 
     const hasRating = form.rating > 0;
-
     const updateForm = (updates: Partial<ReviewForm>) =>
         setForm((prev) => ({ ...prev, ...updates }));
 
@@ -51,6 +49,12 @@ export default function PublicReviewCard() {
             }
         } catch {
             toast.error('Failed to submit the review');
+        }
+    }
+
+    function handleKeyDown(e: React.KeyboardEvent) {
+        if (e.key === 'Enter') {
+            handleSubmit();
         }
     }
 
@@ -163,6 +167,7 @@ export default function PublicReviewCard() {
                             <Textarea
                                 value={form.content}
                                 placeholder="What do you like?"
+                                onKeyDown={handleKeyDown}
                                 onChange={(e) => updateForm({ content: e.target.value })}
                                 className={cn(
                                     'w-full min-h-[60px] resize-none px-3 py-3 rounded-lg text-sm',
@@ -171,8 +176,6 @@ export default function PublicReviewCard() {
                                     'transition-all duration-150',
                                 )}
                             />
-
-                            {/* BUTTON BELOW, CLEAN + MINIMAL */}
                         </motion.div>
                     )}
                 </AnimatePresence>

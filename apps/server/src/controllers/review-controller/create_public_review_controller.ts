@@ -3,7 +3,7 @@ import ResponseWriter from '../../class/response_writer';
 import { public_review_schema } from '@winterfell/types';
 import { prisma } from '@winterfell/database';
 
-export default async function public_review_controller(req: Request, res: Response) {
+export default async function create_public_review_controller(req: Request, res: Response) {
     try {
         if (!req.user || !req.user.id) {
             ResponseWriter.unauthorized(res);

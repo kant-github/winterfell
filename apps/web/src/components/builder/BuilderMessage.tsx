@@ -14,7 +14,7 @@ import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { SidePanelValues } from '../code/EditorSidePanel';
 import { useEditPlanStore } from '@/src/store/code/useEditPlanStore';
 import SystemMessage from './SystemMessage';
-import { FiCopy, FiCheck, FiClock } from "react-icons/fi";
+import { FiCopy, FiCheck, FiClock } from 'react-icons/fi';
 
 interface BuilderMessageProps {
     message: Message;
@@ -41,7 +41,7 @@ export default function BuilderMessage({
         await navigator.clipboard.writeText(text);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
-    };
+    }
 
     function TimeDisplay({ date }: { date: Date }) {
         return (
@@ -54,7 +54,6 @@ export default function BuilderMessage({
 
     return (
         <div className="w-full shrink-0">
-
             {message.role === 'USER' && (
                 <div className="flex justify-end items-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[70%]">
@@ -111,7 +110,7 @@ export default function BuilderMessage({
                                 <button
                                     type="button"
                                     className="text-xs"
-                                    onClick={() => handleCopy("Template", message.id)}
+                                    onClick={() => handleCopy('Template', message.id)}
                                 >
                                     {copiedId === message.id ? (
                                         <FiCheck strokeWidth={2.5} size={12} color="#6c44fc" />
