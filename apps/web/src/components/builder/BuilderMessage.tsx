@@ -96,7 +96,7 @@ export default function BuilderMessage({
                 <div className="flex justify-end items-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[70%]">
                         <div className="flex flex-col gap-y-2">
-                            <div className="relative w-full h-34 aspect-[4/3] rounded-b-[8px] rounded-tl-[8px] overflow-hidden flex items-center justify-end">
+                            <div className="relative w-full h-34 aspect-[4/3] rounded-b-[8px] rounded-tl-[8px] overflow-hidden flex items-center justify-end mt-3">
                                 <Image
                                     src={'/templates/contract-2.jpg'}
                                     alt="Contract preview"
@@ -108,17 +108,6 @@ export default function BuilderMessage({
 
                             <div className="flex justify-end items-center gap-2">
                                 <TimeDisplay date={message.createdAt} />
-                                <button
-                                    type="button"
-                                    className="text-xs"
-                                    onClick={() => handleCopy('Template', message.id)}
-                                >
-                                    {copiedId === message.id ? (
-                                        <FiCheck strokeWidth={2.5} size={12} color="#6c44fc" />
-                                    ) : (
-                                        <FiCopy size={12} />
-                                    )}
-                                </button>
                             </div>
                         </div>
 

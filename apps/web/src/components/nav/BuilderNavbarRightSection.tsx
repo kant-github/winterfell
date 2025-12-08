@@ -13,6 +13,7 @@ import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { cn } from '@/src/lib/utils';
 import ExportPanel from './ExportPanel.';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
+import { LuCopy } from 'react-icons/lu';
 
 export default function BuilderNavbarRightSection() {
     const [openWalletPanel, setOpenWalletPanel] = useState<boolean>(false);
@@ -66,51 +67,50 @@ export default function BuilderNavbarRightSection() {
 
     return (
         <div className="flex items-center justify-between gap-x-3 relative">
-            <ToolTipComponent content="deploy your contract" side="bottom">
-                <Button
-                    disabled={loading}
-                    onClick={() => setOpenWalletPanel(true)}
-                    size="xs"
-                    className="bg-light text-darkest hover:bg-light hover:text-darkest tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 duration-300 font-semibold rounded-[4px] exec-button-light"
-                >
-                    <IoIosPaperPlane className="size-3.5" />
-                    <span className="text-[11px]">Deploy</span>
-                </Button>
-            </ToolTipComponent>
-
-            {!hasGithub ? (
-                <ToolTipComponent content="Connect GitHub to export code" side="bottom">
+            <div className='flex items-center justify-center'>
+                <ToolTipComponent content="deploy your contract" side="bottom">
                     <Button
-                        onClick={handleConnectGitHub}
-                        disabled={isConnectingGithub || loading}
+                        disabled={loading}
+                        onClick={() => setOpenWalletPanel(true)}
                         size="xs"
-                        className="bg-[#24292e] text-white hover:bg-[#1a1e22] gap-1.5 tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed exec-button-dark"
+                        className="bg-light text-darkest hover:bg-light hover:text-darkest tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 duration-300 font-semibold exec-button-dark !rounded-none !rounded-l-[4px]"
                     >
-                        <FaGithub className="size-3.5" />
-                        <span className="text-[11px]">
-                            {isConnectingGithub ? 'Connecting...' : 'Connect GitHub'}
-                        </span>
+                        <IoIosPaperPlane className="size-3.5" />
+                        <span className="text-[11px]">Deploy</span>
                     </Button>
                 </ToolTipComponent>
-            ) : (
-                <div className="relative w-full" ref={panelRef}>
-                    <ToolTipComponent content="Export codebase to GitHub" side="bottom">
+
+                {!hasGithub ? (
+                    <ToolTipComponent content="Connect GitHub to export code" side="bottom">
                         <Button
-                            disabled={loading}
-                            onClick={() => setShowRepoPanel((prev) => !prev)}
+                            onClick={handleConnectGitHub}
+                            disabled={isConnectingGithub || loading}
                             size="xs"
-                            className={cn(
-                                'bg-dark text-light hover:bg-dark/90 hover:text-light/90 mt-0.5',
-                                'tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-[4px] text-xs exec-button-dark',
-                            )}
+                            className="bg-[#24292e] text-white hover:bg-[#1a1e22] gap-1.5 tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-none !rounded-r-[4px] disabled:opacity-50 disabled:cursor-not-allowed exec-button-dark"
                         >
-                            <IoLogoGithub className="size-4.5" />
+                            <FaGithub className="size-3.5" />
+                            <span className="text-[11px]">
+                                {isConnectingGithub ? 'Connecting...' : 'Connect GitHub'}
+                            </span>
                         </Button>
                     </ToolTipComponent>
+                ) : (
+                    <div className="relative w-full" ref={panelRef}>
+                        <ToolTipComponent content="Export codebase to GitHub" side="bottom">
+                            <Button
+                                disabled={loading}
+                                onClick={() => setShowRepoPanel((prev) => !prev)}
+                                size="xs"
+                                className="bg-[#24292e] text-white hover:bg-[#1a1e22] gap-1.5 tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-none !rounded-r-[4px] disabled:opacity-50 disabled:cursor-not-allowed exec-button-dark"
+                            >
+                                <IoLogoGithub className="size-3.5" />
+                            </Button>
+                        </ToolTipComponent>
 
-                    {showRepoPanel && <ExportPanel />}
-                </div>
-            )}
+                        {showRepoPanel && <ExportPanel />}
+                    </div>
+                )}
+            </div>
 
             {session?.user?.image && (
                 <Image
