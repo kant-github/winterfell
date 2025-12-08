@@ -33,6 +33,7 @@ import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
 import { ChatOpenAI } from '@langchain/openai';
 import env from '../configs/config.env';
+import { ChatAnthropic } from '@langchain/anthropic';
 
 export default class Generator {
     protected gpt_planner: ChatOpenAI;
@@ -52,24 +53,43 @@ export default class Generator {
             },
         });
 
+        // this.gpt_planner = new ChatAnthropic({
+        //     model: 'claude-sonnet-4-5-20250929',
+        //     streaming: false,
+        //     apiKey: env.SERVER_ANTHROPIC_API_KEY,
+        // })
+
         this.gpt_coder = new ChatOpenAI({
             model: 'moonshotai/kimi-k2-thinking',
-            streaming: true,
             temperature: 0.2,
+            streaming: true,
             configuration: {
                 baseURL: 'https://openrouter.ai/api/v1',
                 apiKey: env.SERVER_OPENROUTER_KEY,
             },
         });
 
+        // this.gpt_coder = new ChatAnthropic({
+        //     model: 'claude-sonnet-4-5-20250929',
+        //     streaming: false,
+        //     apiKey: env.SERVER_ANTHROPIC_API_KEY,
+        // });
+
         this.claude_coder = new ChatOpenAI({
             model: 'moonshotai/kimi-k2-thinking',
+            temperature: 0.2,
             streaming: true,
             configuration: {
                 baseURL: 'https://openrouter.ai/api/v1',
                 apiKey: env.SERVER_OPENROUTER_KEY,
             },
         });
+
+        // this.claude_coder = new ChatAnthropic({
+        //     model: 'claude-sonnet-4-5-20250929',
+        //     streaming: false,
+        //     apiKey: env.SERVER_ANTHROPIC_API_KEY,
+        // });
 
         this.gpt_finalizer = new ChatOpenAI({
             model: 'openai/gpt-4o-mini',
@@ -215,13 +235,46 @@ export default class Generator {
                 files_likely_affected: planner_data.files_likely_affected,
             });
 
+            console.log(chalk.green('coder stream started ----------------'));
+
+            let buffer = '';
+            let lastFlush = Date.now();
+
+            const MAX_DELAY = 80;
+            const MAX_CHARS = 200;
+
             for await (const chunk of code_stream) {
-                if (chunk.text) {
-                    console.log(chalk.blue(chunk.text));
-                    parser.feed(chunk.text, system_message);
-                    full_response += chunk.text;
+                if (!chunk.text) continue;
+
+                buffer += chunk.text;
+                const now = Date.now();
+
+                const hasNewline = buffer.includes('\n');
+
+                const shouldFlush =
+                    hasNewline ||
+                    buffer.length > MAX_CHARS ||
+                    now - lastFlush > MAX_DELAY;
+
+                if (shouldFlush) {
+                    const lines = buffer.split('\n');
+                    const safeChunk = lines.slice(0, -1).join('\n') + '\n';
+
+                    if (safeChunk.trim()) {
+                        console.log(safeChunk);
+                        parser.feed(safeChunk, system_message);
+                    }
+
+                    buffer = lines.at(-1) ?? '';
+                    lastFlush = now;
                 }
             }
+
+            // send the left over to parser
+            if (buffer.trim()) {
+                parser.feed(buffer + '\n', system_message);
+            }
+
 
             system_message = await prisma.message.update({
                 where: {
@@ -267,6 +320,7 @@ export default class Generator {
             console.error('Error while new contract generation: ', error);
             parser.reset();
             this.delete_parser(contract_id);
+            console.log(this.parsers);
             ResponseWriter.stream.end(res);
         }
     }
@@ -357,10 +411,16 @@ export default class Generator {
         idl: Object[],
     ) {
         try {
+
+            console.log('user instruction: ', user_instruction);
+            console.log('idl: ', idl);
+            
             const planner_data = await planner_chain.invoke({
                 user_instruction: user_instruction,
                 idl: idl,
             });
+
+            console.log(planner_data);
 
             const llm_message = await prisma.message.create({
                 data: {

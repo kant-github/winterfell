@@ -3,7 +3,7 @@ import z from 'zod';
 export const new_planner_output_schema = z.object({
     should_continue: z.boolean(),
     plan: z.string(),
-    contract_name: z.string(),
+    contract_name: z.string().describe('the contract name should be in snake case'),
     context: z.string(),
     files_likely_affected: z.array(
         z.object({

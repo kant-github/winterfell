@@ -5,6 +5,7 @@ import { Bruno_Ace } from 'next/font/google';
 import { cn } from '@/src/lib/utils';
 import { doto } from './FeatureOne';
 import PublicReviewCard from './PublicReviewCard';
+import ToolTipComponent from '../ui/TooltipComponent';
 
 const bruno = Bruno_Ace({
     subsets: ['latin'],
@@ -36,10 +37,10 @@ const footerLinks = [
     {
         title: 'Connect',
         links: [
-            { name: 'Twitter', icon: FaTwitter, link: 'https://x.com/winterfell_dev' },
+            { name: 'Twitter', icon: FaTwitter, link: 'https://x.com/winterfell_dev', tooltip: '@winterfell_dev' },
             // { name: 'GitHub', icon: FaGithub },
-            { name: 'Discord', icon: FaDiscord },
-            { name: 'LinkedIn', icon: FaLinkedin },
+            // { name: 'Discord', icon: FaDiscord },
+            // { name: 'LinkedIn', icon: FaLinkedin },
         ],
     },
 ];
@@ -76,16 +77,18 @@ export default function Footer() {
                                     if (typeof link === 'object' && 'icon' in link) {
                                         const Icon = link.icon;
                                         return (
-                                            <a
-                                                href={link.link}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                key={link.name}
-                                                className="cursor-pointer hover:text-primary transition-colors flex items-center gap-x-2"
-                                            >
-                                                <Icon className="text-xl size-4" />
-                                                {link.name}
-                                            </a>
+                                            <ToolTipComponent content={link.tooltip} >
+                                                <a
+                                                    href={link.link}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    key={link.name}
+                                                    className="cursor-pointer hover:text-primary transition-colors flex items-center gap-x-2"
+                                                >
+                                                    <Icon className="text-xl size-4" />
+                                                    {link.name}
+                                                </a>
+                                            </ToolTipComponent>
                                         );
                                     }
                                     return (
