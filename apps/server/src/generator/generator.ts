@@ -34,6 +34,7 @@ import ResponseWriter from '../class/response_writer';
 import { ChatOpenAI } from '@langchain/openai';
 import env from '../configs/config.env';
 import { ChatAnthropic } from '@langchain/anthropic';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 
 export default class Generator {
     protected gpt_planner: ChatOpenAI;
@@ -44,8 +45,9 @@ export default class Generator {
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
+
         this.gpt_planner = new ChatOpenAI({
-            model: 'openai/gpt-4o-mini',
+            model: 'moonshotai/kimi-dev-72b',
             temperature: 0.2,
             configuration: {
                 baseURL: 'https://openrouter.ai/api/v1',
@@ -53,14 +55,8 @@ export default class Generator {
             },
         });
 
-        // this.gpt_planner = new ChatAnthropic({
-        //     model: 'claude-sonnet-4-5-20250929',
-        //     streaming: false,
-        //     apiKey: env.SERVER_ANTHROPIC_API_KEY,
-        // })
-
         this.gpt_coder = new ChatOpenAI({
-            model: 'moonshotai/kimi-k2-thinking',
+            model: 'anthropic/claude-sonnet-4.5',
             temperature: 0.2,
             streaming: true,
             configuration: {
@@ -68,12 +64,6 @@ export default class Generator {
                 apiKey: env.SERVER_OPENROUTER_KEY,
             },
         });
-
-        // this.gpt_coder = new ChatAnthropic({
-        //     model: 'claude-sonnet-4-5-20250929',
-        //     streaming: false,
-        //     apiKey: env.SERVER_ANTHROPIC_API_KEY,
-        // });
 
         this.claude_coder = new ChatOpenAI({
             model: 'moonshotai/kimi-k2-thinking',
@@ -85,12 +75,6 @@ export default class Generator {
             },
         });
 
-        // this.claude_coder = new ChatAnthropic({
-        //     model: 'claude-sonnet-4-5-20250929',
-        //     streaming: false,
-        //     apiKey: env.SERVER_ANTHROPIC_API_KEY,
-        // });
-
         this.gpt_finalizer = new ChatOpenAI({
             model: 'openai/gpt-4o-mini',
             temperature: 0.2,
@@ -98,7 +82,7 @@ export default class Generator {
                 baseURL: 'https://openrouter.ai/api/v1',
                 apiKey: env.SERVER_OPENROUTER_KEY,
             },
-        });
+        })
 
         this.parsers = new Map<string, StreamParser>();
     }
@@ -248,6 +232,7 @@ export default class Generator {
 
                 buffer += chunk.text;
                 const now = Date.now();
+                full_response += chunk.text;
 
                 const hasNewline = buffer.includes('\n');
 
@@ -274,6 +259,8 @@ export default class Generator {
             if (buffer.trim()) {
                 parser.feed(buffer + '\n', system_message);
             }
+
+            console.log(chalk.bgRed('letters length: '), full_response.length);
 
 
             system_message = await prisma.message.update({
@@ -413,7 +400,6 @@ export default class Generator {
         try {
 
             console.log('user instruction: ', user_instruction);
-            console.log('idl: ', idl);
             
             const planner_data = await planner_chain.invoke({
                 user_instruction: user_instruction,
@@ -506,7 +492,8 @@ export default class Generator {
             this.send_sse(res, STAGE.BUILDING, { stage: 'Building' }, system_message);
 
             const gen_files = parser.getGeneratedFiles();
-            await this.update_contract(contract_id, gen_files, delete_files);
+            console.log('generated files: ', gen_files);
+            const updated_contract = await this.update_contract(contract_id, gen_files, delete_files);
 
             system_message = await prisma.message.update({
                 where: {
@@ -524,7 +511,7 @@ export default class Generator {
             this.old_finalizer(
                 res,
                 finalizer_chain,
-                gen_files,
+                updated_contract,
                 contract_id,
                 parser,
                 system_message,
@@ -639,8 +626,11 @@ export default class Generator {
 
             console.log(chalk.yellowBright('updating contract in s3...'));
             await objectStore.updateContractFiles(contract_id, updated_contract);
+
+            return updated_contract;
         } catch (error) {
             console.error('Error while updating contract to s3: ', error);
+            return [];
         }
     }
 

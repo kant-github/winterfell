@@ -3,6 +3,8 @@ import { PromptTemplate } from '@langchain/core/prompts';
 export const new_chat_planner_prompt = new PromptTemplate({
     template: `You're a senior Anchor Solana contract planning agent.
 
+    give the contract a name in snake case only
+
 Generate a contract plan based on:
 {user_instruction}
 
@@ -44,14 +46,15 @@ If the instruction is not Anchor solana related, return should_continue as false
 });
 
 export const new_chat_coder_prompt = new PromptTemplate({
-    template: `You're a senior Anchor Solana contract developer for Anchor v0.29.0.
+    template: `You're a senior Anchor Solana contract developer for Anchor v0.32.1.
 
 Follow this plan:
 {plan}
 
-=== ANCHOR v0.29.0 CRITICAL RULES ===
+use Anchor version 0.32.1, and update every file which contains data about versoning
 
-1. BUMP ACCESS (v0.29.0):
+1. BUMP ACCESS (v0.32.1):
+   - add init_if_needed in anchor_lang import in Cargo.toml
    - Use: ctx.bumps.field_name (direct struct field access)
    - Never use: ctx.bumps.get("field_name") (old pre-0.28 syntax)
    - Example: escrow_account.bump = ctx.bumps.escrow_account;
@@ -100,12 +103,12 @@ Follow this plan:
    default = []
    
    [dependencies]
-   anchor-lang = "0.29.0"
-   anchor-spl = "0.29.0"
+   anchor-lang = "0.32.1"
+   anchor-spl = "0.32.1"
 
    B. /Anchor.toml (at project root):
    [toolchain]
-   anchor_version = "0.29.0"
+   anchor_version = "0.32.1"
    
    [programs.localnet]
    program_name = "PROGRAM_ID"

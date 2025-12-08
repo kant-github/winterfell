@@ -8,7 +8,7 @@ export const old_chat_planner_prompt = new PromptTemplate({
         the data is provided below
 
         Create a plan and list affected files.
-        also give a context what a coder will do here, not you
+        also give a context what the contract is about
 
         and based on user instruction:
         {user_instruction}
@@ -32,7 +32,7 @@ export const old_chat_coder_prompt = new PromptTemplate({
         follow this plan:
         {plan}
         
-        and make tool call with this contract-id {contract_id} to fetch the files which are mentioned in these:
+        and make tool call with this contract-id {contract_id} to fetch all the files which are mentioned in these:
         {files_likely_affected}
 
         and strictly follow this architecture of generation with the following order
