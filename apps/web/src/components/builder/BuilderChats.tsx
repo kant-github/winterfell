@@ -17,7 +17,7 @@ export default function BuilderChats() {
     const { setContractId } = useChatStore();
     const { handleGeneration } = useGenerate();
     const { messages, loading } = useBuilderChatStore();
-    const { activeTemplate } = useTemplateStore();
+    const { activeTemplate, resetTemplate } = useTemplateStore();
 
     useEffect(() => {
         if (messageEndRef.current) {
@@ -44,6 +44,7 @@ export default function BuilderChats() {
 
     async function startChat(instruction: string, template_id?: string) {
         handleGeneration(contractId, instruction, template_id);
+        if (activeTemplate) resetTemplate();
     }
 
     function returnParsedData(message: string) {

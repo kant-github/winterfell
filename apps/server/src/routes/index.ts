@@ -19,14 +19,14 @@ import get_chat_controller from '../controllers/chat-controller/get_chat_control
 import get_public_reviews_controller from '../controllers/review-controller/get_public_reviews_controller';
 import create_public_review_controller from '../controllers/review-controller/create_public_review_controller';
 import create_contract_review_controller from '../controllers/review-controller/create_contract_review_controller';
+import getContractMessages from '../controllers/contract-controller/getContractMessages';
+import delete_contract_controller from '../controllers/contract-controller/delete_contract_controller';
 
 // <------------------------- MIDDLEWARES ------------------------->
 import authMiddleware from '../middlewares/middleware.auth';
 import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
 import RateLimit from '../class/rate_limit';
-import delete_contract_controller from '../controllers/contract-controller/delete_contract_controller';
-import get_current_chat_messages_controller from '../controllers/contract-controller/get_current_chat_messages_controller';
 
 const router: Router = Router();
 
@@ -58,7 +58,7 @@ router.post(
     authMiddleware,
     plan_executor_controller,
 );
-router.post('/get-contract-data', authMiddleware, get_current_chat_messages_controller);
+router.post('/get-contract-messages', authMiddleware, getContractMessages);
 
 // <------------------------- GITHUB-ROUTES ------------------------->
 router.post(

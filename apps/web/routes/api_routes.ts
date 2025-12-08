@@ -32,7 +32,7 @@ export const GET_REVIEWS = API_URL + '/get-reviews';
 export const GET_USER_CONTRACTS = API_URL + '/contracts/get-user-contracts';
 export const GET_ALL_CONTRACTS = API_URL + '/contracts/get-all-contracts';
 export const DELETE_CONTRACT = API_URL + '/contracts';
-export const GET_CURRENT_CONTRACT_DATA_URL = API_URL + '/get-contract-data';
+export const GET_CURRENT_CONTRACT_DATA_URL = API_URL + '/get-contract-messages';
 
 // templates
 export const GET_ALL_TEMPLATES = API_URL + '/template/get-templates';

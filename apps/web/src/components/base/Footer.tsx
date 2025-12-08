@@ -6,6 +6,7 @@ import { cn } from '@/src/lib/utils';
 import { doto } from './FeatureOne';
 import PublicReviewCard from './PublicReviewCard';
 import ToolTipComponent from '../ui/TooltipComponent';
+import VersionLockTicker from '../tickers/VersionLockTicker';
 
 const bruno = Bruno_Ace({
     subsets: ['latin'],
@@ -94,9 +95,23 @@ export default function Footer() {
                                     return (
                                         <span
                                             key={link as string}
-                                            className="cursor-pointer hover:text-primary transition-colors"
+                                            className="cursor-pointer hover:text-primary transition-colors flex gap-x-1.5"
                                         >
                                             {link as string}
+                                            {(link === 'Smart Contract Editor' ||
+                                                link === 'Deploy & Monitor') && (
+                                                <div>
+                                                    <VersionLockTicker
+                                                        className={cn(
+                                                            'border border-white/10 shadow-[0_4px_20px_rgba(255,255,255,0.1)]',
+                                                            'before:absolute before:inset-0 before:-top-6 before:bg-gradient-to-b before:from-white/10 before:to-transparent before:opacity-40 before:pointer-events-none',
+                                                            'after:absolute after:inset-y-0 after:left-0 after:w-[40%] after:bg-gradient-to-r after:from-white/10 after:to-transparent after:opacity-20 after:blur-md after:pointer-events-none',
+                                                            'p-1 rounded-[5px] cursor-auto',
+                                                        )}
+                                                        iconClassName="size-3"
+                                                    />
+                                                </div>
+                                            )}
                                         </span>
                                     );
                                 })}
