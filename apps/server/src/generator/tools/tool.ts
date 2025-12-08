@@ -43,8 +43,6 @@ export default class Tool {
             const contract_files = await objectStore.get_resource_files(contract_id);
             const file = contract_files.find((f) => f.path === file_path);
 
-            console.log('contract files: ', contract_files);
-
             console.log('file requested: ', file_path);
             console.log('contract id sent: ', contract_id);
 
@@ -52,6 +50,7 @@ export default class Tool {
                 console.error('file not found');
                 return;
             }
+            console.log('req file data: ', file.content);
             return file.content;
         },
         {
