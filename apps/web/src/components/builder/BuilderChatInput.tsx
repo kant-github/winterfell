@@ -11,12 +11,13 @@ import ExecutorSelect from '../base/ExecutorSelect';
 import { ChatRole } from '@/src/types/prisma-types';
 import BuilderTemplatesPanel from './BuilderTemplatesPanel';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import { RxCross2 } from 'react-icons/rx';
-import Image from 'next/image';
-import useGenerate from '@/src/hooks/useGenerate';
-import { TbExternalLink } from 'react-icons/tb';
 import { v4 as uuid } from 'uuid';
+import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
+import { TbExternalLink } from 'react-icons/tb';
+import Image from 'next/image';
+import { RxCross2 } from 'react-icons/rx';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import useGenerate from '@/src/hooks/useGenerate';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -33,6 +34,8 @@ export default function BuilderChatInput() {
     const params = useParams();
     const router = useRouter();
     const contractId = params.contractId as string;
+
+    useHandleClickOutside([templateButtonRef, templatePanelRef], setShowTemplatePanel);
 
     async function handleSubmit() {
         if (!session?.user.id) {

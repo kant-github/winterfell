@@ -59,12 +59,12 @@ export default class PodCleanupManager {
     private async run_cleanup(): Promise<void> {
         console.log(
             chalk.blue('Running cleanup after') +
-                ' ' +
-                chalk.yellow(this.cleanup_config.cleanupInterval + ' minutes') +
-                ' ' +
-                chalk.green('at') +
-                ' ' +
-                chalk.magenta(new Date().toISOString()),
+            ' ' +
+            chalk.yellow(this.cleanup_config.cleanupInterval + ' minutes') +
+            ' ' +
+            chalk.green('at') +
+            ' ' +
+            chalk.magenta(new Date().toISOString()),
         );
 
         try {

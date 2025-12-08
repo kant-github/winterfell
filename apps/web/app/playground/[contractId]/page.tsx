@@ -47,7 +47,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             if (!shouldContinue) {
                 if (interval) clearInterval(interval);
                 stopped = true;
-                setLoading(false);
+                console.log('made false 1');
             }
         };
 

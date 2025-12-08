@@ -43,9 +43,19 @@ export default class Generator {
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
+        // this.gpt_planner = new ChatOpenAI({
+        //     model: 'anthropic/claude-3-haiku',
+        //     temperature: 0.2,
+        //     configuration: {
+        //         baseURL: 'https://openrouter.ai/api/v1',
+        //         apiKey: env.SERVER_OPENROUTER_KEY,
+        //     },
+        // });
+
         this.gpt_planner = new ChatOpenAI({
             model: 'moonshotai/kimi-dev-72b',
             temperature: 0.2,
+            streaming: false,
             configuration: {
                 baseURL: 'https://openrouter.ai/api/v1',
                 apiKey: env.SERVER_OPENROUTER_KEY,
@@ -63,7 +73,7 @@ export default class Generator {
         });
 
         this.claude_coder = new ChatOpenAI({
-            model: 'moonshotai/kimi-k2-thinking',
+            model: 'anthropic/claude-3.7-sonnet',
             temperature: 0.2,
             streaming: true,
             configuration: {
@@ -156,7 +166,7 @@ export default class Generator {
                 user_instruction,
             });
             console.log(chalk.blue(planner_data));
-            let full_response: string = '';
+            const full_response: string = '';
 
             console.log(planner_data);
 
