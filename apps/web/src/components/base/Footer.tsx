@@ -38,7 +38,12 @@ const footerLinks = [
     {
         title: 'Connect',
         links: [
-            { name: 'Twitter', icon: FaTwitter, link: 'https://x.com/winterfell_dev', tooltip: '@winterfell_dev' },
+            {
+                name: 'Twitter',
+                icon: FaTwitter,
+                link: 'https://x.com/winterfell_dev',
+                tooltip: '@winterfell_dev',
+            },
             // { name: 'GitHub', icon: FaGithub },
             // { name: 'Discord', icon: FaDiscord },
             // { name: 'LinkedIn', icon: FaLinkedin },
@@ -78,7 +83,7 @@ export default function Footer() {
                                     if (typeof link === 'object' && 'icon' in link) {
                                         const Icon = link.icon;
                                         return (
-                                            <ToolTipComponent content={link.tooltip} >
+                                            <ToolTipComponent content={link.tooltip}>
                                                 <a
                                                     href={link.link}
                                                     target="_blank"

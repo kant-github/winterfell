@@ -2,7 +2,7 @@ import axios from 'axios';
 import env from '../configs/config.env';
 import ResponseWriter from '../class/response_writer';
 import { Response } from 'express';
-import { ChatRole, Message, prisma } from '@winterfell/database';
+import { ChatRole, prisma } from '@winterfell/database';
 import { generator, objectStore } from '../services/init';
 import { MODEL, STAGE } from '@winterfell/types';
 import { Contract as ContractType } from '@winterfell/database';
@@ -181,7 +181,7 @@ export default class Contract {
 
     static async continue_old_contract(
         res: Response,
-        contract: ContractType & { messages: Message[] },
+        contract: ContractType,
         instruction: string,
         model?: MODEL,
     ) {

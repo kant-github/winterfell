@@ -33,8 +33,6 @@ import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
 import { ChatOpenAI } from '@langchain/openai';
 import env from '../configs/config.env';
-import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 
 export default class Generator {
     protected gpt_planner: ChatOpenAI;
@@ -45,7 +43,6 @@ export default class Generator {
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
-
         this.gpt_planner = new ChatOpenAI({
             model: 'moonshotai/kimi-dev-72b',
             temperature: 0.2,
@@ -82,7 +79,7 @@ export default class Generator {
                 baseURL: 'https://openrouter.ai/api/v1',
                 apiKey: env.SERVER_OPENROUTER_KEY,
             },
-        })
+        });
 
         this.parsers = new Map<string, StreamParser>();
     }
@@ -237,9 +234,7 @@ export default class Generator {
                 const hasNewline = buffer.includes('\n');
 
                 const shouldFlush =
-                    hasNewline ||
-                    buffer.length > MAX_CHARS ||
-                    now - lastFlush > MAX_DELAY;
+                    hasNewline || buffer.length > MAX_CHARS || now - lastFlush > MAX_DELAY;
 
                 if (shouldFlush) {
                     const lines = buffer.split('\n');
@@ -261,7 +256,6 @@ export default class Generator {
             }
 
             console.log(chalk.bgRed('letters length: '), full_response.length);
-
 
             system_message = await prisma.message.update({
                 where: {
@@ -398,9 +392,8 @@ export default class Generator {
         idl: Object[],
     ) {
         try {
-
             console.log('user instruction: ', user_instruction);
-            
+
             const planner_data = await planner_chain.invoke({
                 user_instruction: user_instruction,
                 idl: idl,
@@ -493,7 +486,11 @@ export default class Generator {
 
             const gen_files = parser.getGeneratedFiles();
             console.log('generated files: ', gen_files);
-            const updated_contract = await this.update_contract(contract_id, gen_files, delete_files);
+            const updated_contract = await this.update_contract(
+                contract_id,
+                gen_files,
+                delete_files,
+            );
 
             system_message = await prisma.message.update({
                 where: {
