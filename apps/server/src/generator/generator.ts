@@ -33,8 +33,6 @@ import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
 import { ChatOpenAI } from '@langchain/openai';
 import env from '../configs/config.env';
-import { ChatAnthropic } from '@langchain/anthropic';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 
 export default class Generator {
     protected gpt_planner: ChatOpenAI;
@@ -45,10 +43,19 @@ export default class Generator {
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
+        // this.gpt_planner = new ChatOpenAI({
+        //     model: 'anthropic/claude-3-haiku',
+        //     temperature: 0.2,
+        //     configuration: {
+        //         baseURL: 'https://openrouter.ai/api/v1',
+        //         apiKey: env.SERVER_OPENROUTER_KEY,
+        //     },
+        // });
 
         this.gpt_planner = new ChatOpenAI({
             model: 'moonshotai/kimi-dev-72b',
             temperature: 0.2,
+            streaming: false,
             configuration: {
                 baseURL: 'https://openrouter.ai/api/v1',
                 apiKey: env.SERVER_OPENROUTER_KEY,
@@ -66,7 +73,7 @@ export default class Generator {
         });
 
         this.claude_coder = new ChatOpenAI({
-            model: 'moonshotai/kimi-k2-thinking',
+            model: 'anthropic/claude-3.7-sonnet',
             temperature: 0.2,
             streaming: true,
             configuration: {
@@ -82,7 +89,7 @@ export default class Generator {
                 baseURL: 'https://openrouter.ai/api/v1',
                 apiKey: env.SERVER_OPENROUTER_KEY,
             },
-        })
+        });
 
         this.parsers = new Map<string, StreamParser>();
     }
@@ -159,7 +166,7 @@ export default class Generator {
                 user_instruction,
             });
             console.log(chalk.blue(planner_data));
-            let full_response: string = '';
+            const full_response: string = '';
 
             console.log(planner_data);
 
@@ -232,14 +239,11 @@ export default class Generator {
 
                 buffer += chunk.text;
                 const now = Date.now();
-                full_response += chunk.text;
 
                 const hasNewline = buffer.includes('\n');
 
                 const shouldFlush =
-                    hasNewline ||
-                    buffer.length > MAX_CHARS ||
-                    now - lastFlush > MAX_DELAY;
+                    hasNewline || buffer.length > MAX_CHARS || now - lastFlush > MAX_DELAY;
 
                 if (shouldFlush) {
                     const lines = buffer.split('\n');
@@ -262,7 +266,6 @@ export default class Generator {
 
             console.log(chalk.bgRed('letters length: '), full_response.length);
 
-
             system_message = await prisma.message.update({
                 where: {
                     id: system_message.id,
@@ -278,7 +281,7 @@ export default class Generator {
 
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
             console.log('llm generated files: ', llm_generated_files);
-            const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
+            const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name);
             const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
 
             system_message = await prisma.message.update({
@@ -398,9 +401,8 @@ export default class Generator {
         idl: Object[],
     ) {
         try {
-
             console.log('user instruction: ', user_instruction);
-            
+
             const planner_data = await planner_chain.invoke({
                 user_instruction: user_instruction,
                 idl: idl,
@@ -493,7 +495,11 @@ export default class Generator {
 
             const gen_files = parser.getGeneratedFiles();
             console.log('generated files: ', gen_files);
-            const updated_contract = await this.update_contract(contract_id, gen_files, delete_files);
+            const updated_contract = await this.update_contract(
+                contract_id,
+                gen_files,
+                delete_files,
+            );
 
             system_message = await prisma.message.update({
                 where: {

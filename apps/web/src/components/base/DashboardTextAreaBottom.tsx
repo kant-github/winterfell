@@ -64,7 +64,7 @@ export default function DashboardTextAreaBottom({
                     disabled={isDisabled}
                     onClick={handleSubmit}
                     className={cn(
-                        'group/submit flex items-center gap-2 h-6 w-4 md:h-8 md:w-9 px-2 py-1 rounded-[4px] font-mono text-xs duration-200',
+                        'group/submit flex items-center gap-2 h-6 w-4 md:h-8 md:w-9 px-2 py-1 rounded-[4px] font-mono text-xs duration-200 exec-button-dark',
                         inputValue.trim() || activeTemplate
                             ? 'bg-neutral-800 text-neutral-300 hover:text-neutral-200'
                             : 'bg-neutral-900 text-neutral-700 cursor-not-allowed',

@@ -111,7 +111,7 @@ export default function PublicReviewCard() {
                                         'text-neutral-200 border border-neutral-900 exec-button-dark',
                                     )}
                                 >
-                                    <SiMinutemailer className="size-4 mr-1" />
+                                    <SiMinutemailer className="size-4 mr-1 text-light" />
                                 </Button>
                             </motion.div>
                         )}

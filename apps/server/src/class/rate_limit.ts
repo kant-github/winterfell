@@ -31,7 +31,7 @@ export default class RateLimit {
 
     static get_chat_rate_limit = rateLimit({
         windowMs: 10 * RateLimit.MINUTE,
-        max: 50,
+        max: 400,
         message: 'Too many chat requests, please try again later.',
         standardHeaders: true,
         legacyHeaders: false,
@@ -39,7 +39,7 @@ export default class RateLimit {
 
     static github_export_rate_limit = rateLimit({
         windowMs: 15 * RateLimit.MINUTE,
-        max: 20,
+        max: 15,
         message: 'Too many GitHub export requests, please try again later.',
         standardHeaders: true,
         legacyHeaders: false,
@@ -47,7 +47,7 @@ export default class RateLimit {
 
     static github_zip_rate_limit = rateLimit({
         windowMs: 15 * RateLimit.MINUTE,
-        max: 20,
+        max: 15,
         message: 'Too many zip download requests, please try again later.',
         standardHeaders: true,
         legacyHeaders: false,
@@ -55,7 +55,7 @@ export default class RateLimit {
 
     static github_validate_rate_limit = rateLimit({
         windowMs: 10 * RateLimit.MINUTE,
-        max: 30,
+        max: 50,
         message: 'Too many validation requests, please try again later.',
         standardHeaders: true,
         legacyHeaders: false,

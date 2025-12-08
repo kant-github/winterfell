@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { ForwardedRef, useEffect, useRef } from 'react';
 import { motion, useAnimation, useInView, useScroll, useTransform } from 'framer-motion';
 import { Button } from '../ui/button';
 import { RiCodeSSlashFill } from 'react-icons/ri';
@@ -11,7 +11,11 @@ import { useRouter } from 'next/navigation';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import Marketplace from '@/src/lib/server/marketplace-server';
 
-export default function Hero() {
+interface HeroProps {
+    inputRef: ForwardedRef<HTMLTextAreaElement>;
+}
+
+export default function Hero({ inputRef }: HeroProps) {
     const heroRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(heroRef, { once: true });
     const controls = useAnimation();
@@ -68,7 +72,7 @@ export default function Hero() {
                     </motion.div>
 
                     <HighlighterTicker />
-                    <DashboardTextAreaComponent />
+                    <DashboardTextAreaComponent inputRef={inputRef} />
                     <ActionTickers />
                 </motion.div>
 

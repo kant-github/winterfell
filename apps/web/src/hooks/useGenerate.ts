@@ -10,7 +10,7 @@ import GenerateContract from '../lib/server/generate_contract';
 export default function useGenerate() {
     const { session } = useUserSessionStore();
     const { activeTemplate } = useTemplateStore();
-    const { setMessage } = useBuilderChatStore.getState();
+    const { setMessage, setLoading } = useBuilderChatStore.getState();
     const router = useRouter();
 
     function set_states(contractId: string, instruction?: string, templateId?: string) {
@@ -54,6 +54,7 @@ export default function useGenerate() {
 
     function handleGeneration(contractId: string, instruction?: string, templateId?: string) {
         if (!session?.user.token) return;
+        setLoading(true);
         GenerateContract.start_agentic_executor(
             session.user.token,
             contractId,

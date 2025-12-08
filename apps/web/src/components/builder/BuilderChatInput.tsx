@@ -11,12 +11,14 @@ import ExecutorSelect from '../base/ExecutorSelect';
 import { ChatRole } from '@/src/types/prisma-types';
 import BuilderTemplatesPanel from './BuilderTemplatesPanel';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
-import { RxCross2 } from 'react-icons/rx';
-import Image from 'next/image';
-import useGenerate from '@/src/hooks/useGenerate';
-import { TbExternalLink } from 'react-icons/tb';
 import { v4 as uuid } from 'uuid';
+import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
+import { TbExternalLink } from 'react-icons/tb';
+import Image from 'next/image';
+import { RxCross2 } from 'react-icons/rx';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import useGenerate from '@/src/hooks/useGenerate';
+import { FaCross } from 'react-icons/fa';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -33,6 +35,8 @@ export default function BuilderChatInput() {
     const params = useParams();
     const router = useRouter();
     const contractId = params.contractId as string;
+
+    useHandleClickOutside([templateButtonRef, templatePanelRef], setShowTemplatePanel);
 
     async function handleSubmit() {
         if (!session?.user.id) {
@@ -75,19 +79,19 @@ export default function BuilderChatInput() {
                         <Button
                             onClick={handleContinueToNewChat}
                             size={'mini'}
-                            className="w-fit bg-light/90 text-darker hover:bg-light/80 py-1 px-2.5 font-semibold text-xs rounded-[8px] flex items-center "
+                            className="w-fit bg-dark hover:bg-dark/70 text-light/70 py-1 px-2.5 font-normal text-xs rounded-[4px] flex items-center border border-neutral-800"
                         >
                             continue to new chat
                             <TbExternalLink />
                         </Button>
                         <div
-                            className="bg-red-600/40 rounded-[8px] px-2 leading-snug cursor-pointer"
+                            className="bg-red-600/20 hover:bg-red-500/20 transition-colors duration-100 rounded-[4px] aspect-square h-5.5 w-5.5 leading-snug cursor-pointer flex items-center justify-center"
                             onClick={() => {
                                 setHasExistingMessages(false);
                                 setShowTemplatePanel(false);
                             }}
                         >
-                            x
+                            <RxCross2 className='size-3 text-red-500 hover:text-red-400' />
                         </div>
                     </div>
                 )}

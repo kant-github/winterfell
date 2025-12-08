@@ -8,8 +8,7 @@ import { FiCheck, FiCopy } from 'react-icons/fi';
 import { cn } from '@/src/lib/utils';
 
 export default function CodeEditor(): JSX.Element {
-    const { currentCode, currentFile, collapseFileTree, setCurrentCursorPosition } =
-        useCodeEditor();
+    const { currentCode, currentFile, collapseFileTree, setCurrentCursorPosition } = useCodeEditor();
     const [isCopied, setIsCopied] = useState<boolean>(false);
     const [copyCooldown, setCopyCooldown] = useState<boolean>(false);
 
@@ -126,7 +125,12 @@ export default function CodeEditor(): JSX.Element {
                 const event = new CustomEvent('open-search-bar');
                 window.dispatchEvent(event);
             });
+            editorInstance.onDidChangeCursorPosition((e) => {
+                const { lineNumber, column } = e.position;
+                setCurrentCursorPosition({ ln: lineNumber, col: column });
+            });
         },
+
         [],
     );
 
@@ -139,7 +143,7 @@ export default function CodeEditor(): JSX.Element {
             <div className="flex-1 min-w-0 h-full">
                 {currentFile ? (
                     <>
-                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#0d0e10] text-gray-300 text-sm ">
+                        <div className="w-full flex items-center justify-between px-4 py-1 bg-[#151617] text-gray-300 text-sm ">
                             <span>{filePathModifier(currentFile?.id)}</span>
                             <div
                                 onClick={handleCopyFileContent}

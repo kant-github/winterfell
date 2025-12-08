@@ -26,7 +26,7 @@ export default function FeatureOne({ title, subTitle, description }: FeatureOneP
                 >
                     {title}
                     {(title === 'EditWizard' || title === 'DeployBot') && (
-                        <VersionLockTicker className="absolute bottom-2.5 -right-10 z-10" />
+                        <VersionLockTicker className="absolute bottom-2.5 -right-28 z-10" />
                     )}
                 </h1>
                 <p className="text-left text-xl font-bold mt-2 text-primary">{subTitle}</p>

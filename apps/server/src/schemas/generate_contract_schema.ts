@@ -1,4 +1,3 @@
-import { ChatRole, ContractGenerationStage } from '@winterfell/database';
 import { MODEL } from '@winterfell/types';
 import z from 'zod';
 

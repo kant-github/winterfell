@@ -173,6 +173,7 @@ export default class GenerateContract {
                                         upsertMessage(event.systemMessage);
                                     }
                                     parseFileStructure(event.data.data as FileContent[]);
+                                    console.log('made false 2');
                                     setLoading(false);
                                     setCollapseFileTree(true);
                                 }
@@ -194,6 +195,7 @@ export default class GenerateContract {
         } catch (error) {
             console.error('Chat stream error:', error);
         } finally {
+            console.log('made false 3');
             setLoading(false);
         }
     }
@@ -330,6 +332,7 @@ export default class GenerateContract {
                                         upsertMessage(event.systemMessage);
                                     }
                                     parseFileStructure(event.data.data as FileContent[]);
+                                    console.log('made false 4');
                                     setLoading(false);
                                     setCollapseFileTree(true);
                                 }
