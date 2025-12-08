@@ -1,5 +1,4 @@
 'use client';
-
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Quote } from 'lucide-react';
@@ -54,7 +53,7 @@ export default function ReviewsSection() {
                     secondText="from the Wall"
                     bgcolor="bg-none"
                 />
-                <div className="relative max-w-7xl mx-auto h-[600px]">
+                <div className="relative max-w-7xl mx-auto h-[600px] px-4 md:px-0">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-full relative text-left">
                         <ReviewColumn reviews={column1} duration={30} />
                         <ReviewColumn reviews={column2} duration={35} />

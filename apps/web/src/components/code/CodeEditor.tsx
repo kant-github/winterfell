@@ -8,7 +8,7 @@ import { FiCheck, FiCopy } from 'react-icons/fi';
 import { cn } from '@/src/lib/utils';
 
 export default function CodeEditor(): JSX.Element {
-    const { currentCode, currentFile, collapseFileTree } = useCodeEditor();
+    const { currentCode, currentFile, collapseFileTree, setCurrentCursorPosition } = useCodeEditor();
     const [isCopied, setIsCopied] = useState<boolean>(false);
     const [copyCooldown, setCopyCooldown] = useState<boolean>(false);
 
@@ -125,7 +125,12 @@ export default function CodeEditor(): JSX.Element {
                 const event = new CustomEvent('open-search-bar');
                 window.dispatchEvent(event);
             });
+            editorInstance.onDidChangeCursorPosition((e) => {
+                const { lineNumber, column } = e.position;
+                setCurrentCursorPosition({ ln: lineNumber, col: column });
+            });
         },
+
         [],
     );
 

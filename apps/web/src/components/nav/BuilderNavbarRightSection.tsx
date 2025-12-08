@@ -12,13 +12,15 @@ import { toast } from 'sonner';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { cn } from '@/src/lib/utils';
 import ExportPanel from './ExportPanel.';
+import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 
 export default function BuilderNavbarRightSection() {
-    const { session } = useUserSessionStore();
     const [openWalletPanel, setOpenWalletPanel] = useState<boolean>(false);
     const [showRepoPanel, setShowRepoPanel] = useState<boolean>(false);
     const [openProfileMenu, setOpenProfleMenu] = useState<boolean>(false);
     const [isConnectingGithub, setIsConnectingGithub] = useState<boolean>(false);
+    const { session } = useUserSessionStore();
+    const { loading } = useBuilderChatStore();
 
     const hasGithub = session?.user?.hasGithub;
     const panelRef = useRef<HTMLDivElement | null>(null);
@@ -66,6 +68,7 @@ export default function BuilderNavbarRightSection() {
         <div className="flex items-center justify-between gap-x-3 relative">
             <ToolTipComponent content="deploy your contract" side="bottom">
                 <Button
+                    disabled={loading}
                     onClick={() => setOpenWalletPanel(true)}
                     size="xs"
                     className="bg-light text-darkest hover:bg-light hover:text-darkest tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 duration-300 font-semibold rounded-[4px] exec-button-light"
@@ -79,7 +82,7 @@ export default function BuilderNavbarRightSection() {
                 <ToolTipComponent content="Connect GitHub to export code" side="bottom">
                     <Button
                         onClick={handleConnectGitHub}
-                        disabled={isConnectingGithub}
+                        disabled={isConnectingGithub || loading}
                         size="xs"
                         className="bg-[#24292e] text-white hover:bg-[#1a1e22] gap-1.5 tracking-wider cursor-pointer transition-transform hover:-translate-y-0.5 font-semibold rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed exec-button-dark"
                     >
@@ -93,6 +96,7 @@ export default function BuilderNavbarRightSection() {
                 <div className="relative w-full" ref={panelRef}>
                     <ToolTipComponent content="Export codebase to GitHub" side="bottom">
                         <Button
+                            disabled={loading}
                             onClick={() => setShowRepoPanel((prev) => !prev)}
                             size="xs"
                             className={cn(

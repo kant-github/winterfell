@@ -1,7 +1,7 @@
 import { cn } from '@/src/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { Terminal } from 'lucide-react';
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, ForwardedRef } from 'react';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { v4 as uuid } from 'uuid';
 import LoginModal from '../utility/LoginModal';
@@ -11,7 +11,11 @@ import DashboardTextAreaBottom from './DashboardTextAreaBottom';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import useGenerate from '@/src/hooks/useGenerate';
 
-export default function DashboardTextAreaComponent() {
+interface DashboardTextAreaComponentProps {
+    inputRef?: ForwardedRef<HTMLTextAreaElement>;
+}
+
+export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAreaComponentProps) {
     const [inputValue, setInputValue] = useState<string>('');
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
@@ -72,6 +76,7 @@ export default function DashboardTextAreaComponent() {
                         </div>
                         <Textarea
                             value={inputValue}
+                            ref={inputRef}
                             onChange={(e) => {
                                 setInputValue(e.target.value);
                                 setIsTyping(e.target.value.length > 0);

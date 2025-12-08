@@ -525,7 +525,7 @@ export async function seedTemplates() {
             tags: ['vault', 'anchor', 'solana', 'pda', 'defi'],
             anchorVersion: '0.32.1',
             solanaVersion: '1.18.4',
-            imageUrl: 'https://d3k5vke5jsl4rb.cloudfront.net/images/contract-1.jpg',
+            imageUrl: 'https://d3k5vke5jsl4rb.cloudfront.net/images/contract-5.jpg',
             summarisedObject: JSON.stringify([
                 {
                     id: 'Cargo.toml',

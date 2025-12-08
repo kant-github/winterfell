@@ -33,8 +33,8 @@ export default function WhoWeAre() {
         <>
             <ArchitectureTitleComponent firstText="WINTERFELL's" secondText="ARCHITECTURE" />
             <section ref={containerRef} className="bg-[#0a0c0d] w-screen">
-                <div className="grid grid-cols-2 gap-0">
-                    <div className="h-screen sticky top-0 flex items-center justify-center bg-[#0a0c0d]">
+                <div className="grid md:grid-cols-2 gap-0">
+                    <div className="h-screen hidden md:sticky top-0 md:flex items-center justify-center bg-[#0a0c0d]">
                         <DonutComponent />
                     </div>
 

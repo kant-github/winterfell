@@ -119,8 +119,8 @@ function LogoutRightContent({
                         onClick={LogoutHandler}
                         className={cn(
                             'flex-1 px-6 py-5 text-sm font-medium',
-                            'bg-red-500 hover:bg-red-500/90',
-                            'border border-red-500/50 rounded-[8px]',
+                            'bg-red-600/60 hover:bg-red-700/70',
+                            'rounded-[8px]',
                             'cursor-pointer tracking-wide transition-all',
                         )}
                     >
