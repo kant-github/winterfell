@@ -239,7 +239,6 @@ export default class Generator {
 
                 buffer += chunk.text;
                 const now = Date.now();
-                full_response += chunk.text;
 
                 const hasNewline = buffer.includes('\n');
 
@@ -282,7 +281,7 @@ export default class Generator {
 
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
             console.log('llm generated files: ', llm_generated_files);
-            const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name!);
+            const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name);
             const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
 
             system_message = await prisma.message.update({
