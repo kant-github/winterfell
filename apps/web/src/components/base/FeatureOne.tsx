@@ -1,5 +1,6 @@
 import { cn } from '@/src/lib/utils';
 import { Doto } from 'next/font/google';
+import VersionLockTicker from '../tickers/VersionLockTicker';
 
 export const doto = Doto({
     subsets: ['latin'],
@@ -20,10 +21,13 @@ export default function FeatureOne({ title, subTitle, description }: FeatureOneP
                 <h1
                     className={cn(
                         doto.className,
-                        'text-6xl font-black tracking-wider text-left text-light/70',
+                        'text-6xl font-black tracking-wider text-left text-light/70 flex items-end relative w-fit',
                     )}
                 >
                     {title}
+                    {(title === 'EditWizard' || title === 'DeployBot') && (
+                        <VersionLockTicker className="absolute bottom-2.5 -right-10 z-10" />
+                    )}
                 </h1>
                 <p className="text-left text-xl font-bold mt-2 text-primary">{subTitle}</p>
                 <p className="text-left text-light/50 tracking-wide text-md mt-5">{description}</p>

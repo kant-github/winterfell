@@ -516,3 +516,9 @@ a:visited {
     backdrop-filter: blur(64px);
     mask: linear-gradient(to top, rgba(0, 0, 0, 0) 87.5%, rgba(0, 0, 0, 1) 100%);
 }
+
+.glow-text {
+    text-shadow:
+        0 0 12px rgba(108, 68, 252, 0.4),
+        0 0 24px rgba(108, 68, 252, 0.2);
+}
