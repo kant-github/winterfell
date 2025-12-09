@@ -14,7 +14,8 @@ export default class PodCleanupManager {
     private batch_api: BatchV1Api;
     private core_api: CoreV1Api;
     private cleanup_config: PodCleanupConfig;
-    private cleanup_timer: NodeJS.Timeout | null = null;
+    // private cleanup_timer: NodeJS.Timeout | null = null;
+    private cleanup_timer: ReturnType<typeof setInterval> | null = null;
     private is_runnning: boolean = false;
 
     constructor(kubernetes_client: KubernetesClient, configs: Partial<PodCleanupConfig>) {
@@ -82,7 +83,6 @@ export default class PodCleanupManager {
             });
 
             const now = Date.now();
-            let deleted_count = 0;
 
             for (const job of jobs.items) {
                 const job_name = job.metadata?.name;

@@ -144,7 +144,8 @@ export default class KubernetesManager {
                 propagationPolicy: 'Background', // Also delete pods
             });
             console.log(`Deleted Job: ${job_name}`);
-        } catch (err: any) {
+        } catch (error: unknown) {
+            const err = error as { statusCode: number };
             if (err.statusCode === 404) {
                 console.log(`Job ${job_name} already deleted`);
                 return;
@@ -599,7 +600,7 @@ export default class KubernetesManager {
         }
 
         try {
-            const { stdout } = await this.run_command_on_pod({
+            await this.run_command_on_pod({
                 namespace,
                 pod_name,
                 container_name,
@@ -630,7 +631,7 @@ export default class KubernetesManager {
 
         console.log('Installing dependencies...');
         try {
-            const { stdout, stderr } = await this.run_command_on_pod({
+            const { stderr } = await this.run_command_on_pod({
                 namespace,
                 pod_name,
                 container_name,
