@@ -68,7 +68,7 @@ export default abstract class GeneratorShape {
      */
     protected abstract new_finalizer(
         res: Response,
-        finalizer_chain: any,
+        finalizer_chain: RunnableSequence,
         generated_files: FileContent[],
         full_response: string,
         contract_id: string,
@@ -108,7 +108,11 @@ export default abstract class GeneratorShape {
     protected abstract get_chains(
         chat: 'new' | 'old',
         model: MODEL,
-    ): { planner_chain: any; coder_chain: any; finalizer_chain: any };
+    ): {
+        planner_chain: RunnableSequence;
+        coder_chain: Runnable;
+        finalizer_chain: RunnableSequence;
+    };
 
     /**
      * returns a stream-parser based on contract_id in mapping

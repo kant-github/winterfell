@@ -241,7 +241,6 @@
 //     - IDL: should be generated at last of the contract which should show the basic layout of the contract
 //     - CONTEXT: near about 20 words of what you did at the end of complete contract generation
 
-
 // the file structure to strictly follow
 
 // /migrations

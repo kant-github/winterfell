@@ -9,7 +9,7 @@ export const loggingMiddleware = (req: Request, res: Response, next: NextFunctio
 
     const originalSend = res.send;
 
-    res.send = function (data: any) {
+    res.send = function (data: unknown) {
         const duration = Date.now() - startTime;
 
         // logger.logResponse(req, res, duration);

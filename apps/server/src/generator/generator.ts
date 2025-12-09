@@ -704,7 +704,11 @@ export default class Generator {
     protected get_chains(
         chat: 'new' | 'old',
         model: MODEL,
-    ): { planner_chain: RunnableSequence; coder_chain: Runnable; finalizer_chain: RunnableSequence } | null {
+    ): {
+        planner_chain: RunnableSequence;
+        coder_chain: Runnable;
+        finalizer_chain: RunnableSequence;
+    } | null {
         try {
             let planner_chain;
             let coder_chain;
