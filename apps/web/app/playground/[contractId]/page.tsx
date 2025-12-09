@@ -47,7 +47,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             if (!shouldContinue) {
                 if (interval) clearInterval(interval);
                 stopped = true;
-                console.log('made false 1');
             }
         };
 
@@ -59,7 +58,6 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             stopped = true;
             if (interval) clearInterval(interval);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session?.user?.token]);
 
     useEffect(() => {
@@ -68,6 +66,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             setTemplates(response);
         };
         get_templates();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -119,6 +118,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             reset();
             cleanWebSocketClient();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId]);
 
     return (

@@ -28,6 +28,7 @@ export default function Hero({ inputRef }: HeroProps) {
             setTemplates(response);
         };
         get_templates();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     useEffect(() => {
         if (isInView) {

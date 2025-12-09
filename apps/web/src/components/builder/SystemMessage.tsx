@@ -37,7 +37,7 @@ interface SystemMessageProps {
     currentFile?: string;
 }
 
-export default function SystemMessage({ message, currentPhase, currentFile }: SystemMessageProps) {
+export default function SystemMessage({ message }: SystemMessageProps) {
     const [currentStage, setCurrentStage] = useState<STAGE>(STAGE.PLANNING);
     const initialStageRef = useRef<STAGE | null>(null);
     const lastReviewedContractRef = useRef<string | null>(null);
@@ -67,6 +67,7 @@ export default function SystemMessage({ message, currentPhase, currentFile }: Sy
 
             return () => clearTimeout(timer);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentStage, message?.contractId, show]);
 
     const currentStageIndex = useMemo(() => {

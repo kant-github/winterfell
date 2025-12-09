@@ -3,7 +3,6 @@
 import React from 'react';
 import { Home, ArrowLeft } from 'lucide-react';
 import DustParticles from '@/src/components/base/DustParticles';
-import AppLogo from '@/src/components/tickers/AppLogo';
 import Link from 'next/link';
 import Navbar from '@/src/components/nav/Navbar';
 import { Button } from '@/src/components/ui/button';

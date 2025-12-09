@@ -1,5 +1,4 @@
 import { contents } from '@/src/const/docsSidebarValues';
-import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { ClientDocsPanel } from '@/src/types/docs-types';
 import { cn } from '@/src/lib/utils';
@@ -18,19 +17,9 @@ interface ClientDocsSidebarProps {
 export default function ClientDocsLeftSidebar({ switchPanel }: ClientDocsSidebarProps) {
     const [_activeIndex, setActiveIndex] = useState<number>(1);
     const { activeContent, setActiveContent } = useActiveContentStore();
-    const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
     const router = useRouter();
 
-    function toggleSection(index: number): void {
-        const newExpanded = new Set(expandedSections);
-        if (newExpanded.has(index)) {
-            newExpanded.delete(index);
-        } else {
-            newExpanded.add(index);
-        }
-        setExpandedSections(newExpanded);
-    }
-
+    
     function handlePanelSwitch(index: number, panel: ClientDocsPanel): void {
         setActiveIndex(index);
         setActiveContent(panel);
@@ -101,7 +90,8 @@ export default function ClientDocsLeftSidebar({ switchPanel }: ClientDocsSidebar
                 </div>
             </div>
             <div className="border-t border-neutral-800 px-4 py-3 space-y-1.5">
-                <button
+                <button 
+                    type='button'
                     className="flex items-center gap-x-2 cursor-pointer group"
                     onClick={() => router.push(`/playground/${uuid()}`)}
                 >

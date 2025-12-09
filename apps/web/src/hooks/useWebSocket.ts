@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import WebSocketClient, { MessageHandler } from '../class/socket.client';
-import { cleanWebSocketClient, getWebSocketClient } from '../lib/singletonWebSocket';
+import { cleanWebSocketClient } from '../lib/singletonWebSocket';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
 import { COMMAND } from '@winterfell/types';
@@ -33,7 +33,7 @@ export const useWebSocket = () => {
         }
 
         return () => {
-            interval && clearInterval(interval);
+            if (interval) clearInterval(interval);
             setIsConnected(false);
             socket.current = null;
             cleanWebSocketClient();

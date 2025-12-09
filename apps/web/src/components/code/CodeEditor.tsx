@@ -129,9 +129,8 @@ export default function CodeEditor(): JSX.Element {
                 const { lineNumber, column } = e.position;
                 setCurrentCursorPosition({ ln: lineNumber, col: column });
             });
-        },
-
-        [],
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [],
     );
 
     function filePathModifier(filePath: string | undefined) {

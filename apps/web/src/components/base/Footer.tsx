@@ -1,5 +1,5 @@
 import { LiaServicestack } from 'react-icons/lia';
-import { FaTwitter, FaDiscord, FaLinkedin } from 'react-icons/fa';
+import { FaTwitter } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { Bruno_Ace } from 'next/font/google';
 import { cn } from '@/src/lib/utils';

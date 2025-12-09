@@ -13,7 +13,8 @@ export default function City3D({ className = '' }: City3DProps) {
     const animationFrameRef = useRef<number>(0);
 
     useEffect(() => {
-        if (!containerRef.current) return;
+        const container = containerRef.current;
+        if (!container) return;
 
         const isXL = () => window.innerWidth >= 1280;
 
@@ -25,7 +26,7 @@ export default function City3D({ className = '' }: City3DProps) {
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         }
 
-        containerRef.current.appendChild(renderer.domElement);
+        container.appendChild(renderer.domElement);
         rendererRef.current = renderer;
 
         const camera = new THREE.PerspectiveCamera(
@@ -198,8 +199,8 @@ export default function City3D({ className = '' }: City3DProps) {
 
             cancelAnimationFrame(animationFrameRef.current);
 
-            if (rendererRef.current && containerRef.current) {
-                containerRef.current.removeChild(rendererRef.current.domElement);
+            if (rendererRef.current && container) {
+                container.removeChild(rendererRef.current.domElement);
                 rendererRef.current.dispose();
             }
 

@@ -43,6 +43,7 @@ export default function BuilderDashboard(): JSX.Element {
         if (isConnected) {
             subscribeToHandler(handleIncomingTerminalLogs);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isConnected]);
 
     return (

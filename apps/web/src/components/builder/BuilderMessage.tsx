@@ -15,7 +15,6 @@ import { SidePanelValues } from '../code/EditorSidePanel';
 import { useEditPlanStore } from '@/src/store/code/useEditPlanStore';
 import SystemMessage from './SystemMessage';
 import { FiCopy, FiCheck, FiClock } from 'react-icons/fi';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 
 interface BuilderMessageProps {
     message: Message;

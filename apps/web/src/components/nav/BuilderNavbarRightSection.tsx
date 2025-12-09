@@ -10,10 +10,8 @@ import { WalletPanel } from '../base/WalletPanel';
 import ProfileMenu from '../utility/ProfileMenu';
 import { toast } from 'sonner';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { cn } from '@/src/lib/utils';
 import ExportPanel from './ExportPanel.';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
-import { LuCopy } from 'react-icons/lu';
 
 export default function BuilderNavbarRightSection() {
     const [openWalletPanel, setOpenWalletPanel] = useState<boolean>(false);

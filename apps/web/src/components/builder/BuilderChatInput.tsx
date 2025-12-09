@@ -18,7 +18,6 @@ import Image from 'next/image';
 import { RxCross2 } from 'react-icons/rx';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import useGenerate from '@/src/hooks/useGenerate';
-import { FaCross } from 'react-icons/fa';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
