@@ -8,7 +8,6 @@ import { objectStore } from '../../services/init';
 import { tool_schema } from '../schema/tool_schema';
 import { get_file_schema, get_template_file_schema } from '../schema/get_file_schema';
 import { BaseMessage, ToolMessage } from '@langchain/core/messages';
-import env from '../../configs/config.env';
 
 const RULES_DIR = path.resolve(process.cwd(), 'dist/rules');
 
@@ -38,6 +37,9 @@ export default class Tool {
         },
     );
 
+    /**
+     * for fetching contract file from cdn
+     */
     public static get_file = tool(
         async ({ file_path, contract_id }: { file_path: string; contract_id: string }) => {
             const contract_files = await objectStore.get_resource_files(contract_id);

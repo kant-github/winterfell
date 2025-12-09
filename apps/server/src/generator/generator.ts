@@ -1,4 +1,4 @@
-import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { new_planner_output_schema, old_planner_output_schema } from './schema/output_schema';
 import Tool from './tools/tool';
 import StreamParser from '../services/stream_parser';
@@ -704,7 +704,7 @@ export default class Generator {
     protected get_chains(
         chat: 'new' | 'old',
         model: MODEL,
-    ): { planner_chain: any; coder_chain: any; finalizer_chain: any } | null {
+    ): { planner_chain: RunnableSequence; coder_chain: Runnable; finalizer_chain: RunnableSequence } | null {
         try {
             let planner_chain;
             let coder_chain;
