@@ -28,11 +28,12 @@ import {
     old_finalizer,
     old_planner,
 } from './types/generator_types';
-import { planning_context_prompt } from './prompts/planning_context_prompt';
+import { start_planning_context_prompt } from './prompts/planning_context_prompt';
 import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
 import { ChatOpenAI } from '@langchain/openai';
 import env from '../configs/config.env';
+import Planner from './llm/planner';
 
 export default class Generator {
     protected gpt_planner: ChatOpenAI;
@@ -41,6 +42,8 @@ export default class Generator {
     protected gpt_finalizer: ChatOpenAI;
 
     protected parsers: Map<string, StreamParser>;
+
+    public planner = new Planner();
 
     constructor() {
         // this.gpt_planner = new ChatOpenAI({
@@ -789,7 +792,7 @@ export default class Generator {
     ) {
         try {
             const planner_chain = RunnableSequence.from([
-                planning_context_prompt,
+                start_planning_context_prompt,
                 this.gpt_planner.withStructuredOutput(plan_context_schema),
             ]);
 
