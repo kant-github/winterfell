@@ -168,7 +168,7 @@ export default function BuilderMessage({
             {message.role === 'AI' && (
                 <div className="flex justify-start w-full">
                     <div className="flex items-start gap-x-2 max-w-[70%]">
-                        <div className="w-7 h-7 aspect-square rounded-full bg-dark border border-neutral-800 flex items-center justify-center">
+                        <div className="w-8 h-8 aspect-square rounded-full bg-dark border border-neutral-800 flex items-center justify-center">
                             <AppLogo showLogoText={false} size={22} />
                         </div>
                         <div className="flex flex-col">

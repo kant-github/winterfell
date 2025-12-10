@@ -27,6 +27,7 @@ import authMiddleware from '../middlewares/middleware.auth';
 import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
 import RateLimit from '../class/rate_limit';
+import DailyRateLimit from '../class/daily_rate_limit';
 
 const router: Router = Router();
 
@@ -44,6 +45,8 @@ router.post(
     '/generate',
     // RateLimit.generate_contract_rate_limit,
     authMiddleware,
+    DailyRateLimit.generate_contract_daily_limit,
+    DailyRateLimit.contract_messages_limit,
     generate_contract_controller,
 );
 router.post(
