@@ -53,11 +53,8 @@ export default function BuilderChatInput() {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
 
-            if (!hasExistingMessages && activeTemplate) {
-                handleSubmit();
-            } else if (hasExistingMessages && !activeTemplate) {
-                handleSubmit();
-            }
+            if (hasExistingMessages && activeTemplate) return;
+            handleSubmit();
         }
     }
 
@@ -88,6 +85,7 @@ export default function BuilderChatInput() {
                             onClick={() => {
                                 setHasExistingMessages(false);
                                 setShowTemplatePanel(false);
+                                resetTemplate();
                             }}
                         >
                             <RxCross2 className='size-3 text-red-500 hover:text-red-400' />

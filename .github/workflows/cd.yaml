@@ -1,8 +1,6 @@
 name: Build and Push Docker Image
 
 on:
-  push:
-    branches: [prod]
   pull_request:
     branches: [prod]
 
@@ -57,7 +55,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'prod'
 
     steps:
       - name: Deploy to EC2
