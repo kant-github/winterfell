@@ -1,5 +1,4 @@
 import { RunnableSequence } from "@langchain/core/runnables";
-import { MODEL } from "@winterfell/types";
 import { continue_planning_context_prompt, start_planning_context_prompt } from "../prompts/planning_context_prompt";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
