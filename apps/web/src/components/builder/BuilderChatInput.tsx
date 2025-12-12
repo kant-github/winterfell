@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { RxCross2 } from 'react-icons/rx';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import useGenerate from '@/src/hooks/useGenerate';
+import { useLimitStore } from '@/src/store/code/useLimitStore';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
@@ -34,12 +35,44 @@ export default function BuilderChatInput() {
     const params = useParams();
     const router = useRouter();
     const contractId = params.contractId as string;
+    const { showMessageLimit, setShowMessageLimit, showContractLimit, showRegenerateTime } =
+        useLimitStore();
 
     useHandleClickOutside([templateButtonRef, templatePanelRef], setShowTemplatePanel);
+
+    function formatPretty(isoString: string) {
+        const date = new Date(isoString);
+
+        const day = date.getDate();
+        const month = date.toLocaleString('en-US', { month: 'short' });
+
+        const suffix =
+            day % 10 === 1 && day !== 11
+                ? 'st'
+                : day % 10 === 2 && day !== 12
+                  ? 'nd'
+                  : day % 10 === 3 && day !== 13
+                    ? 'rd'
+                    : 'th';
+
+        const time = date
+            .toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+            })
+            .toLowerCase();
+
+        return `${day}${suffix} ${month}, ${time}`;
+    }
 
     async function handleSubmit() {
         if (!session?.user.id) {
             setOpenLoginModal(true);
+            return;
+        }
+        // if message/contract limit is reached -> return
+        if (showContractLimit || showMessageLimit) {
             return;
         }
 
@@ -60,16 +93,24 @@ export default function BuilderChatInput() {
 
     function handleContinueToNewChat() {
         const redirect_contract_id = uuid();
-        set_states(contractId, inputValue, activeTemplate?.id);
+        if (activeTemplate) {
+            set_states(contractId, inputValue, activeTemplate?.id);
+        }
+        if (showMessageLimit) {
+            setShowMessageLimit(false);
+        }
         router.push(`/playground/${redirect_contract_id}`);
     }
 
     const isDisabled =
-        (!inputValue.trim() && !activeTemplate) || (!activeTemplate && userMessagesLength >= 5);
+        (!inputValue.trim() && !activeTemplate) ||
+        (!activeTemplate && userMessagesLength >= 5) ||
+        showContractLimit ||
+        showMessageLimit;
 
     return (
         <>
-            <div className="relative group w-full flex flex-col gap-3">
+            <div className="relative group w-full flex flex-col">
                 {hasExistingMessages && (
                     <div className="flex gap-x-2 items-center w-full justify-center">
                         <Button
@@ -89,6 +130,30 @@ export default function BuilderChatInput() {
                             }}
                         >
                             <RxCross2 className="size-3 text-red-500 hover:text-red-400" />
+                        </div>
+                    </div>
+                )}
+
+                {showContractLimit && (
+                    <div className="w-full px-1">
+                        <div className="flex flex-col text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1">
+                            <span>You have reached your daily limit, Try again at</span>
+                            {formatPretty(showRegenerateTime!)}
+                        </div>
+                    </div>
+                )}
+
+                {showMessageLimit && (
+                    <div className="w-full px-1">
+                        <div className="flex gap-x-2 text-[13px] text-light/80 tracking-wider items-center w-full justify-center bg-dark border border-neutral-800 border-b-0 rounded-t-[8px] p-1">
+                            <span>Message limit reached.</span>
+                            <span
+                                onClick={handleContinueToNewChat}
+                                className="hover:underline cursor-pointer flex items-center gap-x-1"
+                            >
+                                start new chat
+                                <TbExternalLink />
+                            </span>
                         </div>
                     </div>
                 )}

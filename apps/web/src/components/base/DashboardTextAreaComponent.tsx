@@ -10,6 +10,7 @@ import { RxCross2 } from 'react-icons/rx';
 import DashboardTextAreaBottom from './DashboardTextAreaBottom';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import useGenerate from '@/src/hooks/useGenerate';
+import { useLimitStore } from '@/src/store/code/useLimitStore';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
@@ -19,6 +20,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     const [inputValue, setInputValue] = useState<string>('');
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
+    const { showMessageLimit, showContractLimit } = useLimitStore();
     const { set_states } = useGenerate();
     const { session } = useUserSessionStore();
     const { activeTemplate, resetTemplate } = useTemplateStore();
@@ -28,6 +30,9 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
             setOpenLoginModal(true);
             return;
         }
+        // if message/ contract limit is reached -> return
+        if (showMessageLimit || showContractLimit) return;
+
         const contractId = uuid();
         set_states(contractId, inputValue, activeTemplate?.id);
     }

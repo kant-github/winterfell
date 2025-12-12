@@ -131,9 +131,7 @@ export default function CodeEditor(): JSX.Element {
                 setCurrentCursorPosition({ ln: lineNumber, col: column });
             });
             // eslint-disable-next-line react-hooks/exhaustive-deps
-        },
-        [],
-    );
+        }, []);
 
     function filePathModifier(filePath: string | undefined) {
         return filePath ? filePath.replaceAll('/', ' / ') : '';
