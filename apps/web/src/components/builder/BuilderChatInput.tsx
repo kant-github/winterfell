@@ -88,7 +88,7 @@ export default function BuilderChatInput() {
                                 resetTemplate();
                             }}
                         >
-                            <RxCross2 className='size-3 text-red-500 hover:text-red-400' />
+                            <RxCross2 className="size-3 text-red-500 hover:text-red-400" />
                         </div>
                     </div>
                 )}

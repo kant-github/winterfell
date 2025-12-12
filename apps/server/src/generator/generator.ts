@@ -33,7 +33,6 @@ import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
 import { ChatOpenAI } from '@langchain/openai';
 import env from '../configs/config.env';
-import Planner from './llm/planner';
 
 export default class Generator {
     protected gpt_planner: ChatOpenAI;
@@ -150,13 +149,7 @@ export default class Generator {
                 }
             }
         } catch (error) {
-            this.handle_error(
-                res,
-                error,
-                'generate',
-                contract_id,
-                parser,
-            );
+            this.handle_error(res, error, 'generate', contract_id, parser);
         }
     }
 
@@ -317,13 +310,7 @@ export default class Generator {
                 system_message,
             );
         } catch (error) {
-            this.handle_error(
-                res,
-                error,
-                'new_contract',
-                contract_id,
-                parser,
-            );
+            this.handle_error(res, error, 'new_contract', contract_id, parser);
         }
     }
 
@@ -538,13 +525,7 @@ export default class Generator {
                 delete_files,
             );
         } catch (error) {
-            this.handle_error(
-                res,
-                error,
-                'old_contract',
-                contract_id,
-                parser,
-            );
+            this.handle_error(res, error, 'old_contract', contract_id, parser);
         }
     }
 
@@ -900,10 +881,7 @@ export default class Generator {
         this.parsers.delete(contract_id);
     }
 
-    protected async update_contract_state(
-        contract_id: string,
-        state: GenerationStatus
-    ) {
+    protected async update_contract_state(contract_id: string, state: GenerationStatus) {
         await prisma.contract.update({
             where: {
                 id: contract_id,
@@ -944,7 +922,7 @@ export default class Generator {
         error: unknown,
         coming_from_fn: string,
         contract_id: string,
-        parser: StreamParser
+        parser: StreamParser,
     ) {
         console.error(`Error in ${coming_from_fn}`, error);
         parser.reset();

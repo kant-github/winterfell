@@ -19,7 +19,6 @@ export default function ClientDocsLeftSidebar({ switchPanel }: ClientDocsSidebar
     const { activeContent, setActiveContent } = useActiveContentStore();
     const router = useRouter();
 
-    
     function handlePanelSwitch(index: number, panel: ClientDocsPanel): void {
         setActiveIndex(index);
         setActiveContent(panel);
@@ -90,8 +89,8 @@ export default function ClientDocsLeftSidebar({ switchPanel }: ClientDocsSidebar
                 </div>
             </div>
             <div className="border-t border-neutral-800 px-4 py-3 space-y-1.5">
-                <button 
-                    type='button'
+                <button
+                    type="button"
                     className="flex items-center gap-x-2 cursor-pointer group"
                     onClick={() => router.push(`/playground/${uuid()}`)}
                 >

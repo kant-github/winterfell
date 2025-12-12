@@ -65,7 +65,7 @@ export default function BuilderNavbarRightSection() {
 
     return (
         <div className="flex items-center justify-between gap-x-3 relative">
-            <div className='flex items-center justify-center'>
+            <div className="flex items-center justify-center">
                 <ToolTipComponent content="deploy your contract" side="bottom">
                     <Button
                         disabled={loading}
