@@ -4,7 +4,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { plan_context_schema } from "../schema/plan_context_schema";
-import { ChatRole, prisma } from "@winterfell/database";
+import { ChatRole, GenerationStatus, prisma } from "@winterfell/database";
 import ResponseWriter from "../../class/response_writer";
 import { Response } from "express";
 import { finalizer_output_schema } from "../schema/finalizer_output_schema";
@@ -45,9 +45,13 @@ export default class Planner extends Generator {
                 message,
                 `successfully outlined your plan for ${planner_data.contract_title}`,
             );
-        } catch (err) {
-            ResponseWriter.error(res, 'error in outlining your plan');
-            console.error('Error while planning context ', err);
+        } catch (error) {
+            this.handle_error(
+                res,
+                error,
+                'continue planner',
+                contract_id,
+            );
         }
     }
 
@@ -89,10 +93,25 @@ export default class Planner extends Generator {
                 `successfully outlined your plan for ${planner_data.contract_title}`,
             );
 
-        } catch (err) {
-            ResponseWriter.error(res, 'error in outlining your plan');
-            console.error('Error while planning context ', err);
+        } catch (error) {
+            this.handle_error(
+                res,
+                error,
+                'continue planner',
+                contract_id,
+            );
         }
+    }
+
+    protected async handle_error(
+        res: Response,
+        error: unknown,
+        coming_from_fn: string,
+        contract_id: string,
+    ) {
+        console.error(`Error in ${coming_from_fn}: `, error);
+        this.update_contract_state(contract_id, GenerationStatus.IDLE);
+        ResponseWriter.stream.end(res);
     }
 
 }

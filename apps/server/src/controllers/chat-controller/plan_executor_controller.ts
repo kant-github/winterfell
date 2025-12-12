@@ -54,20 +54,20 @@ export default async function plan_executor_controller(req: Request, res: Respon
             },
         });
         console.log('messsage created is : ', message);
-        // generator.plan_context(
-        //     res,
-        //     contract.messages.length === 1 ? 'new' : 'old',
-        //     parsed.data.instruction,
-        //     parsed.data.model || MODEL.GEMINI,
-        //     contract.id,
-        //     // contract.summarisedObject ? JSON.parse(contract.summarisedObject) : undefined,
-        // );
-
-        generator.planner.start(
+        generator.plan_context(
             res,
+            contract.messages.length === 1 ? 'new' : 'old',
             parsed.data.instruction,
+            parsed.data.model || MODEL.GEMINI,
             contract.id,
+            // contract.summarisedObject ? JSON.parse(contract.summarisedObject) : undefined,
         );
+
+        // generator.planner.start(
+        //     res,
+        //     parsed.data.instruction,
+        //     contract.id,
+        // );
 
     } catch (error) {
         ResponseWriter.server_error(

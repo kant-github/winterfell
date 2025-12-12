@@ -2,7 +2,7 @@ import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runn
 import { new_planner_output_schema, old_planner_output_schema } from './schema/output_schema';
 import Tool from './tools/tool';
 import StreamParser from '../services/stream_parser';
-import { ChatRole, Message, prisma } from '@winterfell/database';
+import { ChatRole, GenerationStatus, Message, prisma } from '@winterfell/database';
 
 import { Response } from 'express';
 import {
@@ -43,7 +43,7 @@ export default class Generator {
 
     protected parsers: Map<string, StreamParser>;
 
-    public planner = new Planner();
+    // public planner = new Planner();
 
     constructor() {
         // this.gpt_planner = new ChatOpenAI({
@@ -97,7 +97,7 @@ export default class Generator {
         this.parsers = new Map<string, StreamParser>();
     }
 
-    public generate(
+    public async generate(
         res: Response,
         chat: 'new' | 'old',
         user_instruction: string,
@@ -115,6 +115,9 @@ export default class Generator {
                 throw new Error('chains not created');
             }
             const { planner_chain, coder_chain, finalizer_chain } = chain;
+
+            // make the contract busy
+            await this.update_contract_state(contract_id, GenerationStatus.GENERATING);
 
             switch (chat) {
                 case 'new': {
@@ -147,10 +150,13 @@ export default class Generator {
                 }
             }
         } catch (error) {
-            console.error('Error while generating: ', error);
-            parser.reset();
-            this.delete_parser(contract_id);
-            ResponseWriter.stream.end(res);
+            this.handle_error(
+                res,
+                error,
+                'generate',
+                contract_id,
+                parser,
+            );
         }
     }
 
@@ -191,6 +197,7 @@ export default class Generator {
                 console.log('planner said to not continue.');
                 parser.reset();
                 this.delete_parser(contract_id);
+                this.update_contract_state(contract_id, GenerationStatus.IDLE);
                 ResponseWriter.stream.end(res);
                 return;
             }
@@ -310,11 +317,13 @@ export default class Generator {
                 system_message,
             );
         } catch (error) {
-            console.error('Error while new contract generation: ', error);
-            parser.reset();
-            this.delete_parser(contract_id);
-            console.log(this.parsers);
-            ResponseWriter.stream.end(res);
+            this.handle_error(
+                res,
+                error,
+                'new_contract',
+                contract_id,
+                parser,
+            );
         }
     }
 
@@ -389,6 +398,7 @@ export default class Generator {
         } finally {
             parser.reset();
             this.delete_parser(contract_id);
+            this.update_contract_state(contract_id, GenerationStatus.IDLE);
             ResponseWriter.stream.end(res);
         }
     }
@@ -431,6 +441,7 @@ export default class Generator {
                 console.log('planner said to not continue.');
                 parser.reset();
                 this.delete_parser(contract_id);
+                this.update_contract_state(contract_id, GenerationStatus.IDLE);
                 ResponseWriter.stream.end(res);
                 return;
             }
@@ -527,10 +538,13 @@ export default class Generator {
                 delete_files,
             );
         } catch (error) {
-            console.error('Error in old_contract: ', error);
-            parser.reset();
-            this.delete_parser(contract_id);
-            ResponseWriter.stream.end(res);
+            this.handle_error(
+                res,
+                error,
+                'old_contract',
+                contract_id,
+                parser,
+            );
         }
     }
 
@@ -595,6 +609,7 @@ export default class Generator {
         } finally {
             parser.reset();
             this.delete_parser(contract_id);
+            this.update_contract_state(contract_id, GenerationStatus.IDLE);
             ResponseWriter.stream.end(res);
         }
     }
@@ -885,6 +900,20 @@ export default class Generator {
         this.parsers.delete(contract_id);
     }
 
+    protected async update_contract_state(
+        contract_id: string,
+        state: GenerationStatus
+    ) {
+        await prisma.contract.update({
+            where: {
+                id: contract_id,
+            },
+            data: {
+                generationStatus: state,
+            },
+        });
+    }
+
     public send_sse(
         res: Response,
         type: PHASE_TYPES | FILE_STRUCTURE_TYPES | STAGE,
@@ -907,5 +936,20 @@ export default class Generator {
         res.setHeader('Connection', 'keep-alive');
         res.setHeader('X-Accel-Buffering', 'no');
         res.flushHeaders();
+    }
+
+    // this after any fn throws an error this method resets parser, delete the parser from mapping, make the contract idle again and sends back the data
+    protected async handle_error(
+        res: Response,
+        error: unknown,
+        coming_from_fn: string,
+        contract_id: string,
+        parser: StreamParser
+    ) {
+        console.error(`Error in ${coming_from_fn}`, error);
+        parser.reset();
+        this.delete_parser(contract_id);
+        this.update_contract_state(contract_id, GenerationStatus.IDLE);
+        ResponseWriter.stream.end(res);
     }
 }
