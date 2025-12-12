@@ -7,6 +7,7 @@ import { generator, objectStore } from '../services/init';
 import { MODEL, STAGE } from '@winterfell/types';
 import { Contract as ContractType } from '@winterfell/database';
 import chalk from 'chalk';
+import { EndData, StreamEventData } from '../types/stream_event_types';
 
 export default class Contract {
     static async generate_with_template(
@@ -77,7 +78,8 @@ export default class Contract {
                     },
                 });
                 generator.create_stream(res);
-                generator.send_sse(res, STAGE.END, { stage: 'End', data: template_data.data });
+                const data: EndData = { data: template_data.data };
+                generator.send_sse(res, STAGE.END, data);
                 ResponseWriter.stream.end(res);
                 return;
             } else {

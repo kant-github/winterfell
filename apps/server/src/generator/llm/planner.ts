@@ -1,25 +1,21 @@
-import { RunnableSequence } from "@langchain/core/runnables";
-import { continue_planning_context_prompt, start_planning_context_prompt } from "../prompts/planning_context_prompt";
-import { ChatOpenAI } from "@langchain/openai";
-import { ChatAnthropic } from "@langchain/anthropic";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { plan_context_schema } from "../schema/plan_context_schema";
-import { ChatRole, GenerationStatus, prisma } from "@winterfell/database";
-import ResponseWriter from "../../class/response_writer";
-import { Response } from "express";
-import { finalizer_output_schema } from "../schema/finalizer_output_schema";
-import Generator from "../generator";
-
+import { RunnableSequence } from '@langchain/core/runnables';
+import {
+    continue_planning_context_prompt,
+    start_planning_context_prompt,
+} from '../prompts/planning_context_prompt';
+import { ChatOpenAI } from '@langchain/openai';
+import { ChatAnthropic } from '@langchain/anthropic';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { plan_context_schema } from '../schema/plan_context_schema';
+import { ChatRole, GenerationStatus, prisma } from '@winterfell/database';
+import ResponseWriter from '../../class/response_writer';
+import { Response } from 'express';
+import { finalizer_output_schema } from '../schema/finalizer_output_schema';
+import Generator from '../generator';
 
 export default class Planner extends Generator {
-
-    public async start(
-        res: Response,
-        user_instruction: string,
-        contract_id: string,
-    ) {
+    public async start(res: Response, user_instruction: string, contract_id: string) {
         try {
-
             // create planner chain
             const planner_chain = RunnableSequence.from([
                 start_planning_context_prompt,
@@ -46,12 +42,7 @@ export default class Planner extends Generator {
                 `successfully outlined your plan for ${planner_data.contract_title}`,
             );
         } catch (error) {
-            this.handle_error(
-                res,
-                error,
-                'continue planner',
-                contract_id,
-            );
+            this.handle_error(res, error, 'continue planner', contract_id);
         }
     }
 
@@ -60,10 +51,9 @@ export default class Planner extends Generator {
         user_instruction: string,
         llm: ChatOpenAI | ChatAnthropic | ChatGoogleGenerativeAI,
         contract_id: string,
-        summarized_object: typeof finalizer_output_schema[],
+        summarized_object: (typeof finalizer_output_schema)[],
     ) {
         try {
-
             // create planner chain
             const planner_chain = RunnableSequence.from([
                 continue_planning_context_prompt,
@@ -92,14 +82,8 @@ export default class Planner extends Generator {
                 message,
                 `successfully outlined your plan for ${planner_data.contract_title}`,
             );
-
         } catch (error) {
-            this.handle_error(
-                res,
-                error,
-                'continue planner',
-                contract_id,
-            );
+            this.handle_error(res, error, 'continue planner', contract_id);
         }
     }
 
@@ -113,5 +97,4 @@ export default class Planner extends Generator {
         this.update_contract_state(contract_id, GenerationStatus.IDLE);
         ResponseWriter.stream.end(res);
     }
-
 }

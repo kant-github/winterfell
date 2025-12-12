@@ -89,16 +89,12 @@ export default async function generate_contract_controller(req: Request, res: Re
             // if the user has sent some other msgs before, so the contract doesn't exist
 
             // return if the user is trying to send another message while generation
-            if(existing_contract.generationStatus === GenerationStatus.GENERATING) {
-                ResponseWriter.custom(
-                    res,
-                    409,
-                    {
-                        success: false,
-                        meta: { timestamp: Date.now().toString() },
-                        message: 'Repo already exists',
-                    },
-                );
+            if (existing_contract.generationStatus === GenerationStatus.GENERATING) {
+                ResponseWriter.custom(res, 409, {
+                    success: false,
+                    meta: { timestamp: Date.now().toString() },
+                    message: 'Repo already exists',
+                });
                 return;
             }
 
@@ -125,16 +121,12 @@ export default async function generate_contract_controller(req: Request, res: Re
             // start generation if and only if the instruction is provided
 
             // return if the user is trying to send another message while generation
-            if(existing_contract.generationStatus === GenerationStatus.GENERATING) {
-                ResponseWriter.custom(
-                    res,
-                    409,
-                    {
-                        success: false,
-                        meta: { timestamp: Date.now().toString() },
-                        message: 'Repo already exists',
-                    },
-                );
+            if (existing_contract.generationStatus === GenerationStatus.GENERATING) {
+                ResponseWriter.custom(res, 409, {
+                    success: false,
+                    meta: { timestamp: Date.now().toString() },
+                    message: 'Repo already exists',
+                });
                 return;
             }
 

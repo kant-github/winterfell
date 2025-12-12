@@ -1,7 +1,6 @@
 {
   "name": "@winterfell/database",
   "version": "1.0.0",
-  "type": "module",
   "exports": {
     ".": "./src/client.ts"
   },
