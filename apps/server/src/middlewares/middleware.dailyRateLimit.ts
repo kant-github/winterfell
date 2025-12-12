@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import ResponseWriter from './response_writer';
+import ResponseWriter from '../class/response_writer';
 import { ChatRole, prisma } from '@winterfell/database';
-import chalk from 'chalk';
+import { DAILY_LIMIT } from '@winterfell/types';
 
 export default class DailyRateLimit {
     private static readonly WINDOW_MS: number = 24 * 60 * 60 * 1000;
@@ -42,24 +42,33 @@ export default class DailyRateLimit {
             // the first message, that user sends is when the time starts
             const window_start = new Date(Date.now() - DailyRateLimit.WINDOW_MS);
 
-            const contract_count = await prisma.contract.count({
+            const contracts = await prisma.contract.findMany({
                 where: {
                     userId: user.id,
                     createdAt: {
                         gte: window_start,
                     },
                 },
+                orderBy: {
+                    createdAt: 'asc',
+                },
             });
 
-            // if limit excedes deny the request
-            if (contract_count > limit.CONTRACTS_PER_DAY) {
+            if (contracts.length >= limit.CONTRACTS_PER_DAY) {
+                const oldest = contracts[0].createdAt;
+                const allowed_time = new Date(oldest.getTime() + DailyRateLimit.WINDOW_MS);
                 ResponseWriter.custom(res, 429, {
                     success: false,
-                    message: 'You have reached your daily contract limit',
-                    meta: { timestamp: Date.now().toString() },
+                    message: 'Limit reached',
+                    meta: {
+                        next_allowed_time: allowed_time.toISOString(),
+                        error_code: DAILY_LIMIT.CONTRACT_DAILY_LIMIT,
+                        timestamp: Date.now().toString(),
+                    },
                 });
                 return;
             }
+
             next();
         } catch (error) {
             console.error('Daily limit middleware error: ', error);
@@ -106,11 +115,14 @@ export default class DailyRateLimit {
             });
 
             // if message per contract limit exceeds deny the request
-            if (message_count > limit.MESSAGES_PER_CONTRACT) {
+            if (message_count >= limit.MESSAGES_PER_CONTRACT) {
                 ResponseWriter.custom(res, 429, {
                     success: false,
-                    message: 'You have reached your contract message limit',
-                    meta: { timestamp: Date.now().toString() },
+                    message: 'Limit reached',
+                    meta: {
+                        error_code: DAILY_LIMIT.MESSAGE_PER_CONTRACT_LIMIT,
+                        timestamp: Date.now().toString(),
+                    },
                 });
                 return;
             }

@@ -11,6 +11,8 @@ import {
 import { Message } from '@/src/types/prisma-types';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
+import { useLimitStore } from '@/src/store/code/useLimitStore';
+import { DAILY_LIMIT } from '@winterfell/types';
 
 export default class GenerateContract {
     static async start_planner_executor(
@@ -65,6 +67,8 @@ export default class GenerateContract {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
             useBuilderChatStore.getState();
         const { deleteFile, parseFileStructure, setCollapseFileTree } = useCodeEditor.getState();
+        const { setShowContractLimit, setShowMessageLimit, setShowRegenerateTime } =
+            useLimitStore.getState();
 
         try {
             setLoading(true);
@@ -83,8 +87,19 @@ export default class GenerateContract {
                 }),
             });
 
-            // contract limit, do not remove
-            if (response.status === 423) {
+            if (response.status === 429) {
+                const data = await response.json();
+                const limit_type = data.meta?.error_code;
+                if (limit_type === DAILY_LIMIT.MESSAGE_PER_CONTRACT_LIMIT) {
+                    setShowMessageLimit(true);
+                }
+                if (limit_type === DAILY_LIMIT.CONTRACT_DAILY_LIMIT) {
+                    setShowContractLimit(true);
+                    if (data.meta?.next_allowed_time) {
+                        setShowRegenerateTime(data.meta.next_allowed_time);
+                    }
+                }
+                setLoading(false);
                 return;
             }
 
@@ -207,6 +222,8 @@ export default class GenerateContract {
         const { setLoading, upsertMessage, setPhase, setCurrentFileEditing } =
             useBuilderChatStore.getState();
         const { deleteFile, parseFileStructure, setCollapseFileTree } = useCodeEditor.getState();
+        const { setShowMessageLimit, setShowContractLimit, setShowRegenerateTime } =
+            useLimitStore.getState();
 
         try {
             setLoading(true);
@@ -227,6 +244,25 @@ export default class GenerateContract {
                     model: MODEL.GEMINI,
                 }),
             });
+
+            // limit reached handler
+            if (response.status === 429) {
+                const data = await response.json();
+                const limit_type = data.meta?.error_code;
+
+                if (limit_type === DAILY_LIMIT.MESSAGE_PER_CONTRACT_LIMIT) {
+                    setShowMessageLimit(true);
+                }
+
+                if (limit_type === DAILY_LIMIT.CONTRACT_DAILY_LIMIT) {
+                    setShowContractLimit(true);
+                    if (data.meta?.next_allowed_time) {
+                        setShowRegenerateTime(data.meta.next_allowed_time);
+                    }
+                }
+                setLoading(false);
+                return;
+            }
 
             if (response.status === 423) {
                 const data = await response.json();

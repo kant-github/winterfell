@@ -27,7 +27,7 @@ import authMiddleware from '../middlewares/middleware.auth';
 import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
 import RateLimit from '../class/rate_limit';
-import DailyRateLimit from '../class/daily_rate_limit';
+import DailyRateLimit from '../middlewares/middleware.dailyRateLimit';
 
 const router: Router = Router();
 
