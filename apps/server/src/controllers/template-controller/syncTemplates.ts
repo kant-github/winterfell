@@ -31,7 +31,6 @@ export default async function syncTemplate(req: Request, res: Response) {
         s3_prefix: body.s3_prefix,
         solanaVersion: body.solanaVersion,
         anchorVersion: body.anchorVersion,
-        imageUrl: body.imageUrl,
         summarisedObject:
             typeof body.summarisedObject === 'string'
                 ? body.summarisedObject
