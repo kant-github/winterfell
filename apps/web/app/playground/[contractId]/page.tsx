@@ -13,9 +13,10 @@ import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
 import { ChatRole } from '@/src/types/prisma-types';
 import Marketplace from '@/src/lib/server/marketplace-server';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function Page({ params }: { params: Promise<{ contractId: string }> }) {
-    const { cleanStore, loading, setLoading } = useBuilderChatStore();
+    const { setLoading, setCurrentContractId, cleanContract } = useBuilderChatStore();
     const { reset, collapseFileTree, setCollapseFileTree } = useCodeEditor();
     const unwrappedParams = React.use(params);
     const { contractId } = unwrappedParams;
@@ -23,7 +24,8 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     const { session } = useUserSessionStore();
     const { open, hide } = useReviewModalStore();
     const { setTemplates } = useTemplateStore();
-
+    const contract = useCurrentContract();
+    console.log('messages are : ', contract.messages);
     useEffect(() => {
         if (!session?.user?.token) return;
 
@@ -37,7 +39,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             // setLoading(true);
             await Playground.get_chat(session.user.token, contractId);
 
-            const { messages } = useBuilderChatStore.getState();
+            const messages = contract.messages;
             if (messages.length === 0) return;
 
             const last = messages[messages.length - 1];
@@ -58,6 +60,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
             stopped = true;
             if (interval) clearInterval(interval);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session?.user?.token]);
 
     useEffect(() => {
@@ -93,7 +96,11 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     });
 
     useEffect(() => {
-        if (loading || !session || !session.user || !session.user.token) return;
+        if (contractId) setCurrentContractId(contractId);
+    }, [contractId, setCurrentContractId])
+
+    useEffect(() => {
+        if (contract.loading || !session || !session.user || !session.user.token) return;
         Playground.get_chat(session.user.token, contractId);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [contractId, session]);
@@ -101,7 +108,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
     useEffect(() => {
         if (!session || !session.user) return;
 
-        const { messages } = useBuilderChatStore.getState();
+        const { messages } = contract;
         if (messages.length === 0) return;
 
         const last = messages[messages.length - 1];
@@ -113,7 +120,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
 
     useEffect(() => {
         return () => {
-            cleanStore();
+            cleanContract(contractId);
             resetContractId();
             reset();
             cleanWebSocketClient();

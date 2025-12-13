@@ -1,67 +1,194 @@
-import { Message } from '@/src/types/prisma-types';
+import { Message, Template } from '@/src/types/prisma-types';
 import { create } from 'zustand';
 
-interface BuilderChatState {
+interface ContractState {
     messages: Message[];
     phase: string;
     loading: boolean;
     currentFileEditing: string | null;
+    activeTemplate: Template | null; // Move template state here too
+}
 
+interface BuilderChatState {
+    contracts: Record<string, ContractState>; // Key by contractId
+    currentContractId: string | null;
+    setCurrentContractId: (contractId: string) => void;
+    getCurrentContract: () => ContractState;
     setCurrentFileEditing: (file: string | null) => void;
     setLoading: (loading: boolean) => void;
     setPhase: (phase: string) => void;
     setMessage: (message: Message) => void;
     upsertMessage: (message: Partial<Message> & { id: string }) => void;
-    cleanStore: () => void;
+    setActiveTemplate: (template: Template | null) => void;
+    resetTemplate: () => void;
+    cleanContract: (contractId: string) => void;
 }
 
-export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
+const getDefaultContractState = (): ContractState => ({
     messages: [],
     phase: '',
     loading: false,
     currentFileEditing: null,
+    activeTemplate: null,
+});
 
-    setCurrentFileEditing: (file) => set({ currentFileEditing: file }),
-    setLoading: (loading) => set({ loading }),
-    setPhase: (phase) => set({ phase }),
-    setMessage: (message) => {
-        const messages = get().messages;
+export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
+    contracts: {},
+    currentContractId: null,
+
+    setCurrentContractId: (contractId) => {
+        set({ currentContractId: contractId });
+        // Initialize contract state if it doesn't exist
+        const { contracts } = get();
+        if (!contracts[contractId]) {
+            set({
+                contracts: {
+                    ...contracts,
+                    [contractId]: getDefaultContractState(),
+                },
+            });
+        }
+    },
+
+    getCurrentContract: () => {
+        const { contracts, currentContractId } = get();
+        if (!currentContractId || !contracts[currentContractId]) {
+            return getDefaultContractState();
+        }
+        return contracts[currentContractId];
+    },
+
+    setCurrentFileEditing: (file) => {
+        const { contracts, currentContractId } = get();
+        if (!currentContractId) return;
+        
         set({
-            messages: [...messages, message],
+            contracts: {
+                ...contracts,
+                [currentContractId]: {
+                    ...contracts[currentContractId],
+                    currentFileEditing: file,
+                },
+            },
         });
     },
+
+    setLoading: (loading) => {
+        const { contracts, currentContractId } = get();
+        if (!currentContractId) return;
+        
+        set({
+            contracts: {
+                ...contracts,
+                [currentContractId]: {
+                    ...contracts[currentContractId],
+                    loading,
+                },
+            },
+        });
+    },
+
+    setPhase: (phase) => {
+        const { contracts, currentContractId } = get();
+        if (!currentContractId) return;
+        
+        set({
+            contracts: {
+                ...contracts,
+                [currentContractId]: {
+                    ...contracts[currentContractId],
+                    phase,
+                },
+            },
+        });
+    },
+
+    setMessage: (message) => {
+        const { contracts, currentContractId } = get();
+        if (!currentContractId) return;
+        
+        const currentContract = contracts[currentContractId] || getDefaultContractState();
+        set({
+            contracts: {
+                ...contracts,
+                [currentContractId]: {
+                    ...currentContract,
+                    messages: [...currentContract.messages, message],
+                },
+            },
+        });
+    },
+
     upsertMessage: (message: Partial<Message> & { id: string }) => {
-        const messages = get().messages;
+        const { contracts, currentContractId } = get();
+        if (!currentContractId) return;
+        
+        const currentContract = contracts[currentContractId] || getDefaultContractState();
+        const messages = currentContract.messages;
         const existingIndex = messages.findIndex((msg) => msg.id === message.id);
-
+        
         let updatedMessages: Message[];
-
         if (existingIndex !== -1) {
-            // Update existing message
-            updatedMessages = messages.map((msg) => {
-                if (msg.id === message.id) {
-                    return { ...msg, ...message };
-                }
-                return msg;
-            });
+            updatedMessages = messages.map((msg) =>
+                msg.id === message.id ? { ...msg, ...message } : msg
+            );
         } else {
-            // Add new message
             updatedMessages = [...messages, message as Message];
         }
-
-        // Sort by createdAt to maintain chronological order
+        
         updatedMessages.sort((a, b) => {
             const dateA = new Date(a.createdAt).getTime();
             const dateB = new Date(b.createdAt).getTime();
             return dateA - dateB;
         });
-
-        set({ messages: updatedMessages });
-    },
-    cleanStore: () => {
+        
         set({
-            messages: [],
-            phase: '',
+            contracts: {
+                ...contracts,
+                [currentContractId]: {
+                    ...currentContract,
+                    messages: updatedMessages,
+                },
+            },
         });
+    },
+
+    setActiveTemplate: (template) => {
+        const { contracts, currentContractId } = get();
+        if (!currentContractId) return;
+        
+        const currentContract = contracts[currentContractId] || getDefaultContractState();
+        set({
+            contracts: {
+                ...contracts,
+                [currentContractId]: {
+                    ...currentContract,
+                    activeTemplate: template,
+                },
+            },
+        });
+    },
+
+    resetTemplate: () => {
+        const { contracts, currentContractId } = get();
+        if (!currentContractId) return;
+        
+        const currentContract = contracts[currentContractId] || getDefaultContractState();
+        set({
+            contracts: {
+                ...contracts,
+                [currentContractId]: {
+                    ...currentContract,
+                    activeTemplate: null,
+                },
+            },
+        });
+    },
+
+    cleanContract: (contractId) => {
+        const { contracts } = get();
+        const newContracts = { ...contracts };
+        delete newContracts[contractId];
+        set({ contracts: newContracts });
     },
 }));

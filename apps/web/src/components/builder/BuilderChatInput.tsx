@@ -16,24 +16,26 @@ import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { TbExternalLink } from 'react-icons/tb';
 import Image from 'next/image';
 import { RxCross2 } from 'react-icons/rx';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
+import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function BuilderChatInput() {
     const [inputValue, setInputValue] = useState<string>('');
     const { executor, setExecutor } = useExecutorStore();
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const { session } = useUserSessionStore();
-    const { messages } = useBuilderChatStore();
+    
+    // Get contract-specific data
+    const contract = useCurrentContract();
+    const resetTemplate = useBuilderChatStore((state) => state.resetTemplate);
+    
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
     const templatePanelRef = useRef<HTMLDivElement | null>(null);
     const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);
-    const { activeTemplate, resetTemplate } = useTemplateStore();
     const { set_states, handleGeneration } = useGenerate();
     const [hasExistingMessages, setHasExistingMessages] = useState<boolean>(false);
     const params = useParams();
-    const router = useRouter();
     const contractId = params.contractId as string;
     const { showMessageLimit, setShowMessageLimit, showContractLimit, showRegenerateTime } =
         useLimitStore();
@@ -42,19 +44,16 @@ export default function BuilderChatInput() {
 
     function formatPretty(isoString: string) {
         const date = new Date(isoString);
-
         const day = date.getDate();
         const month = date.toLocaleString('en-US', { month: 'short' });
-
         const suffix =
             day % 10 === 1 && day !== 11
                 ? 'st'
                 : day % 10 === 2 && day !== 12
-                  ? 'nd'
-                  : day % 10 === 3 && day !== 13
-                    ? 'rd'
-                    : 'th';
-
+                    ? 'nd'
+                    : day % 10 === 3 && day !== 13
+                        ? 'rd'
+                        : 'th';
         const time = date
             .toLocaleTimeString('en-US', {
                 hour: 'numeric',
@@ -62,7 +61,6 @@ export default function BuilderChatInput() {
                 hour12: true,
             })
             .toLowerCase();
-
         return `${day}${suffix} ${month}, ${time}`;
     }
 
@@ -71,40 +69,37 @@ export default function BuilderChatInput() {
             setOpenLoginModal(true);
             return;
         }
-        // if message/contract limit is reached -> return
         if (showContractLimit || showMessageLimit) {
             return;
         }
-
-        set_states(contractId, inputValue, activeTemplate?.id);
-        handleGeneration(contractId, inputValue, activeTemplate?.id);
+        set_states(contractId, inputValue, contract.activeTemplate?.id);
+        handleGeneration(contractId, inputValue, contract.activeTemplate?.id);
     }
 
-    const userMessagesLength = messages.filter((m) => m.role === ChatRole.USER).length;
+    const userMessagesLength = contract.messages.filter((m) => m.role === ChatRole.USER).length;
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-
-            if (hasExistingMessages && activeTemplate) return;
+            if (hasExistingMessages && contract.activeTemplate) return;
             handleSubmit();
         }
     }
 
     function handleContinueToNewChat() {
         const redirect_contract_id = uuid();
-        if (activeTemplate) {
-            set_states(contractId, inputValue, activeTemplate?.id);
+        // Copy current contract's template to the new contract before navigating
+        if (contract.activeTemplate) {
+            set_states(redirect_contract_id, inputValue, contract.activeTemplate.id, contract.activeTemplate);
         }
         if (showMessageLimit) {
             setShowMessageLimit(false);
         }
-        router.push(`/playground/${redirect_contract_id}`);
     }
 
     const isDisabled =
-        (!inputValue.trim() && !activeTemplate) ||
-        (!activeTemplate && userMessagesLength >= 5) ||
+        (!inputValue.trim() && !contract.activeTemplate) ||
+        (!contract.activeTemplate && userMessagesLength >= 5) ||
         showContractLimit ||
         showMessageLimit;
 
@@ -180,7 +175,7 @@ export default function BuilderChatInput() {
                             rows={3}
                         />
 
-                        {activeTemplate && !hasExistingMessages && (
+                        {contract.activeTemplate && !hasExistingMessages && (
                             <div className="mx-3 mb-3">
                                 <div className="h-25 w-25 relative rounded-sm overflow-hidden shadow-lg">
                                     <div
@@ -190,14 +185,14 @@ export default function BuilderChatInput() {
                                         <RxCross2 />
                                     </div>
                                     <Image
-                                        src={activeTemplate.imageUrl}
+                                        src={contract.activeTemplate.imageUrl}
                                         alt=""
                                         fill
                                         className="object-cover"
                                         unoptimized
                                     />
                                     <div className="absolute bottom-0 text-[13px] text-darkest w-full bg-light px-1 py-px lowercase truncate font-semibold tracking-wide">
-                                        {activeTemplate.title}
+                                        {contract.activeTemplate.title}
                                     </div>
                                 </div>
                             </div>
@@ -238,7 +233,7 @@ export default function BuilderChatInput() {
                             className={cn(
                                 'group/submit flex items-center gap-2 h-8 w-9 px-2 py-1 rounded-[4px] text-xs font-mono',
                                 'disabled:cursor-not-allowed exec-button-dark',
-                                inputValue.trim() && activeTemplate
+                                inputValue.trim() && contract.activeTemplate
                                     ? 'bg-neutral-800 text-neutral-300 hover:text-neutral-200'
                                     : 'bg-neutral-900 text-neutral-700',
                             )}

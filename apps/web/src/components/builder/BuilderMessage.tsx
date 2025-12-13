@@ -15,6 +15,7 @@ import { SidePanelValues } from '../code/EditorSidePanel';
 import { useEditPlanStore } from '@/src/store/code/useEditPlanStore';
 import SystemMessage from './SystemMessage';
 import { FiCopy, FiCheck, FiClock } from 'react-icons/fi';
+import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 interface BuilderMessageProps {
     message: Message;
@@ -28,7 +29,8 @@ export default function BuilderMessage({
     returnParsedData,
 }: BuilderMessageProps): JSX.Element {
     const { session } = useUserSessionStore();
-    const { messages } = useBuilderChatStore();
+    const contract = useCurrentContract();
+    const { messages } = contract;
     const [collapsePanel, setCollapsePanel] = useState<boolean>(false);
     const { editExeutorPlanPanel, setEditExeutorPlanPanel } = useExecutorStore();
     const { setCollapseFileTree } = useCodeEditor();
@@ -96,13 +98,15 @@ export default function BuilderMessage({
                     <div className="flex items-start gap-x-2 max-w-[70%]">
                         <div className="flex flex-col gap-y-2">
                             <div className="relative w-full h-34 aspect-[4/3] rounded-b-[8px] rounded-tl-[8px] overflow-hidden flex items-center justify-end mt-3">
-                                <Image
-                                    src={'/templates/contract-2.jpg'}
-                                    alt="Contract preview"
-                                    fill
-                                    className="object-cover"
-                                    unoptimized
-                                />
+                                {message.template?.imageUrl && (
+                                    <Image
+                                        src={message.template.imageUrl}
+                                        alt="Contract preview"
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                    />
+                                )}
                             </div>
 
                             <div className="flex justify-end items-center gap-2">

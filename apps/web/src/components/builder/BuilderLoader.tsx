@@ -4,9 +4,11 @@ import { LiaServicestack } from 'react-icons/lia';
 import { FILE_STRUCTURE_TYPES, PHASE_TYPES, STAGE } from '@/src/types/stream_event_types';
 import { useMemo } from 'react';
 import FileIcon from '../tickers/FileIcon';
+import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function BuilderLoader() {
-    const { currentFileEditing, phase } = useBuilderChatStore();
+    const contract = useCurrentContract();
+    const { currentFileEditing, phase } = contract;
 
     const phaseInfo = useMemo(() => {
         switch (phase) {

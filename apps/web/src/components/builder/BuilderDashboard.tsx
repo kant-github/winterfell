@@ -16,9 +16,11 @@ import { useSidePanelStore } from '@/src/store/code/useSidePanelStore';
 import FileTree from '../code/Filetree';
 import GithubPanel from '../code/GithubPanel';
 import PlanPanel from '../code/PlanPanel';
+import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function BuilderDashboard(): JSX.Element {
-    const { loading } = useBuilderChatStore();
+    const contract = useCurrentContract();
+    const { loading } = contract;
     const { collapseChat } = useCodeEditor();
     const { isConnected, subscribeToHandler } = useWebSocket();
     const { addLog, setIsCommandRunning, setTerminalLoader } = useTerminalLogStore();

@@ -7,6 +7,7 @@ import { useChatStore } from '@/src/store/user/useChatStore';
 import BuilderMessage from './BuilderMessage';
 import useGenerate from '@/src/hooks/useGenerate';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function BuilderChats() {
     const params = useParams();
@@ -15,7 +16,8 @@ export default function BuilderChats() {
     const messageEndRef = useRef<HTMLDivElement>(null);
     const { setContractId } = useChatStore();
     const { handleGeneration } = useGenerate();
-    const { messages, loading } = useBuilderChatStore();
+    const contract = useCurrentContract();
+    const { messages, loading } = contract;
     const { activeTemplate, resetTemplate } = useTemplateStore();
 
     useEffect(() => {

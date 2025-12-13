@@ -1,20 +1,29 @@
 import { useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '../store/code/useBuilderChatStore';
-import { useTemplateStore } from '../store/user/useTemplateStore';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { v4 as uuid } from 'uuid';
-import { ChatRole } from '../types/prisma-types';
+import { ChatRole, Template } from '../types/prisma-types';
 import { STAGE } from '../types/stream_event_types';
 import GenerateContract from '../lib/server/generate_contract';
 
 export default function useGenerate() {
     const { session } = useUserSessionStore();
-    const { activeTemplate } = useTemplateStore();
-    const { setMessage, setLoading } = useBuilderChatStore.getState();
     const router = useRouter();
-
-    function set_states(contractId: string, instruction?: string, templateId?: string) {
-        if (templateId && activeTemplate) {
+    
+    function set_states(contractId: string, instruction?: string, templateId?: string, template?: Template) {
+        // Get store methods
+        const { setCurrentContractId, setMessage, setActiveTemplate } = useBuilderChatStore.getState();
+        
+        // Initialize the new contract
+        setCurrentContractId(contractId);
+        
+        // Set template in the new contract if provided
+        if (template) {
+            setActiveTemplate(template);
+        }
+        
+        // Add messages
+        if (templateId && template) {
             if (instruction) {
                 setMessage({
                     id: uuid(),
@@ -32,7 +41,7 @@ export default function useGenerate() {
                 role: ChatRole.TEMPLATE,
                 content: '',
                 templateId: templateId,
-                template: activeTemplate,
+                template: template,
                 stage: STAGE.START,
                 isPlanExecuted: false,
                 createdAt: new Date(),
@@ -49,11 +58,13 @@ export default function useGenerate() {
                 createdAt: new Date(),
             });
         }
+        
         router.push(`/playground/${contractId}`);
     }
-
+    
     function handleGeneration(contractId: string, instruction?: string, templateId?: string) {
         if (!session?.user.token) return;
+        const { setLoading } = useBuilderChatStore.getState();
         setLoading(true);
         GenerateContract.start_agentic_executor(
             session.user.token,
@@ -62,7 +73,7 @@ export default function useGenerate() {
             templateId,
         );
     }
-
+    
     return {
         handleGeneration,
         set_states,
