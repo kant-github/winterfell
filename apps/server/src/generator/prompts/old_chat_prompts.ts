@@ -20,6 +20,10 @@ export const old_chat_planner_prompt = new PromptTemplate({
         make a plan on changing the contract based on reading this summary of the contract
         {idl}
 
+        if the file will get some changes, then use update and it's description
+        if the file should be deleted, then use delete and it's description
+        same for creation
+
         strictly follow the file structure
     `,
     inputVariables: ['idl', 'user_instruction'],
@@ -45,11 +49,11 @@ export const old_chat_coder_prompt = new PromptTemplate({
         <phase>generating</phase>
 
         <file>path_to_the_file</file>
-
-        <phase>deleting</phase> (if needed)
+        
+        <phase>updating</phase> (if needed)
         <file>path_to_the_file</file>
 
-        <phase>updating</phase>
+        <phase>deleting</phase> (if needed)
         <file>path_to_the_file</file>
 
         <stage>Building</stage>
