@@ -12,6 +12,7 @@ RUN echo '{"name": "server-docker", "private": true, "workspaces": ["apps/server
 RUN yarn --frozen-lockfile
 
 WORKDIR /app/packages/database
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN npx prisma generate
 
 

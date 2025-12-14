@@ -11,15 +11,16 @@ import ProfileMenu from '../utility/ProfileMenu';
 import { toast } from 'sonner';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import ExportPanel from './ExportPanel.';
-import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
+import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function BuilderNavbarRightSection() {
     const [openWalletPanel, setOpenWalletPanel] = useState<boolean>(false);
     const [showRepoPanel, setShowRepoPanel] = useState<boolean>(false);
     const [openProfileMenu, setOpenProfleMenu] = useState<boolean>(false);
     const [isConnectingGithub, setIsConnectingGithub] = useState<boolean>(false);
+    const contract = useCurrentContract();
     const { session } = useUserSessionStore();
-    const { loading } = useBuilderChatStore();
+    const { loading } = contract;
 
     const hasGithub = session?.user?.hasGithub;
     const panelRef = useRef<HTMLDivElement | null>(null);
@@ -65,7 +66,7 @@ export default function BuilderNavbarRightSection() {
 
     return (
         <div className="flex items-center justify-between gap-x-3 relative">
-            <div className='flex items-center justify-center'>
+            <div className="flex items-center justify-center">
                 <ToolTipComponent content="deploy your contract" side="bottom">
                     <Button
                         disabled={loading}

@@ -70,10 +70,11 @@ export default function Footer() {
                     {footerLinks.map((section, index) => (
                         <div
                             key={section.title}
-                            className={`w-full h-full px-4 flex flex-col items-start text-neutral-200 gap-y-3 mb-8 md:mb-0 pb-6 md:pb-0 ${index < footerLinks.length - 1
-                                ? 'md:border-r border-b md:border-b-0 border-neutral-700'
-                                : ''
-                                }`}
+                            className={`w-full h-full px-4 flex flex-col items-start text-neutral-200 gap-y-3 mb-8 md:mb-0 pb-6 md:pb-0 ${
+                                index < footerLinks.length - 1
+                                    ? 'md:border-r border-b md:border-b-0 border-neutral-700'
+                                    : ''
+                            }`}
                         >
                             <div className="md:text-3xl text-2xl font-semibold">
                                 {section.title}
@@ -83,7 +84,10 @@ export default function Footer() {
                                     if (typeof link === 'object' && 'icon' in link) {
                                         const Icon = link.icon;
                                         return (
-                                            <ToolTipComponent key={link.name} content={link.tooltip}>
+                                            <ToolTipComponent
+                                                key={link.name}
+                                                content={link.tooltip}
+                                            >
                                                 <Link
                                                     href={link.link}
                                                     target="_blank"
@@ -104,17 +108,17 @@ export default function Footer() {
                                             {link as string}
                                             {(link === 'Smart Contract Editor' ||
                                                 link === 'Deploy & Monitor') && (
-                                                    <div>
-                                                        <VersionLockTicker
-                                                            showText={false}
-                                                            className={cn(
-                                                                'border border-white/10',
-                                                                'p-1 rounded-[5px] cursor-auto',
-                                                            )}
-                                                            iconClassName="size-3"
-                                                        />
-                                                    </div>
-                                                )}
+                                                <div>
+                                                    <VersionLockTicker
+                                                        showText={false}
+                                                        className={cn(
+                                                            'border border-white/10',
+                                                            'p-1 rounded-[5px] cursor-auto',
+                                                        )}
+                                                        iconClassName="size-3"
+                                                    />
+                                                </div>
+                                            )}
                                         </span>
                                     );
                                 })}

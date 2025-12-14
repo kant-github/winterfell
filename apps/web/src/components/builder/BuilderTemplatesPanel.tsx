@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import { HiPlus } from 'react-icons/hi';
 import { cn } from '@/src/lib/utils';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import { useTemplateStore } from '@/src/store/user/useTemplateStore'; // Keep this for templates list
+import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore'; // Use this for setActiveTemplate
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
@@ -19,7 +20,9 @@ export default function BuilderTemplatesPanel({
     className,
     setHasExistingMessages,
 }: BuilderTemplatesPanelProps) {
-    const { templates, setActiveTemplate } = useTemplateStore();
+    const { templates } = useTemplateStore();
+    const setActiveTemplate = useBuilderChatStore((state) => state.setActiveTemplate);
+
     const params = useParams();
     const contractId = params.contractId as string;
     const { session } = useUserSessionStore();
@@ -36,15 +39,14 @@ export default function BuilderTemplatesPanel({
 
             const hasMessages = data?.data?.hasMessages;
             if (hasMessages) {
-                // if there are existing messages, prevent template selection
                 setHasExistingMessages(true);
-                setActiveTemplate(template);
+                setActiveTemplate(template); // Sets in current contract's store
                 return;
             }
 
             // allow template selection only if no messages exist
             setHasExistingMessages(false);
-            setActiveTemplate(template);
+            setActiveTemplate(template); // Sets in current contract's store
             closePanel();
         } catch (error) {
             console.error('Error checking contract messages:', error);
@@ -96,7 +98,6 @@ function TemplateListItem({ title, description, image, onClick }: TemplateListIt
                 'group/item',
             )}
         >
-            {}
             <div className="flex items-center gap-3">
                 <div className="relative h-8 min-w-8 bg-neutral-800 overflow-hidden ">
                     <Image

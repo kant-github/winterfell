@@ -2,17 +2,21 @@ import Image from 'next/image';
 import { HiPlus } from 'react-icons/hi';
 import { cn } from '@/src/lib/utils';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import { Dispatch, SetStateAction } from 'react';
+import { Template } from '@/src/types/prisma-types';
 
 interface BaseContractTemplatePanelProps {
     closePanel: () => void;
+    setActiveTemplate: Dispatch<SetStateAction<Template | null>>;
     className?: string;
 }
 
 export default function BaseContractTemplatesPanel({
     closePanel,
+    setActiveTemplate,
     className,
 }: BaseContractTemplatePanelProps) {
-    const { templates, setActiveTemplate } = useTemplateStore();
+    const { templates } = useTemplateStore();
 
     return (
         <div
@@ -70,6 +74,7 @@ function TemplateListItem({ title, description, image, onClick }: TemplateListIt
                         fill
                         className="object-cover rounded-[4px]"
                         unoptimized
+                        priority
                     />
                 </div>
 

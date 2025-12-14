@@ -10,6 +10,8 @@ import { RxCross2 } from 'react-icons/rx';
 import DashboardTextAreaBottom from './DashboardTextAreaBottom';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import useGenerate from '@/src/hooks/useGenerate';
+import { useLimitStore } from '@/src/store/code/useLimitStore';
+import { Template } from '@/src/types/prisma-types';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
@@ -19,17 +21,23 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
     const [inputValue, setInputValue] = useState<string>('');
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
+    const { showMessageLimit, showContractLimit } = useLimitStore();
     const { set_states } = useGenerate();
     const { session } = useUserSessionStore();
-    const { activeTemplate, resetTemplate } = useTemplateStore();
+    const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
+    // const { activeTemplate, resetTemplate } = useTemplateStore();
 
     function handleSubmit() {
         if (!session?.user.id) {
             setOpenLoginModal(true);
             return;
         }
+        // if message/ contract limit is reached -> return
+        if (showMessageLimit || showContractLimit) return;
+
         const contractId = uuid();
-        set_states(contractId, inputValue, activeTemplate?.id);
+        console.log('active template is  : ', activeTemplate);
+        set_states(contractId, inputValue, activeTemplate?.id, activeTemplate ?? undefined);
     }
 
     function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -96,7 +104,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                             <div className="mx-3 mb-3">
                                 <div className="h-25 w-25 relative rounded-sm overflow-hidden shadow-lg">
                                     <div
-                                        onClick={() => resetTemplate()}
+                                        onClick={() => setActiveTemplate(null)}
                                         className="absolute rounded-full h-4.5 w-4.5 flex justify-center items-center right-1 top-1 text-[13px] z-10 bg-light text-darkest transition-colors transform duration-100 cursor-pointer shadow-sm"
                                     >
                                         <RxCross2 />
@@ -116,7 +124,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                         )}
                     </div>
 
-                    <DashboardTextAreaBottom inputValue={inputValue} handleSubmit={handleSubmit} />
+                    <DashboardTextAreaBottom activeTemplate={activeTemplate} setActiveTemplate={setActiveTemplate} inputValue={inputValue} handleSubmit={handleSubmit} />
                 </div>
 
                 <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-50" />

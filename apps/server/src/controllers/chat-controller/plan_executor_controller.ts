@@ -62,6 +62,12 @@ export default async function plan_executor_controller(req: Request, res: Respon
             contract.id,
             // contract.summarisedObject ? JSON.parse(contract.summarisedObject) : undefined,
         );
+
+        // generator.planner.start(
+        //     res,
+        //     parsed.data.instruction,
+        //     contract.id,
+        // );
     } catch (error) {
         ResponseWriter.server_error(
             res,

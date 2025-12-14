@@ -48,6 +48,7 @@ model Contract {
   clientSdk Json?
 
   summarisedObject String?
+  generationStatus GenerationStatus @default(IDLE)
 
   deployed  Boolean  @default(false)
   programId String?
@@ -279,4 +280,9 @@ enum ContractGenerationStage {
   FINALIZING
   END
   ERROR
+}
+
+enum GenerationStatus {
+  IDLE
+  GENERATING
 }

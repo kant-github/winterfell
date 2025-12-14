@@ -3,11 +3,10 @@ import BuilderChatInput from './BuilderChatInput';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
-
 import { useChatStore } from '@/src/store/user/useChatStore';
 import BuilderMessage from './BuilderMessage';
 import useGenerate from '@/src/hooks/useGenerate';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function BuilderChats() {
     const params = useParams();
@@ -16,8 +15,10 @@ export default function BuilderChats() {
     const messageEndRef = useRef<HTMLDivElement>(null);
     const { setContractId } = useChatStore();
     const { handleGeneration } = useGenerate();
-    const { messages, loading } = useBuilderChatStore();
-    const { activeTemplate, resetTemplate } = useTemplateStore();
+    const contract = useCurrentContract();
+    const { messages, loading } = contract;
+    const { activeTemplate } = contract
+    const { resetTemplate } = useBuilderChatStore()
 
     useEffect(() => {
         if (messageEndRef.current) {

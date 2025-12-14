@@ -186,21 +186,6 @@ export default class Contract {
         model?: MODEL,
     ) {
         try {
-            // get the total number of messages
-            // const total_messages = contract.messages.filter((m) => {
-            //     if (m.role === ChatRole.USER && !m.plannerContext) {
-            //         return true;
-            //     }
-            //     return false;
-            // });
-            const total_messages = 1;
-
-            // let the user continue only if the message count is less than 5
-            if (total_messages > 5) {
-                ResponseWriter.error(res, 'message limit reached!', 403);
-                return;
-            }
-
             // create user message
             await prisma.message.create({
                 data: {

@@ -1,18 +1,12 @@
 import { Template } from '@/src/types/prisma-types';
 import { create } from 'zustand';
 
-interface TemplateStoreData {
-    templates: Template[] | [];
-    activeTemplate: Template | null;
-    setActiveTemplate: (template: Template) => void;
-    resetTemplate: () => void;
+interface TemplateState {
+    templates: Template[]; // Global list of available templates
     setTemplates: (templates: Template[]) => void;
 }
 
-export const useTemplateStore = create<TemplateStoreData>((set) => ({
+export const useTemplateStore = create<TemplateState>((set) => ({
     templates: [],
-    activeTemplate: null,
-    setActiveTemplate: (activeTemplate) => set({ activeTemplate }),
-    resetTemplate: () => set({ activeTemplate: null }),
     setTemplates: (templates) => set({ templates }),
 }));

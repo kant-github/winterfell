@@ -38,6 +38,11 @@ export default async function get_chat_controller(req: Request, res: Response) {
                         content: true,
                         isPlanExecuted: true,
                         templateId: true,
+                        template: {
+                            select: {
+                                imageUrl: true,
+                            },
+                        },
                         stage: true,
                         createdAt: true,
                     },

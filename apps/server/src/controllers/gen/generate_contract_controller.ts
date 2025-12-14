@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import ResponseWriter from '../../class/response_writer';
 import { generate_contract } from '../../schemas/generate_contract_schema';
-import { ChatRole, PlanType, prisma } from '@winterfell/database';
+import { ChatRole, GenerationStatus, PlanType, prisma } from '@winterfell/database';
 import { MODEL } from '@winterfell/types';
 import Contract from '../../class/contract';
 import { generator } from '../../services/init';
@@ -16,8 +16,6 @@ export default async function generate_contract_controller(req: Request, res: Re
             ResponseWriter.unauthorized(res, 'Unauthorised');
             return;
         }
-
-        console.log('body: ', req.body);
 
         // checking for valid data
         const parsed_data = generate_contract.safeParse(req.body);
@@ -90,6 +88,16 @@ export default async function generate_contract_controller(req: Request, res: Re
         } else if (existing_contract && !existing_contract.summarisedObject) {
             // if the user has sent some other msgs before, so the contract doesn't exist
 
+            // return if the user is trying to send another message while generation
+            if (existing_contract.generationStatus === GenerationStatus.GENERATING) {
+                ResponseWriter.custom(res, 409, {
+                    success: false,
+                    meta: { timestamp: Date.now().toString() },
+                    message: 'Repo already exists',
+                });
+                return;
+            }
+
             // only start if instrution is provided
             if (instruction) {
                 // create user message
@@ -111,8 +119,18 @@ export default async function generate_contract_controller(req: Request, res: Re
             }
         } else if (existing_contract && existing_contract.summarisedObject) {
             // start generation if and only if the instruction is provided
+
+            // return if the user is trying to send another message while generation
+            if (existing_contract.generationStatus === GenerationStatus.GENERATING) {
+                ResponseWriter.custom(res, 409, {
+                    success: false,
+                    meta: { timestamp: Date.now().toString() },
+                    message: 'Repo already exists',
+                });
+                return;
+            }
+
             if (instruction) {
-                console.log('old contract gen');
                 Contract.continue_old_contract(res, existing_contract, instruction, model);
             } else {
                 ResponseWriter.error(res, 'Instruction not provided', 401);
