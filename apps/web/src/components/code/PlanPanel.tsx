@@ -12,7 +12,7 @@ export default function PlanPanel(): JSX.Element {
     const { message } = useEditPlanStore();
     if (!message)
         return (
-            <div className="w-full h-full flex items-center justify-center text-light-secondary">
+            <div className="w-full h-full flex items-center justify-center text-light/50 bg-[#151617]">
                 No Plan Selected
             </div>
         );

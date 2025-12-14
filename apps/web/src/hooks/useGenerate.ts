@@ -13,7 +13,7 @@ export default function useGenerate() {
     function set_states(contractId: string, instruction?: string, templateId?: string, template?: Template) {
         // Get store methods
         const { setCurrentContractId, setMessage, setActiveTemplate } = useBuilderChatStore.getState();
-        
+        console.log('contract id set is : ', contractId);
         // Initialize the new contract
         setCurrentContractId(contractId);
         

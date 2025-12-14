@@ -1,23 +1,29 @@
 import { cn } from '@/src/lib/utils';
 import { Button } from '../ui/button';
-import { FileCode, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import ExecutorSelect from './ExecutorSelect';
 import BaseContractTemplatesPanel from './BaseContractTemplatePanel';
-import React, { useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
+import { HiMiniRectangleStack } from 'react-icons/hi2';
+import { Template } from '@/src/types/prisma-types';
 
 interface DashboardTextAreaBottomProps {
     inputValue: string;
     handleSubmit: () => void;
+    activeTemplate: Template | null;
+    setActiveTemplate: Dispatch<SetStateAction<Template | null>>;
 }
 
 export default function DashboardTextAreaBottom({
     inputValue,
     handleSubmit,
+    activeTemplate,
+    setActiveTemplate,
 }: DashboardTextAreaBottomProps) {
-    const { activeTemplate } = useTemplateStore();
+    // const { activeTemplate } = useTemplateStore();
     const { executor, setExecutor } = useExecutorStore();
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
     const templatePanelRef = useRef<HTMLDivElement | null>(null);
@@ -32,22 +38,13 @@ export default function DashboardTextAreaBottom({
             <div className="flex items-center justify-between px-3 py-1.5 md:px-4 md:py-2.5 border-t border-neutral-800/50 bg-neutral-900/30">
                 <div className="flex items-center gap-1.5 md:gap-3">
                     <ExecutorSelect value={executor} onChange={setExecutor} />
-                    {/* <Button
-                        onClick={handleFileUpload}
-                        ref={templateButtonRef}
-                        type="button"
-                        className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
-                    >
-                        <IoAddSharp className="md:w-3.5 md:h-3.5 w-2 h-2 mb-0.5" />
-                        <span className="font-mono">upload</span>
-                    </Button> */}
                     <Button
                         onClick={() => setShowTemplatePanel((prev) => !prev)}
                         ref={templateButtonRef}
                         type="button"
                         className="group/btn bg-transparent hover:bg-transparent flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
                     >
-                        <FileCode className="md:w-3.5 md:h-3.5 w-2 h-2 mb-0.5" />
+                        <HiMiniRectangleStack className="md:w-3.5 md:h-3.5 w-2 h-2 mb-0.5" />
                         <span className="font-mono">templates</span>
                     </Button>
                     <div className="w-px h-3 bg-neutral-800" />
@@ -81,7 +78,7 @@ export default function DashboardTextAreaBottom({
             </div>
             {showTemplatePanel && (
                 <div ref={templatePanelRef}>
-                    <BaseContractTemplatesPanel closePanel={() => setShowTemplatePanel(false)} />
+                    <BaseContractTemplatesPanel setActiveTemplate={setActiveTemplate} closePanel={() => setShowTemplatePanel(false)} />
                 </div>
             )}
         </>
