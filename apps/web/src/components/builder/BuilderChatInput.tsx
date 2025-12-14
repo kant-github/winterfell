@@ -25,11 +25,11 @@ export default function BuilderChatInput() {
     const { executor, setExecutor } = useExecutorStore();
     const [openLoginModal, setOpenLoginModal] = useState<boolean>(false);
     const { session } = useUserSessionStore();
-    
+
     // Get contract-specific data
     const contract = useCurrentContract();
     const resetTemplate = useBuilderChatStore((state) => state.resetTemplate);
-    
+
     const templateButtonRef = useRef<HTMLButtonElement | null>(null);
     const templatePanelRef = useRef<HTMLDivElement | null>(null);
     const [showTemplatePanel, setShowTemplatePanel] = useState<boolean>(false);

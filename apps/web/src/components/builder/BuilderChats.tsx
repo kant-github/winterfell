@@ -6,7 +6,6 @@ import { useEffect, useRef } from 'react';
 import { useChatStore } from '@/src/store/user/useChatStore';
 import BuilderMessage from './BuilderMessage';
 import useGenerate from '@/src/hooks/useGenerate';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';
 
 export default function BuilderChats() {
@@ -18,7 +17,8 @@ export default function BuilderChats() {
     const { handleGeneration } = useGenerate();
     const contract = useCurrentContract();
     const { messages, loading } = contract;
-    const { activeTemplate, resetTemplate } = useTemplateStore();
+    const { activeTemplate } = contract
+    const { resetTemplate } = useBuilderChatStore()
 
     useEffect(() => {
         if (messageEndRef.current) {
