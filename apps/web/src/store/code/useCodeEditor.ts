@@ -1,5 +1,5 @@
 import CodeEditorServer from '@/src/lib/server/code-editor-server';
-import { FileNode, NODE } from '@/src/types/prisma-types';
+import { FileNode, NODE } from '@winterfell/types';
 import { FileContent } from '@/src/types/stream_event_types';
 import { create } from 'zustand';
 

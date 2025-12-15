@@ -8,7 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import LoginModal from '../utility/LoginModal';
 import ExecutorSelect from '../base/ExecutorSelect';
-import { ChatRole } from '@/src/types/prisma-types';
+import { ChatRole } from '@winterfell/types';
 import BuilderTemplatesPanel from './BuilderTemplatesPanel';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { v4 as uuid } from 'uuid';
@@ -50,10 +50,10 @@ export default function BuilderChatInput() {
             day % 10 === 1 && day !== 11
                 ? 'st'
                 : day % 10 === 2 && day !== 12
-                    ? 'nd'
-                    : day % 10 === 3 && day !== 13
-                        ? 'rd'
-                        : 'th';
+                  ? 'nd'
+                  : day % 10 === 3 && day !== 13
+                    ? 'rd'
+                    : 'th';
         const time = date
             .toLocaleTimeString('en-US', {
                 hour: 'numeric',
@@ -90,7 +90,12 @@ export default function BuilderChatInput() {
         const redirect_contract_id = uuid();
         // Copy current contract's template to the new contract before navigating
         if (contract.activeTemplate) {
-            set_states(redirect_contract_id, inputValue, contract.activeTemplate.id, contract.activeTemplate);
+            set_states(
+                redirect_contract_id,
+                inputValue,
+                contract.activeTemplate.id,
+                contract.activeTemplate,
+            );
         }
         if (showMessageLimit) {
             setShowMessageLimit(false);
