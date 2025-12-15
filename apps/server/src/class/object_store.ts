@@ -174,7 +174,7 @@ export default class ObjectStore {
     }
 
     public get_raw_files(contractId: string) {
-        return `${process.env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/raw/llm-response.txt`;
+        return `${env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/raw/llm-response.txt`;
     }
 
     public get_template_files_path(templateId: string) {
@@ -182,6 +182,6 @@ export default class ObjectStore {
     }
 
     public get_resource_files_path(contractId: string) {
-        return `${process.env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/resource`;
+        return `${env.SERVER_CLOUDFRONT_DOMAIN}/${contractId}/resource`;
     }
 }

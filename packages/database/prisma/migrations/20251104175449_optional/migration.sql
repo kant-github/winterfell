@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Contract" ALTER COLUMN "lastBuildStatus" SET DEFAULT 'NEVER_BUILT',
-ALTER COLUMN "lastBuildId" DROP NOT NULL;

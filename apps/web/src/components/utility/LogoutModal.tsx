@@ -140,11 +140,16 @@ export default function LogoutModal({ openLogoutModal, setOpenLogoutModal }: Log
             className="bg-darkest/70"
             onBackgroundClick={() => setOpenLogoutModal(false)}
         >
-            <ShaderSplitPanel
-                imageSrc="/images/template/red-shader.png"
-                leftChildren={<LogoutLeftContent />}
-                rightChildren={<LogoutRightContent setOpenLogoutModal={setOpenLogoutModal} />}
-            />
+            <div
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+            >
+                <ShaderSplitPanel
+                    imageSrc="/images/template/red-shader.png"
+                    leftChildren={<LogoutLeftContent />}
+                    rightChildren={<LogoutRightContent setOpenLogoutModal={setOpenLogoutModal} />}
+                />
+            </div>
         </OpacityBackground>
     );
 }
