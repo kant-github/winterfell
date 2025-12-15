@@ -1,5 +1,5 @@
 import { SYNC_FILES_URL } from '@/routes/api_routes';
-import { FileNode } from '@/src/types/prisma-types';
+import { FileNode } from '@winterfell/types';
 import axios from 'axios';
 
 export default class CodeEditorServer {

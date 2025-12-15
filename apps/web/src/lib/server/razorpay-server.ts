@@ -1,5 +1,5 @@
 import { CREATE_ORDER_URL, GET_PLAN_URL, UPDATE_URL } from '@/routes/api_routes';
-import { PlanType } from '@/src/types/prisma-types';
+import { PlanType } from '@winterfell/types';
 import axios from 'axios';
 import PLANS from '../plans';
 

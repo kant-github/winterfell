@@ -3,7 +3,7 @@ import { HiPlus } from 'react-icons/hi';
 import { cn } from '@/src/lib/utils';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { Dispatch, SetStateAction } from 'react';
-import { Template } from '@/src/types/prisma-types';
+import { Template } from '@winterfell/types';
 
 interface BaseContractTemplatePanelProps {
     closePanel: () => void;

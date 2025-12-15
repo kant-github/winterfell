@@ -2,7 +2,7 @@
 import useGenerate from '@/src/hooks/useGenerate';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-import { Template } from '@/src/types/prisma-types';
+import { Template } from '@winterfell/types';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

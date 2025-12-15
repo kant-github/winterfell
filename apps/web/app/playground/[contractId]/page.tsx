@@ -10,7 +10,7 @@ import React, { useEffect, use } from 'react';
 import ContractReviewCard from '@/src/components/base/ContractReviewCard';
 import Playground from '@/src/lib/server/playground';
 import { useReviewModalStore } from '@/src/store/user/useReviewModalStore';
-import { ChatRole } from '@/src/types/prisma-types';
+import { ChatRole } from '@winterfell/types';
 import Marketplace from '@/src/lib/server/marketplace-server';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useCurrentContract } from '@/src/hooks/useCurrentContract';

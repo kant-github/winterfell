@@ -4,12 +4,12 @@ export enum NODE {
 }
 
 export interface FileNode {
-  name: string;
-  type: NODE;
-  path: string;
-  content?: string;
-  language?: string;
-  children?: FileNode[];
+    id: string;
+    name: string;
+    type: NODE;
+    content?: string;
+    language?: string;
+    children?: FileNode[];
 }
 
 export interface FileContent {

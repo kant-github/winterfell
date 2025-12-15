@@ -2,9 +2,8 @@ import { useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '../store/code/useBuilderChatStore';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { v4 as uuid } from 'uuid';
-import { ChatRole, Template } from '../types/prisma-types';
-import { STAGE } from '../types/stream_event_types';
 import GenerateContract from '../lib/server/generate_contract';
+import { ChatRole, STAGE, Template } from '@winterfell/types';
 
 export default function useGenerate() {
     const { session } = useUserSessionStore();

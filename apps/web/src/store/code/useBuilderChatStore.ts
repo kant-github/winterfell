@@ -1,4 +1,4 @@
-import { Message, Template } from '@/src/types/prisma-types';
+import { Message, Template } from '@winterfell/types';
 import { create } from 'zustand';
 
 interface ContractState {
