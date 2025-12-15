@@ -11,3 +11,6 @@ export * from "./generator/stream_event_types";
 export * from "./executor/executor.types";
 
 export * from "./limit_types/limit_types";
+
+export * from "./prisma/prisma.types";
+export * from "./prisma/prisma.enums";
