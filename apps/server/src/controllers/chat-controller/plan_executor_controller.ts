@@ -68,7 +68,6 @@ export default async function plan_executor_controller(req: Request, res: Respon
         //     parsed.data.instruction,
         //     contract.id,
         // );
-
     } catch (error) {
         ResponseWriter.server_error(
             res,

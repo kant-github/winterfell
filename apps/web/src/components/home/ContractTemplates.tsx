@@ -12,8 +12,8 @@ import { v4 as uuid } from 'uuid';
 
 export default function ContractTemplates() {
     const { templates } = useTemplateStore();
-    const { session } = useUserSessionStore()
-    const { set_states } = useGenerate()
+    const { session } = useUserSessionStore();
+    const { set_states } = useGenerate();
     const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
     const router = useRouter();
 

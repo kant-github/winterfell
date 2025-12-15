@@ -124,7 +124,12 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                         )}
                     </div>
 
-                    <DashboardTextAreaBottom activeTemplate={activeTemplate} setActiveTemplate={setActiveTemplate} inputValue={inputValue} handleSubmit={handleSubmit} />
+                    <DashboardTextAreaBottom
+                        activeTemplate={activeTemplate}
+                        setActiveTemplate={setActiveTemplate}
+                        inputValue={inputValue}
+                        handleSubmit={handleSubmit}
+                    />
                 </div>
 
                 <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-50" />
