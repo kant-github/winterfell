@@ -1,6 +1,6 @@
-import { Message } from "@winterfell/database";
 import { STAGE } from "./content_types";
 import { FileContent } from "../file_types/file_types";
+import { Message } from "../prisma/prisma.types";
 
 export type StreamEventType =
   | "START"
