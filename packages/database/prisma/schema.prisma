@@ -41,7 +41,7 @@ model Contract {
 
   githubRepoName String?
 
-  lastBuildStatus BuildStatus @default(NEVER_BUILT)
+  lastBuildStatus BuildStatus? @default(NEVER_BUILT)
   lastBuildId     String?
 
   idl       Json?
