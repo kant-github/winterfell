@@ -97,7 +97,7 @@ export default function Page({ params }: { params: Promise<{ contractId: string 
 
     useEffect(() => {
         if (contractId) setCurrentContractId(contractId);
-    }, [contractId, setCurrentContractId])
+    }, [contractId, setCurrentContractId]);
 
     useEffect(() => {
         if (contract.loading || !session || !session.user || !session.user.token) return;

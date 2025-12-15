@@ -78,7 +78,10 @@ export default function DashboardTextAreaBottom({
             </div>
             {showTemplatePanel && (
                 <div ref={templatePanelRef}>
-                    <BaseContractTemplatesPanel setActiveTemplate={setActiveTemplate} closePanel={() => setShowTemplatePanel(false)} />
+                    <BaseContractTemplatesPanel
+                        setActiveTemplate={setActiveTemplate}
+                        closePanel={() => setShowTemplatePanel(false)}
+                    />
                 </div>
             )}
         </>

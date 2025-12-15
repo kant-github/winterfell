@@ -17,8 +17,8 @@ export default function BuilderChats() {
     const { handleGeneration } = useGenerate();
     const contract = useCurrentContract();
     const { messages, loading } = contract;
-    const { activeTemplate } = contract
-    const { resetTemplate } = useBuilderChatStore()
+    const { activeTemplate } = contract;
+    const { resetTemplate } = useBuilderChatStore();
 
     useEffect(() => {
         if (messageEndRef.current) {

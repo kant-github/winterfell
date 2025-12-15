@@ -61,7 +61,7 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
     setCurrentFileEditing: (file) => {
         const { contracts, currentContractId } = get();
         if (!currentContractId) return;
-        
+
         set({
             contracts: {
                 ...contracts,
@@ -76,7 +76,7 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
     setLoading: (loading) => {
         const { contracts, currentContractId } = get();
         if (!currentContractId) return;
-        
+
         set({
             contracts: {
                 ...contracts,
@@ -91,7 +91,7 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
     setPhase: (phase) => {
         const { contracts, currentContractId } = get();
         if (!currentContractId) return;
-        
+
         set({
             contracts: {
                 ...contracts,
@@ -106,7 +106,7 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
     setMessage: (message) => {
         const { contracts, currentContractId } = get();
         if (!currentContractId) return;
-        
+
         const currentContract = contracts[currentContractId] || getDefaultContractState();
         set({
             contracts: {
@@ -122,26 +122,26 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
     upsertMessage: (message: Partial<Message> & { id: string }) => {
         const { contracts, currentContractId } = get();
         if (!currentContractId) return;
-        
+
         const currentContract = contracts[currentContractId] || getDefaultContractState();
         const messages = currentContract.messages;
         const existingIndex = messages.findIndex((msg) => msg.id === message.id);
-        
+
         let updatedMessages: Message[];
         if (existingIndex !== -1) {
             updatedMessages = messages.map((msg) =>
-                msg.id === message.id ? { ...msg, ...message } : msg
+                msg.id === message.id ? { ...msg, ...message } : msg,
             );
         } else {
             updatedMessages = [...messages, message as Message];
         }
-        
+
         updatedMessages.sort((a, b) => {
             const dateA = new Date(a.createdAt).getTime();
             const dateB = new Date(b.createdAt).getTime();
             return dateA - dateB;
         });
-        
+
         set({
             contracts: {
                 ...contracts,
@@ -156,7 +156,7 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
     setActiveTemplate: (template) => {
         const { contracts, currentContractId } = get();
         if (!currentContractId) return;
-        
+
         const currentContract = contracts[currentContractId] || getDefaultContractState();
         set({
             contracts: {
@@ -172,7 +172,7 @@ export const useBuilderChatStore = create<BuilderChatState>((set, get) => ({
     resetTemplate: () => {
         const { contracts, currentContractId } = get();
         if (!currentContractId) return;
-        
+
         const currentContract = contracts[currentContractId] || getDefaultContractState();
         set({
             contracts: {
