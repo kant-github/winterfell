@@ -8,7 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import LoginModal from '../utility/LoginModal';
 import ExecutorSelect from '../base/ExecutorSelect';
-import { ChatRole } from '@/src/types/prisma-types';
+import { ChatRole } from '@winterfell/types';
 import BuilderTemplatesPanel from './BuilderTemplatesPanel';
 import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { v4 as uuid } from 'uuid';

@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { cn } from '@/src/lib/utils';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { flattenFileTree, searchFiles } from '@/src/lib/file_tree_helper';
-import { FlatFile, FileNode } from '@/src/types/prisma-types';
+import { FlatFile, FileNode } from '@winterfell/types';
 import useShortcuts from '@/src/hooks/useShortcut';
 
 export default function BuilderNavbarSearchComponent() {

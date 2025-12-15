@@ -11,7 +11,7 @@ import { IoMdExpand } from 'react-icons/io';
 import { AiFillEdit } from 'react-icons/ai';
 import ToolTipComponent from '../ui/TooltipComponent';
 import { FaPlus } from 'react-icons/fa';
-import { PlanMessage } from '@/src/types/prisma-types';
+import { PlanMessage } from '@winterfell/types';
 
 export interface PlanExecutorPanelProps {
     className?: string;

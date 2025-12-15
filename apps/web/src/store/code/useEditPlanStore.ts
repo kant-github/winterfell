@@ -1,4 +1,4 @@
-import { PlanMessage } from '@/src/types/prisma-types';
+import { PlanMessage } from '@winterfell/types';
 import { create } from 'zustand';
 
 interface EditPlanStore {

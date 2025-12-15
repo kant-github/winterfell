@@ -8,7 +8,7 @@ import {
     FileContent,
     MODEL,
 } from '@/src/types/stream_event_types';
-import { Message } from '@/src/types/prisma-types';
+import { Message } from '@winterfell/types';
 import { useBuilderChatStore } from '@/src/store/code/useBuilderChatStore';
 import { useCodeEditor } from '@/src/store/code/useCodeEditor';
 import { useLimitStore } from '@/src/store/code/useLimitStore';

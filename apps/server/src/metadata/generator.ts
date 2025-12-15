@@ -1,6 +1,5 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { MODEL } from '@winterfell/types';
 import { Runnable, RunnableSequence } from '@langchain/core/runnables';
 import { Response } from 'express';
 import StreamParser from '../services/stream_parser';
@@ -10,6 +9,7 @@ import {
     PHASE_TYPES,
     STAGE,
     StreamEventData,
+    MODEL,
 } from '@winterfell/types';
 import { Message } from '@winterfell/database';
 

@@ -11,7 +11,7 @@ import DashboardTextAreaBottom from './DashboardTextAreaBottom';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
-import { Template } from '@/src/types/prisma-types';
+import { Template } from '@winterfell/types';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
