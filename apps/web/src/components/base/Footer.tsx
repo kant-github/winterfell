@@ -1,19 +1,12 @@
 import { LiaServicestack } from 'react-icons/lia';
 import { FaTwitter } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { Bruno_Ace } from 'next/font/google';
 import { cn } from '@/src/lib/utils';
 import { doto } from './FeatureOne';
 import PublicReviewCard from './PublicReviewCard';
 import ToolTipComponent from '../ui/TooltipComponent';
 import VersionLockTicker from '../tickers/VersionLockTicker';
 import Link from 'next/link';
-
-const bruno = Bruno_Ace({
-    subsets: ['latin'],
-    weight: '400',
-    display: 'swap',
-});
 
 const footerLinks = [
     {
@@ -128,7 +121,7 @@ export default function Footer() {
                 </div>
             </div>
             <div
-                className={`md:h-[35%] py-12 md:py-0 text-neutral-200 w-full flex flex-col justify-center items-center ${bruno.className}`}
+                className={`md:h-[35%] py-12 md:py-0 text-neutral-200 w-full flex flex-col justify-center items-center`}
             >
                 <div className="md:text-[10rem] text-5xl font-black tracking-wider flex items-center flex-col md:flex-row">
                     <span className={cn(doto.className)}>WINTERFELL</span>

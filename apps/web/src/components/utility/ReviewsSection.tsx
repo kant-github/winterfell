@@ -9,6 +9,7 @@ import axios from 'axios';
 import { GET_REVIEWS } from '@/routes/api_routes';
 import timeParser from '@/src/hooks/useTimeParser';
 import { PiStarFill } from 'react-icons/pi';
+import UnclickableTicker from '../tickers/UnclickableTicker';
 
 type User = {
     name: string;
@@ -44,9 +45,9 @@ export default function ReviewsSection() {
     const column2 = reviews.slice(3, 6);
     const column3 = reviews.slice(6, 10);
     return (
-        <section className="relative min-h-screen max-h-screen flex flex-col items-center overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black pb-20 px-4">
+        <section className="relative min-h-screen max-h-screen max-w-screen flex flex-col items-center bg-gradient-to-b from-black via-zinc-950 to-black pb-20 border-t border-light/30">
+            <UnclickableTicker className='py-0.5 -top-2.5 right-1/3 z-50 absolute'>reviews</UnclickableTicker>
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-grid-white/[0.02] bg-grid" />
             <div className="relative z-10 w-full">
                 <ArchitectureTitleComponent
                     firstText="Winter tales"

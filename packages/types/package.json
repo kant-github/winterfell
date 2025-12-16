@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@winterfell/typescript-config": "workspace:*"
   },
   "dependencies": {
     "zod": "^4.1.12"
