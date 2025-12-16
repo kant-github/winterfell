@@ -10,6 +10,7 @@ import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useEffect, useState } from 'react';
 import LoginModal from '../utility/LoginModal';
 import { MdHomeFilled } from 'react-icons/md';
+import AppLogo from '../tickers/AppLogo';
 
 const navItems: NavItemsType[] = [
     { name: 'Features', link: '#feature' },
@@ -67,10 +68,7 @@ export default function Navbar() {
                         : '-translate-y-[calc(100%+2rem)] pointer-events-none',
                 )}
             >
-                <div className="flex items-center justify-between gap-x-2">
-                    <LiaServicestack className="text-primary h-10 w-10 transition-all duration-500" />
-                    <span className="tracking-[0.1rem] font-semibold">WINTERFELL</span>
-                </div>
+                <AppLogo size={30} />
                 <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500">
                     <div
                         className={cn(

@@ -1,18 +1,18 @@
 {
-  "name": "kubernetes",
+  "@winterfell/types": "workspace:*",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "build": "npx esbuild ./src/index.ts --bundle --platform=node --outdir=dist --format=cjs --loader:.ts=ts --sourcemap --minify --external:@prisma/client --external:express --external:jsonwebtoken --external:@aws-sdk/client-s3 --external:@aws-sdk/s3-request-presigner --external:bull --external:ioredis --external:ws --external:@google/genai --external:@anthropic-ai/sdk --external:razorpay --external:uuid --external:winston --external:zod",
     "start": "node dist/index.js",
-    "dev": "yarn build && yarn start",
+    "dev": "pnpm build && pnpm start",
     "remove-logs": "npx ts-node src/scripts/remove-logs",
     "format": "prettier --write './src/**/*.{ts,tsx,js,jsx,json,md}'"
   },
   "dependencies": {
     "@kubernetes/client-node": "^1.4.0",
-    "@winterfell/types": "*",
+    "@winterfell/types": "workspace:*",
     "axios": "^1.13.2",
     "bullmq": "^5.63.0",
     "chalk": "^5.6.2",

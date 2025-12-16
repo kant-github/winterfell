@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npx esbuild ./src/index.ts --bundle --platform=node --outdir=dist --format=cjs --loader:.ts=ts --sourcemap --minify --external:@prisma/client --external:express --external:jsonwebtoken --external:@aws-sdk/* --external:ioredis --external:ws --external:@google/genai --external:razorpay --external:uuid --external:winston --external:zod --external:stripe --external:bullmq --external:cookie-parser --external:cors --external:dotenv --external:langchain --external:@langchain/* --external:@opentelemetry/*",
     "start": "node dist/index.js",
-    "dev": "yarn build && yarn start",
+    "dev": "pnpm build && pnpm start",
     "remove-logs": "npx ts-node src/scripts/remove-logs",
     "lint": "eslint './src/**/*.{ts,js}'",
     "format": "prettier --write './src/**/*.{ts,tsx,js,jsx,json,md}'"
@@ -42,8 +42,9 @@
     "@prisma/instrumentation": "^7.0.0",
     "@solana/web3.js": "^1.98.4",
     "@types/stripe": "^8.0.417",
-    "@winterfell/database": "*",
-    "@winterfell/types": "*",
+    "@winterfell/database": "workspace:*",
+    "@winterfell/types": "workspace:*",
+    "@winterfell/typescript-config": "workspace:*",
     "axios": "^1.12.2",
     "bullmq": "^5.63.0",
     "cookie-parser": "^1.4.7",
