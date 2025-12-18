@@ -42,18 +42,7 @@ export default class Generator {
 
     protected parsers: Map<string, StreamParser>;
 
-    // public planner = new Planner();
-
     constructor() {
-        // this.gpt_planner = new ChatOpenAI({
-        //     model: 'anthropic/claude-3-haiku',
-        //     temperature: 0.2,
-        //     configuration: {
-        //         baseURL: 'https://openrouter.ai/api/v1',
-        //         apiKey: env.SERVER_OPENROUTER_KEY,
-        //     },
-        // });
-
         this.gpt_planner = new ChatOpenAI({
             model: 'moonshotai/kimi-dev-72b',
             temperature: 0.2,

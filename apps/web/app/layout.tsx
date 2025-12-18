@@ -8,11 +8,13 @@ import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
     title: 'Winterfell',
-    description: 'Winterfell is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
+    description:
+        'Winterfell is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
     metadataBase: new URL('https://winterfell.dev'),
     openGraph: {
         title: 'Winterfell',
-        description: 'Winterfell is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
+        description:
+            'Winterfell is an AI-powered platform for building and deploying Solana smart contracts with Anchor, end-to-end.',
         url: 'https://winterfell.dev',
         siteName: 'Winterfell',
         images: [

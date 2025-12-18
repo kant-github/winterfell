@@ -23,7 +23,8 @@
     "winston": "^3.18.3",
     "ws": "^8.18.3",
     "@winterfell/types": "workspace:*",
-    "@winterfell/database": "workspace:*"
+    "@winterfell/database": "workspace:*",
+    "@winterfell/typescript-config": "workspace:*"
   },
   "devDependencies": {
     "eslint": "^9.37.0",
