@@ -1,24 +1,37 @@
 FROM node:20-bullseye-slim
 
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
-COPY package.json yarn.lock turbo.json ./
+# Copy workspace configuration files
+COPY package.json pnpm-lock.yaml turbo.json ./
+
+# Copy application code
 COPY apps/server/ ./apps/server/
 COPY packages/ ./packages/
 
-# Create a minimal workspace just for server dependencies
-RUN echo '{"name": "server-docker", "private": true, "workspaces": ["apps/server", "packages/*"]}' > package.json
+# Create pnpm workspace file
+RUN echo 'packages:\n  - "apps/server"\n  - "packages/*"' > pnpm-workspace.yaml
 
-RUN yarn --frozen-lockfile
+# Create .env file at root for Prisma
+RUN echo 'DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"' > .env
 
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Don't modify prisma.config.ts - just generate with the .env file present
 WORKDIR /app/packages/database
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN npx prisma generate
 
-
+# Build the server
 WORKDIR /app/apps/server
-RUN yarn build
+RUN pnpm build
+
+# Set runtime environment variables
+ENV NODE_ENV=production
+ENV PORT=8787
 
 EXPOSE 8787
-
-CMD ["yarn", "start"]
+CMD ["pnpm", "start"]
