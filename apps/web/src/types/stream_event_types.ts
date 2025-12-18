@@ -1,4 +1,4 @@
-import { Message } from '@/src/types/prisma-types';
+import { Message } from '@winterfell/types';
 
 export enum FILE_STRUCTURE_TYPES {
     EDITING_FILE = 'EDITING_FILE',

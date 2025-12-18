@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/src/lib/utils';
-import { Message } from '@/src/types/prisma-types';
+import { Message } from '@winterfell/types';
 import {
     FILE_STRUCTURE_TYPES,
     LOADER_STATES,

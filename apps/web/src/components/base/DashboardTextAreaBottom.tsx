@@ -8,7 +8,7 @@ import { useExecutorStore } from '@/src/store/model/useExecutorStore';
 import { useHandleClickOutside } from '@/src/hooks/useHandleClickOutside';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { HiMiniRectangleStack } from 'react-icons/hi2';
-import { Template } from '@/src/types/prisma-types';
+import { Template } from '@winterfell/types';
 
 interface DashboardTextAreaBottomProps {
     inputValue: string;
@@ -78,7 +78,10 @@ export default function DashboardTextAreaBottom({
             </div>
             {showTemplatePanel && (
                 <div ref={templatePanelRef}>
-                    <BaseContractTemplatesPanel setActiveTemplate={setActiveTemplate} closePanel={() => setShowTemplatePanel(false)} />
+                    <BaseContractTemplatesPanel
+                        setActiveTemplate={setActiveTemplate}
+                        closePanel={() => setShowTemplatePanel(false)}
+                    />
                 </div>
             )}
         </>

@@ -1,4 +1,4 @@
-import { Template } from '@/src/types/prisma-types';
+import { Template } from '@winterfell/types';
 import { create } from 'zustand';
 
 interface TemplateState {

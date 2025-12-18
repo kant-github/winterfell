@@ -1,4 +1,4 @@
-import { Message } from '@/src/types/prisma-types';
+import { Message } from '@winterfell/types';
 import { JSX, useState } from 'react';
 import { LayoutGrid } from '../ui/animated/layout-grid-icon';
 import AppLogo from '../tickers/AppLogo';

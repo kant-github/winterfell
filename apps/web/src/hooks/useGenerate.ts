@@ -2,26 +2,36 @@ import { useRouter } from 'next/navigation';
 import { useBuilderChatStore } from '../store/code/useBuilderChatStore';
 import { useUserSessionStore } from '../store/user/useUserSessionStore';
 import { v4 as uuid } from 'uuid';
-import { ChatRole, Template } from '../types/prisma-types';
-import { STAGE } from '../types/stream_event_types';
 import GenerateContract from '../lib/server/generate_contract';
+import { ChatRole, STAGE, Template } from '@winterfell/types';
 
 export default function useGenerate() {
     const { session } = useUserSessionStore();
     const router = useRouter();
+<<<<<<< HEAD
     
     function set_states(contractId: string, instruction: string | null, templateId?: string, template?: Template) {
+=======
+
+    function set_states(
+        contractId: string,
+        instruction: string | null,
+        templateId?: string,
+        template?: Template,
+    ) {
+>>>>>>> dev
         // Get store methods
-        const { setCurrentContractId, setMessage, setActiveTemplate } = useBuilderChatStore.getState();
+        const { setCurrentContractId, setMessage, setActiveTemplate } =
+            useBuilderChatStore.getState();
         console.log('contract id set is : ', contractId);
         // Initialize the new contract
         setCurrentContractId(contractId);
-        
+
         // Set template in the new contract if provided
         if (template) {
             setActiveTemplate(template);
         }
-        
+
         // Add messages
         if (templateId && template) {
             if (instruction) {
@@ -58,10 +68,10 @@ export default function useGenerate() {
                 createdAt: new Date(),
             });
         }
-        
+
         router.push(`/playground/${contractId}`);
     }
-    
+
     function handleGeneration(contractId: string, instruction?: string, templateId?: string) {
         if (!session?.user.token) return;
         const { setLoading } = useBuilderChatStore.getState();
@@ -73,7 +83,7 @@ export default function useGenerate() {
             templateId,
         );
     }
-    
+
     return {
         handleGeneration,
         set_states,

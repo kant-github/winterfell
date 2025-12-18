@@ -1,4 +1,4 @@
-import { Contract } from '@/src/types/prisma-types';
+import { Contract } from '@winterfell/types';
 import { create } from 'zustand';
 
 interface AllContractStoreProps {

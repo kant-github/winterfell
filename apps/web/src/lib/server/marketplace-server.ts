@@ -4,7 +4,7 @@ import {
     GET_ALL_TEMPLATES,
     GET_USER_CONTRACTS,
 } from '@/routes/api_routes';
-import { Contract, Template } from '@/src/types/prisma-types';
+import { Contract, Template } from '@winterfell/types';
 import axios from 'axios';
 
 export default class Marketplace {

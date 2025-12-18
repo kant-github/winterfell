@@ -16,16 +16,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "yarn"
+          cache: "pnpm"
 
-      - name: Install dependencies (Yarn Workspaces)
-        run: yarn install --frozen-lockfile
+      - name: Install dependencies (PNPM Workspaces)
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Format Check (Prettier)
-        run: yarn format --check
+        run: pnpm format --check
 
       - name: Build
-        run: yarn build
+        run: pnpm build

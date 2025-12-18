@@ -1,5 +1,6 @@
 import { cn } from '@/src/lib/utils';
 import { LiaServicestack } from 'react-icons/lia';
+import { doto } from '../base/FeatureOne';
 
 interface AppLogoProps {
     className?: string;
@@ -9,9 +10,9 @@ interface AppLogoProps {
 
 export default function AppLogo({ className, size = 20, showLogoText = true }: AppLogoProps) {
     return (
-        <div className={cn('flex items-center gap-x-2', className)}>
+        <div className={cn('flex items-center gap-x-2', doto.className, className)}>
             <LiaServicestack size={size} className="text-primary transition-all duration-500" />
-            {showLogoText && <span className="tracking-[0.1rem] font-semibold">WINTERFELL</span>}
+            {showLogoText && <span className="tracking-[0.1rem] font-black">WINTERFELL</span>}
         </div>
     );
 }

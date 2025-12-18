@@ -1,4 +1,4 @@
-import { BuildStatus } from "@winterfell/database";
+import { BuildStatus } from "../prisma/prisma.enums";
 import { TerminalSocketData } from "../socket/const";
 
 export interface BuildCacheCheck {

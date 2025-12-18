@@ -8,10 +8,9 @@ import LoginModal from '../utility/LoginModal';
 import Image from 'next/image';
 import { RxCross2 } from 'react-icons/rx';
 import DashboardTextAreaBottom from './DashboardTextAreaBottom';
-import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import useGenerate from '@/src/hooks/useGenerate';
 import { useLimitStore } from '@/src/store/code/useLimitStore';
-import { Template } from '@/src/types/prisma-types';
+import { Template } from '@winterfell/types';
 
 interface DashboardTextAreaComponentProps {
     inputRef?: ForwardedRef<HTMLTextAreaElement>;
@@ -32,11 +31,9 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
             setOpenLoginModal(true);
             return;
         }
-        // if message/ contract limit is reached -> return
         if (showMessageLimit || showContractLimit) return;
 
         const contractId = uuid();
-        console.log('active template is  : ', activeTemplate);
         set_states(contractId, inputValue, activeTemplate?.id, activeTemplate ?? undefined);
     }
 
@@ -51,7 +48,7 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
         <>
             <div className="relative group ">
                 <div className="absolute -inset-1 bg-gradient-to-r from-neutral-600/20 via-neutral-500/20 to-neutral-600/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative bg-neutral-950 rounded-lg border border-neutral-800 overflow-visible shadow-2xl">
+                <div className="relative bg-neutral-950 rounded-lg border border-neutral-800 overflow-hidden shadow-2xl">
                     <div className="flex items-center justify-between px-2.5 py-1 md:px-4 md:py-3 border-b border-neutral-800/50 bg-neutral-900/50">
                         <div className="flex items-center gap-3">
                             <div className="flex gap-1.5">
@@ -124,7 +121,12 @@ export default function DashboardTextAreaComponent({ inputRef }: DashboardTextAr
                         )}
                     </div>
 
-                    <DashboardTextAreaBottom activeTemplate={activeTemplate} setActiveTemplate={setActiveTemplate} inputValue={inputValue} handleSubmit={handleSubmit} />
+                    <DashboardTextAreaBottom
+                        activeTemplate={activeTemplate}
+                        setActiveTemplate={setActiveTemplate}
+                        inputValue={inputValue}
+                        handleSubmit={handleSubmit}
+                    />
                 </div>
 
                 <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-neutral-600 to-transparent opacity-50" />

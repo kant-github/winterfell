@@ -4,9 +4,9 @@ export enum NODE {
 }
 
 export interface FileNode {
+  id: string;
   name: string;
   type: NODE;
-  path: string;
   content?: string;
   language?: string;
   children?: FileNode[];

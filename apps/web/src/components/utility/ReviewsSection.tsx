@@ -9,13 +9,14 @@ import axios from 'axios';
 import { GET_REVIEWS } from '@/routes/api_routes';
 import timeParser from '@/src/hooks/useTimeParser';
 import { PiStarFill } from 'react-icons/pi';
+import UnclickableTicker from '../tickers/UnclickableTicker';
 
-type User = {
+interface User {
     name: string;
     image: string;
-};
+}
 
-type Review = {
+interface Review {
     id: string | null;
     rating: number;
     title?: string | null;
@@ -23,7 +24,7 @@ type Review = {
     visible: boolean;
     createdAt: string;
     user: User;
-};
+}
 
 export default function ReviewsSection() {
     const { session } = useUserSessionStore();
@@ -44,9 +45,11 @@ export default function ReviewsSection() {
     const column2 = reviews.slice(3, 6);
     const column3 = reviews.slice(6, 10);
     return (
-        <section className="relative min-h-screen max-h-screen flex flex-col items-center overflow-hidden bg-gradient-to-b from-black via-zinc-950 to-black pb-20 px-4">
+        <section className="relative min-h-screen max-h-screen max-w-screen flex flex-col items-center bg-gradient-to-b from-black via-zinc-950 to-black pb-20 border-t border-light/30">
+            <UnclickableTicker className="py-0.5 -top-2.5 right-1/3 z-50 absolute">
+                reviews
+            </UnclickableTicker>
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-grid-white/[0.02] bg-grid" />
             <div className="relative z-10 w-full">
                 <ArchitectureTitleComponent
                     firstText="Winter tales"
@@ -84,7 +87,7 @@ function ReviewCard({ review }: { review: Review }) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-zinc-900/80 to-zinc-950/80 backdrop-blur-sm rounded-2xl p-6 mb-4 border border-zinc-800/50 hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-primary/10 gap-y-2 flex flex-col"
+            className="bg-linear-to-br from-zinc-900/80 to-zinc-950/80 backdrop-blur-sm rounded-2xl p-6 mb-4 border border-zinc-800/50 hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-primary/10 gap-y-2 flex flex-col"
         >
             <Quote className="w-8 h-8 fill-primary text-primary mb-2" />
             <div className="flex gap-x-1 text-light/80 mb-2">
@@ -112,7 +115,6 @@ function ReviewCard({ review }: { review: Review }) {
     );
 }
 
-// Review Column Component
 function ReviewColumn({ reviews, duration }: { reviews: Review[]; duration: number }) {
     return (
         <div className="relative h-full overflow-hidden">

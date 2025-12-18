@@ -7,7 +7,7 @@ import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import { GET_CURRENT_CONTRACT_DATA_URL } from '@/routes/api_routes';
-import { Template } from '@/src/types/prisma-types';
+import { Template } from '@winterfell/types';
 
 interface BuilderTemplatesPanelProps {
     closePanel: () => void;

@@ -1,4 +1,4 @@
-import { FileNode, FlatFile } from '../types/prisma-types';
+import { FileNode, FlatFile } from '@winterfell/types';
 
 export function flattenFileTree(node: FileNode, path: string = ''): FlatFile[] {
     const results: FlatFile[] = [];
