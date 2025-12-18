@@ -30,9 +30,15 @@ importers:
       '@kubernetes/client-node':
         specifier: ^1.4.0
         version: 1.4.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@winterfell/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@winterfell/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@winterfell/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/config-typescript
       axios:
         specifier: ^1.13.2
         version: 1.13.2
@@ -48,6 +54,10 @@ importers:
       zod:
         specifier: ^4.1.12
         version: 4.2.1
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.2
+        version: 25.0.2
 
   apps/server:
     dependencies:
@@ -256,6 +266,9 @@ importers:
       '@winterfell/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@winterfell/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/config-typescript
       esbuild:
         specifier: ^0.25.11
         version: 0.25.12
@@ -4668,6 +4681,9 @@ packages:
 
   '@types/node@24.10.4':
     resolution: {integrity: sha512-vnDVpYPMzs4wunl27jHrfmwojOGKya0xyM3sH+UE5iv5uPS6vX7UIoh6m+vQc5LGBq52HBKPIn/zcSZVzeDEZg==}
+
+  '@types/node@25.0.2':
+    resolution: {integrity: sha512-gWEkeiyYE4vqjON/+Obqcoeffmk0NF15WSBwSs7zwVA2bAbTaE0SJ7P0WNGoJn8uE7fiaV5a7dKYIJriEqOrmA==}
 
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
@@ -15053,6 +15069,10 @@ snapshots:
       undici-types: 6.21.0
 
   '@types/node@24.10.4':
+    dependencies:
+      undici-types: 7.16.0
+
+  '@types/node@25.0.2':
     dependencies:
       undici-types: 7.16.0
 

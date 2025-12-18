@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { TiHome } from "react-icons/ti";
+import { TiHome } from 'react-icons/ti';
 import DustParticles from '@/src/components/base/DustParticles';
 import Link from 'next/link';
 import Navbar from '@/src/components/nav/Navbar';

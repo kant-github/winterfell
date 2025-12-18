@@ -8,6 +8,7 @@ import OpacityBackground from '../utility/OpacityBackground';
 import { Button } from '../ui/button';
 import { cn } from '@/src/lib/utils';
 import ShaderSplitPanel from './ShaderSplitPanel';
+import { IoMdLogOut } from 'react-icons/io';
 
 interface LogoutModalProps {
     openLogoutModal: boolean;
@@ -125,6 +126,7 @@ function LogoutRightContent({
                         )}
                     >
                         <span className="text-light">Sign Out</span>
+                        <IoMdLogOut />
                     </Button>
                 </div>
             </div>

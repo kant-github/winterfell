@@ -18,6 +18,11 @@ app.use(
         credentials: true,
     }),
 );
+
+app.get('/aniruddha', (req, res) => {
+    res.send('eerything is working fine');
+});
+
 app.use('/api/v1', router);
 
 init_services();
