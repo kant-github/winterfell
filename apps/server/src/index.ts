@@ -19,7 +19,6 @@ app.use(
     }),
 );
 
-
 app.get('/aniruddha', (req, res) => {
     res.send('eerything is working fine');
 });
