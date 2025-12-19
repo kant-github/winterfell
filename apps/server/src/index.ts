@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 
 const app = express();
 
-app.set('trust proxy', 1);
+app.set('trust proxy', true);
 
 const server = http.createServer(app);
 
