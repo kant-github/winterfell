@@ -8,10 +8,6 @@ import { ChatRole, STAGE, Template } from '@winterfell/types';
 export default function useGenerate() {
     const { session } = useUserSessionStore();
     const router = useRouter();
-<<<<<<< HEAD
-    
-    function set_states(contractId: string, instruction: string | null, templateId?: string, template?: Template) {
-=======
 
     function set_states(
         contractId: string,
@@ -19,15 +15,10 @@ export default function useGenerate() {
         templateId?: string,
         template?: Template,
     ) {
->>>>>>> dev
-        // Get store methods
         const { setCurrentContractId, setMessage, setActiveTemplate } =
             useBuilderChatStore.getState();
-        console.log('contract id set is : ', contractId);
-        // Initialize the new contract
         setCurrentContractId(contractId);
 
-        // Set template in the new contract if provided
         if (template) {
             setActiveTemplate(template);
         }

@@ -2,11 +2,7 @@
 import useGenerate from '@/src/hooks/useGenerate';
 import { useTemplateStore } from '@/src/store/user/useTemplateStore';
 import { useUserSessionStore } from '@/src/store/user/useUserSessionStore';
-<<<<<<< HEAD
-import { Template } from '@/src/types/prisma-types';
-=======
 import { Template } from '@winterfell/types';
->>>>>>> dev
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -16,13 +12,8 @@ import { v4 as uuid } from 'uuid';
 
 export default function ContractTemplates() {
     const { templates } = useTemplateStore();
-<<<<<<< HEAD
     const { session } = useUserSessionStore()
-    const { set_states } = useGenerate()
-=======
-    const { session } = useUserSessionStore();
     const { set_states } = useGenerate();
->>>>>>> dev
     const [activeTemplate, setActiveTemplate] = useState<Template | null>(null);
     const router = useRouter();
 
